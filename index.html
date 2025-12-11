@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HIIT 間歇訓練計時器</title>
+    <style>
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #222;
+            color: white;
+            transition: background-color 0.3s;
+            overflow: hidden; /* 防止整體頁面捲動 */
+        }
+
+        /* 設定頁面樣式 */
+        #setup-screen {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            height: 100%;
+            overflow-y: auto; /* 允許設定頁內容捲動 */
+        }
+        .input-group {
+            background: #333;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .input-group label {
+            display: block;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: #ccc;
+            font-weight: bold;
+        }
+        .time-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 1.2rem;
+            border: none;
+            background: #444;
+            color: white;
+            border-radius: 8px;
+            text-align: center;
+            -moz-appearance: textfield; /* Firefox 移除箭頭 */
+        }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none; /* Chrome/Safari 移除箭頭 */
+            margin: 0;
+        }
+
+        .unit { font-size: 0.9rem; color: #888; white-space: nowrap; }
+        
+        #total-display {
+            text-align: center;
+            font-size: 1.2rem;
+            margin-top: 10px;
+            color: #4cd964;
+            font-weight: bold;
+            padding-bottom: 20px;
+        }
+
+        /* 運動頁面樣式 */
+        #timer-screen {
+            display: none; /* 預設隱藏 */
+            height: 100%;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            text-align: center;
+            padding: 20px;
+        }
+        #status-text { font-size: 2.5rem; font-weight: bold; margin-bottom: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        #main-timer { font-size: 22vw; /* 自適應字體大小 */ font-weight: bold; font-variant-numeric: tabular-nums; line-height: 1; margin: 10px 0; }
+        @media (min-width: 600px) { #main-timer { font-size: 8rem; } }
+        
+        #sub-info { font-size: 1.5rem; margin-top: 5px; opacity: 0.9; font-weight: 500;}
+        
+        /* 按鈕樣式 */
+        .btn {
+            width: 100%;
+            padding: 18px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: transform 0.1s;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        .btn:active { transform: scale(0.96); }
+        .btn-start { background: #007aff; color: white; margin-bottom: 30px; }
+        
+        /* 暫停按鈕 (固定底部) */
+        #btn-pause { 
+            position: absolute; bottom: 40px; width: 80%; 
+            background: rgba(255,255,255,0.2); border: 2px solid white; color: white;
+            backdrop-filter: blur(5px);
+        }
+
+        /* 結束時的按鈕 (原本隱藏) */
+        #btn-home {
+            display: none;
+            background: white; 
+            color: #2980b9; 
+            width: 80%;
+            margin-top: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            animation: popIn 0.5s ease-out;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        /* 暫停選單 */
+        #pause-overlay {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85);
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            z-index: 10;
+            backdrop-filter: blur(5px);
+        }
+        .btn-resume { background: #34c759; color: white; width: 80%; }
+        .btn-stop { background: #ff3b30; color: white; width: 80%; }
+
+        /* 背景顏色類別 */
+        .bg-setup { background-color: #222; }
+        .bg-warmup { background-color: #27ae60; } /* 綠色 */
+        .bg-work { background-color: #c0392b; }   /* 紅色 */
+        .bg-rest { background-color: #27ae60; }   /* 綠色 */
+        .bg-finished { background-color: #2980b9; } /* 藍色 */
+    </style>
+</head>
+<body>
+
+<div id="setup-screen">
+    <h2 style="text-align:center; margin-bottom: 5px;">間歇訓練設定</h2>
+    <div class="input-group">
+        <label>1. 熱身時間 (準備)</label>
+        <div class="time-inputs">
+            <input type="number" id="warmMin" value="1" min="0" oninput="calcTotal()"> <span class="unit">分</span>
+            <input type="number" id="warmSec" value="0" min="0" max="59" oninput="calcTotal()"> <span class="unit">秒</span>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label style="color: #ff5e57;">2. 運動/衝刺時間 (紅)</label>
+        <div class="time-inputs">
+            <input type="number" id="workMin" value="1" min="0" oninput="calcTotal()"> <span class="unit">分</span>
+            <input type="number" id="workSec" value="0" min="0" max="59" oninput="calcTotal()"> <span class="unit">秒</span>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label style="color: #2ecc71;">3. 緩和/休息時間 (綠)</label>
+        <div class="time-inputs">
+            <input type="number" id="restMin" value="1" min="0" oninput="calcTotal()"> <span class="unit">分</span>
+            <input type="number" id="restSec" value="0" min="0" max="59" oninput="calcTotal()"> <span class="unit">秒</span>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label>4. 輪次 (衝刺+緩和算1輪)</label>
+        <div class="time-inputs">
+            <input type="number" id="rounds" value="10" min="1" oninput="calcTotal()"> <span class="unit">次</span>
+        </div>
+    </div>
+
+    <div id="total-display">預估總長度: 21:00</div>
+    <button class="btn btn-start" onclick="startWorkout()">開始訓練</button>
+</div>
+
+<div id="timer-screen">
+    <div id="status-text">熱身</div>
+    <div id="main-timer">00:00</div>
+    <div id="sub-info">準備開始</div>
+    
+    <button id="btn-pause" class="btn" onclick="pauseWorkout()">暫 停</button>
+    <button id="btn-home" class="btn" onclick="stopWorkout()">回到設定頁面</button>
+
+    <div id="pause-overlay">
+        <h2 style="font-size: 2rem; margin-bottom: 20px;">已暫停</h2>
+        <button class="btn btn-resume" onclick="resumeWorkout()">繼續</button>
+        <button class="btn btn-stop" onclick="stopWorkout()">結束訓練</button>
+    </div>
+</div>
+
+<script>
+    let intervalTimer = null;
+    let currentPhase = 'warmup'; 
+    let currentRound = 1;
+    let maxRounds = 10;
+    let phaseTimeLeft = 0;
+    let cfg = {};
+    // 初始化 AudioContext
+    let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    calcTotal();
+
+    function calcTotal() {
+        const wm = parseInt(document.getElementById('warmMin').value) || 0;
+        const ws = parseInt(document.getElementById('warmSec').value) || 0;
+        const km = parseInt(document.getElementById('workMin').value) || 0;
+        const ks = parseInt(document.getElementById('workSec').value) || 0;
+        const rm = parseInt(document.getElementById('restMin').value) || 0;
+        const rs = parseInt(document.getElementById('restSec').value) || 0;
+        const r = parseInt(document.getElementById('rounds').value) || 1;
+        
+        // 熱身 + (運動+休息)*輪數
+        const total = (wm*60+ws) + ((km*60+ks)+(rm*60+rs))*r;
+        document.getElementById('total-display').innerText = `預估總長度: ${formatTime(total)}`;
+    }
+
+    function formatTime(sec) {
+        if (sec < 0) sec = 0; 
+        let m = Math.floor(sec / 60);
+        let s = sec % 60;
+        return `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    // 播放提示音
+    function playBeep(type) {
+        // 確保 AudioContext 處於運行狀態 (瀏覽器政策限制)
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        const now = audioCtx.currentTime;
+
+        if (type === 'high') { 
+            // 運動開始：高音
+            osc.frequency.setValueAtTime(880, now); 
+            osc.type = 'square';
+            gain.gain.setValueAtTime(0.1, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+            osc.start(now); 
+            osc.stop(now + 0.6);
+        } else if (type === 'low') { 
+            // 休息/熱身：低音
+            osc.frequency.setValueAtTime(440, now);
+            osc.type = 'sine';
+            gain.gain.setValueAtTime(0.1, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+            osc.start(now); 
+            osc.stop(now + 0.4);
+        } else if (type === 'end') { 
+            // 結束音效：三聲
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(523.25, now); // Do
+            gain.gain.setValueAtTime(0.1, now);
+            osc.start(now); 
+            osc.stop(now + 0.2);
+
+            const osc2 = audioCtx.createOscillator();
+            const gain2 = audioCtx.createGain();
+            osc2.connect(gain2); gain2.connect(audioCtx.destination);
+            osc2.type = 'triangle';
+            osc2.frequency.setValueAtTime(659.25, now + 0.25); // Mi
+            gain2.gain.setValueAtTime(0.1, now + 0.25);
+            osc2.start(now + 0.25); osc2.stop(now + 0.45);
+
+            const osc3 = audioCtx.createOscillator();
+            const gain3 = audioCtx.createGain();
+            osc3.connect(gain3); gain3.connect(audioCtx.destination);
+            osc3.type = 'triangle';
+            osc3.frequency.setValueAtTime(783.99, now + 0.5); // Sol
+            gain3.gain.setValueAtTime(0.1, now + 0.5);
+            gain3.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+            osc3.start(now + 0.5); osc3.stop(now + 1.5);
+        }
+    }
+
+    function startWorkout() {
+        // 讀取設定
+        cfg = {
+            warm: (parseInt(document.getElementById('warmMin').value)||0)*60 + (parseInt(document.getElementById('warmSec').value)||0),
+            work: (parseInt(document.getElementById('workMin').value)||0)*60 + (parseInt(document.getElementById('workSec').value)||0),
+            rest: (parseInt(document.getElementById('restMin').value)||0)*60 + (parseInt(document.getElementById('restSec').value)||0),
+            rounds: parseInt(document.getElementById('rounds').value)||1
+        };
+
+        // UI 切換
+        document.getElementById('setup-screen').style.display = 'none';
+        document.getElementById('timer-screen').style.display = 'flex';
+        document.getElementById('pause-overlay').style.display = 'none';
+        
+        document.getElementById('btn-pause').style.display = 'block';
+        document.getElementById('btn-home').style.display = 'none';
+        
+        currentRound = 1;
+        maxRounds = cfg.rounds;
+        
+        // 喚醒音效引擎
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+
+        // 決定初始階段
+        if (cfg.warm > 0) {
+            setPhase('warmup');
+            playBeep('low');
+        } else {
+            setPhase('work');
+            // 如果沒有熱身直接開始，這裡會在 setPhase 裡發聲
+        }
+
+        intervalTimer = setInterval(tick, 1000);
+    }
+
+    function setPhase(phase) {
+        currentPhase = phase;
+        if (phase === 'warmup') {
+            phaseTimeLeft = cfg.warm;
+            updateUI('熱身時間', 'bg-warmup', `準備進入第 1 輪`);
+        } else if (phase === 'work') {
+            phaseTimeLeft = cfg.work;
+            updateUI('🔥 全力衝刺', 'bg-work', `第 ${currentRound} / ${maxRounds} 輪`);
+            playBeep('high');
+        } else if (phase === 'rest') {
+            phaseTimeLeft = cfg.rest;
+            updateUI('😌 緩和休息', 'bg-rest', `第 ${currentRound} 輪完成`);
+            playBeep('low');
+        } else if (phase === 'finished') {
+            clearInterval(intervalTimer);
+            phaseTimeLeft = 0;
+            document.getElementById('main-timer').innerText = "00:00";
+            updateUI('🎉 訓練結束', 'bg-finished', '太厲害了！完成這次訓練');
+            document.getElementById('btn-pause').style.display = 'none';
+            document.getElementById('btn-home').style.display = 'block';
+            playBeep('end');
+        }
+        
+        if (phase !== 'finished') {
+            document.getElementById('main-timer').innerText = formatTime(phaseTimeLeft);
+        }
+    }
+
+    function updateUI(status, bgClass, subInfo) {
+        document.getElementById('status-text').innerText = status;
+        document.body.className = bgClass;
+        document.getElementById('sub-info').innerText = subInfo;
+    }
+
+    function tick() {
+        if (phaseTimeLeft > 0) {
+            phaseTimeLeft--;
+            document.getElementById('main-timer').innerText = formatTime(phaseTimeLeft);
+        } else {
+            nextPhase();
+        }
+    }
+
+    function nextPhase() {
+        if (currentPhase === 'warmup') {
+            setPhase('work');
+        } else if (currentPhase === 'work') {
+            // 如果是最後一輪且不需要最後休息，可以直接結束 (此處邏輯設定為一定有休息)
+            setPhase('rest');
+        } else if (currentPhase === 'rest') {
+            if (currentRound < maxRounds) {
+                currentRound++;
+                setPhase('work');
+            } else {
+                setPhase('finished');
+            }
+        }
+    }
+
+    function pauseWorkout() {
+        clearInterval(intervalTimer);
+        document.getElementById('pause-overlay').style.display = 'flex';
+    }
+
+    function resumeWorkout() {
+        document.getElementById('pause-overlay').style.display = 'none';
+        intervalTimer = setInterval(tick, 1000);
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function stopWorkout() {
+        clearInterval(intervalTimer);
+        document.getElementById('timer-screen').style.display = 'none';
+        document.getElementById('setup-screen').style.display = 'flex';
+        document.body.className = 'bg-setup';
+    }
+</script>
+
+</body>
+</html>
