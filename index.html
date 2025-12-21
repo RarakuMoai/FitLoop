@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SmartTimer V37: Stable & Pulse</title>
+    <title>SmartTimer V38: Audio Engine</title>
     <style>
         :root {
             --bg-body: #000000;
@@ -43,8 +43,9 @@
             margin: 0 auto; max-width: 500px; 
             background: var(--bg-idle); 
             display: flex; flex-direction: column; 
-            transition: background 0.5s ease; 
+            transition: background 0.3s ease-out; /* 加快背景反應速度 */
             position: relative; 
+            will-change: background;
         }
 
         #confetti-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
@@ -157,7 +158,6 @@
         .btn-play { flex: 1.8; background: #fff; color: #000; box-shadow: 0 4px 20px rgba(255,255,255,0.25); }
         .btn-play:active { transform: scale(0.96); opacity: 0.9; transition: 0s; }
 
-        /* 關鍵新增：呼吸燈動畫 */
         @keyframes pulse-red {
             0% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.6); }
             70% { box-shadow: 0 0 0 12px rgba(255, 59, 48, 0); }
@@ -204,7 +204,7 @@
             <div class="app-title">SmartTimer</div>
             <div class="btn-lang-pill" onclick="openLangModal()">
                 <svg class="icon-svg" viewBox="0 0 24 24" style="width:18px;height:18px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-                <span data-i18n="btn_lang_text">Language / 語言</span>
+                <span data-i18n="btn_lang_text">Language</span>
             </div>
         </div>
 
@@ -262,7 +262,7 @@
                     <span class="tool-label" id="text-warmup" data-i18n="btn_warmup_off">Warmup? (OFF)</span>
                 </button>
                 <button class="tool-btn lockable" onclick="openSettings()">
-                    <div class="tool-icon-wrap"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg></div>
+                    <div class="tool-icon-wrap"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg></div>
                     <span class="tool-label" data-i18n="btn_custom">Edit</span>
                 </button>
             </div>
@@ -300,9 +300,39 @@
 
 <script>
 try {
+    // 1. Audio Engine (Reference Implementation)
+    const SoundEngine = {
+        ctx: null,
+        init: function() {
+            if (!this.ctx) {
+                const Ctx = window.AudioContext || window.webkitAudioContext;
+                if (Ctx) this.ctx = new Ctx();
+            }
+        },
+        resume: function() {
+            if (this.ctx && this.ctx.state === 'suspended') {
+                this.ctx.resume();
+            }
+        },
+        play: function(freq, type, duration, vol, startTime = 0) {
+            if (!this.ctx) return;
+            const t = this.ctx.currentTime + startTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, t);
+            gain.gain.setValueAtTime(vol, t);
+            gain.gain.exponentialRampToValueAtTime(0.01, t + duration);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(t);
+            osc.stop(t + duration);
+        }
+    };
+
     const translations = {
         'en': {
-            btn_lang_text: "Language / 語言", mode_tabata_title: "Tabata", mode_tabata_desc: "20s Work / 10s Rest", mode_hiit_title: "HIIT", mode_hiit_desc: "High Intensity Intervals", mode_emom_title: "EMOM", mode_emom_desc: "Every Minute on the Minute", mode_gym_title: "Gym / Weights", mode_gym_desc: "Sets & Rest Timer", 
+            btn_lang_text: "Language", mode_tabata_title: "Tabata", mode_tabata_desc: "20s Work / 10s Rest", mode_hiit_title: "HIIT", mode_hiit_desc: "High Intensity Intervals", mode_emom_title: "EMOM", mode_emom_desc: "Every Minute on the Minute", mode_gym_title: "Gym / Weights", mode_gym_desc: "Sets & Rest Timer", 
             btn_back: "Back", btn_start: "Start", btn_pause: "Pause", btn_resume: "Resume", btn_reset: "End / Reset", btn_warmup_on: "Warmup? (ON)", btn_warmup_off: "Warmup? (OFF)", btn_custom: "Edit", btn_done: "Done", btn_restore: "Reset Defaults", btn_close: "Close", 
             label_total_remain: "Total Left", label_total_est: "Est. Total", modal_settings_title: "Settings", modal_lang_title: "Language", group_prep: "Preparation", group_work: "Workout", label_prep: "Get Ready", label_warmup: "Warmup", label_work: "Work", label_rest: "Rest", label_rounds: "Rounds", 
             sound_beep: "Beep", sound_voice: "Voice", sound_mute: "Mute", phase_prep: "GET READY", phase_warmup: "WARM UP", phase_work: "WORK", phase_gym_work: "WORKOUT", phase_rest: "REST", phase_gym_rest: "REST", phase_finish: "COMPLETE", phase_start_warmup: "Start Warmup", phase_start_work: "Start Work", phase_gym_start: "Start Training", phase_start_rest: "Rest Now", phase_finish_train: "Workout Complete",
@@ -381,8 +411,7 @@ try {
         let val = parseInt(el.value); if(isNaN(val) || val < 0) val = 0; if(val > max) val = max; el.value = val;
     }
 
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    let audioCtx = null; let soundMode = 'beep'; let wakeLock = null; 
+    let soundMode = 'beep'; let wakeLock = null; 
 
     const defaultPresets = {
         tabata: { name: "Tabata", work: 20, rest: 10, rounds: 8, prep: 5, warmupOn: false, warmupTime: 60, type: 'interval', color: '#FF3B30' },
@@ -391,8 +420,8 @@ try {
         gym:    { name: "Gym",    work: 40, rest: 90, rounds: 5, prep: 5, warmupOn: false, warmupTime: 0, type: 'interval', color: '#0A84FF' }
     };
     
-    // CHANGED KEY TO V37
-    let presets = JSON.parse(localStorage.getItem('myTimerSettingsV37')) || JSON.parse(JSON.stringify(defaultPresets));
+    // CHANGED KEY TO V38
+    let presets = JSON.parse(localStorage.getItem('myTimerSettingsV38')) || JSON.parse(JSON.stringify(defaultPresets));
     let currentMode = 'tabata';
     
     let state = { phase: 'idle', timeLeft: 0, currentRound: 1, isRunning: false, timerId: null, endTime: 0, remainingMs: 0, phaseDuration: 0 };
@@ -500,13 +529,16 @@ try {
         const isPaused = !state.isRunning && !isIdle && !isFinished;
 
         if (isIdle || isFinished) { back.classList.remove('btn-locked'); } else { back.classList.add('btn-locked'); }
+        
+        // Logic for Reset Button with Pulse
         if (isPaused || isFinished) { 
             reset.classList.remove('btn-locked'); 
-            reset.classList.add('btn-pulse'); // Add Breathing Effect
+            reset.classList.add('btn-pulse');
         } else { 
             reset.classList.add('btn-locked'); 
-            reset.classList.remove('btn-pulse'); // Remove Breathing Effect
+            reset.classList.remove('btn-pulse');
         }
+        
         if (isIdle || isFinished) { locks.forEach(b => b.classList.remove('disabled')); } else { locks.forEach(b => b.classList.add('disabled')); }
     }
 
@@ -543,12 +575,11 @@ try {
     }
 
     function toggleTimerState() {
-        // 1. Audio Resume (Must be first for mobile Safari)
-        if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if(audioCtx.state === 'suspended') audioCtx.resume();
+        // Init/Resume Sound on Touch
+        SoundEngine.init();
+        SoundEngine.resume();
         playClick();
 
-        // 2. Logic & UI Update (Synchronous to fix locking delay)
         if (state.isRunning) {
             // PAUSE
             clearInterval(state.timerId); 
@@ -577,8 +608,6 @@ try {
             state.timerId = setInterval(tick, 100); 
             updateRingLoop(); 
         }
-        
-        // 3. Finalize UI
         updateSafeguards(); 
         updateActionBtnState(); 
         updateDisplay();
@@ -780,35 +809,37 @@ try {
         savePresets();
     }
     
-    function savePresets() { localStorage.setItem('myTimerSettingsV37', JSON.stringify(presets)); }
+    function savePresets() { localStorage.setItem('myTimerSettingsV38', JSON.stringify(presets)); }
     function restoreDefaults() {
         if(confirm("Restore defaults?")) { playClick(); presets[currentMode] = JSON.parse(JSON.stringify(defaultPresets[currentMode])); savePresets(); loadSettingsToUI(); liveUpdateTotal(); }
     }
 
     function playClick() {
-        if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-        osc.frequency.value = 1200; osc.type = 'triangle'; osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.start(); gain.gain.setValueAtTime(0.02, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05); osc.stop(audioCtx.currentTime + 0.05);
+        SoundEngine.play(1200, 'triangle', 0.05, 0.02);
     }
     function announce(text, type) {
         if (soundMode === 'mute') return;
         if (soundMode === 'voice') speak(text);
         else {
-            if (type === 'start') playTone(880, 0.4); else if (type === 'rest') playTone(440, 0.4);
-            else if (type === 'tick') playTone(600, 0.05); else if (type === 'finish') { playTone(880, 0.1); setTimeout(()=>playTone(880,0.1), 150); }
+            // Schedule Sounds Ahead of time (0 latency feel)
+            if (type === 'start') SoundEngine.play(880, 'sine', 0.4, 0.3); 
+            else if (type === 'rest') SoundEngine.play(440, 'sine', 0.4, 0.3);
+            else if (type === 'tick') SoundEngine.play(600, 'sine', 0.05, 0.3); 
+            else if (type === 'finish') { 
+                SoundEngine.play(880, 'square', 0.1, 0.3, 0); 
+                SoundEngine.play(880, 'square', 0.1, 0.3, 0.15); 
+            }
         }
     }
     function speak(text) {
-        if ('speechSynthesis' in window) { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.rate = 1.1; u.lang = currentLang; window.speechSynthesis.speak(u); }
+        if ('speechSynthesis' in window) { 
+            window.speechSynthesis.cancel(); 
+            const u = new SpeechSynthesisUtterance(text); u.rate = 1.1; u.lang = currentLang; 
+            window.speechSynthesis.speak(u); 
+        }
     }
     function playTone(freq, duration) {
-        if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-        osc.frequency.value = freq; osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.start(); gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration); osc.stop(audioCtx.currentTime + duration);
+        SoundEngine.play(freq, 'sine', duration, 0.3);
     }
     
     // STARTUP SEQUENCE
