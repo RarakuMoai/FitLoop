@@ -3,584 +3,277 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SmartTimer V21: Pro Content & Limits</title>
+    <title>SmartTimer V33: Final Fix</title>
     <style>
         :root {
-            /* 暗色主題 (預設) */
-            --text-main: #ffffff;
-            --text-sub: rgba(255, 255, 255, 0.6);
-            --card-bg: rgba(255, 255, 255, 0.1);
-            --card-border: rgba(255, 255, 255, 0.05);
-            --btn-deck: rgba(0, 0, 0, 0.3);
-            
-            --bg-idle: linear-gradient(135deg, #1e1e1e 0%, #3a3a3a 100%);
-            --bg-prep: linear-gradient(135deg, #d35400 0%, #e67e22 100%);
-            --bg-warmup: linear-gradient(135deg, #6c3483 0%, #8e44ad 100%);
-            --bg-work: linear-gradient(135deg, #922b21 0%, #c0392b 100%);
-            --bg-gym-work: linear-gradient(135deg, #001f3f 0%, #003366 100%);
-            --bg-rest: linear-gradient(135deg, #145a32 0%, #27ae60 100%);
-            --bg-finish: linear-gradient(135deg, #2c3e50 0%, #4ca1af 100%);
-
-            /* Modal */
-            --modal-bg: #2c2c2e;
-            --modal-text: #ffffff;
-            --input-bg: #1c1c1e;
-            --input-border: #444;
-            --setting-row-bg: #3a3a3c;
-            --lang-item-bg: #3a3a3c;
+            --bg-body: #000000;
+            --surface-glass: rgba(255, 255, 255, 0.14);
+            --surface-glass-hover: rgba(255, 255, 255, 0.2);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --accent-color: #0A84FF;
+            /* 背景狀態色 */
+            --bg-idle: radial-gradient(circle at 50% 30%, #2c3e50 0%, #000000 80%);
+            --bg-work: radial-gradient(circle at 50% 30%, #8b0000 0%, #000000 80%);
+            --bg-rest: radial-gradient(circle at 50% 30%, #006400 0%, #000000 80%);
+            --bg-warmup: radial-gradient(circle at 50% 30%, #4b0082 0%, #000000 80%);
+            --bg-finish: radial-gradient(circle at 50% 30%, #004e92 0%, #000000 80%);
         }
-
-        /* 亮色主題 */
-        body.light-theme {
-            --text-main: #2c3e50;
-            --text-sub: rgba(0, 0, 0, 0.6);
-            --card-bg: rgba(255, 255, 255, 0.85);
-            --card-border: rgba(0, 0, 0, 0.05);
-            --btn-deck: rgba(255, 255, 255, 0.8);
-            --bg-idle: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
-            
-            --modal-bg: #ffffff;
-            --modal-text: #333333;
-            --input-bg: #f0f0f0;
-            --input-border: #ccc;
-            --setting-row-bg: #f8f9fa;
-            --lang-item-bg: #f0f0f0;
-        }
-
-        body.light-theme.active-mode {
-            --text-main: #ffffff;
-            --text-sub: rgba(255, 255, 255, 0.8);
-            --btn-deck: rgba(0, 0, 0, 0.2);
-            --card-bg: rgba(0, 0, 0, 0.2);
-        }
-
-        html, body {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            background-color: #000; color: var(--text-main);
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
-            overflow: hidden; -webkit-user-select: none; user-select: none;
-            display: flex; justify-content: center; transition: color 0.3s;
-        }
-
-        #app-container {
-            width: 100%; max-width: 480px; height: 100dvh;
-            background: var(--bg-idle);
-            display: flex; flex-direction: column;
-            position: relative; box-shadow: 0 0 30px rgba(0,0,0,0.5);
-            transition: background 0.5s ease;
-        }
-
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; -webkit-user-select: none; }
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; min-height: 100vh; background-color: #000; color: var(--text-primary); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; overflow: hidden; }
+        .icon-svg { width: 24px; height: 24px; fill: currentColor; display: block; }
+        .icon-lg { width: 32px; height: 32px; }
         .hidden { display: none !important; }
-        .screen {
-            flex: 1; display: flex; flex-direction: column;
-            height: 100%; box-sizing: border-box; padding: 20px 20px 0 20px;
-            overflow: hidden;
-        }
 
-        /* --- Header --- */
-        .header { 
-            flex-shrink: 0; margin-top: 20px; margin-bottom: 20px; 
-            display: flex; justify-content: space-between; align-items: flex-start;
-        }
-        .header-text { display: flex; flex-direction: column; width: 50%; }
-        .app-title { font-size: 28px; font-weight: 800; margin-bottom: 5px; line-height: 1.2;}
-        .app-subtitle { font-size: 14px; color: var(--text-sub); }
-        
-        .header-controls { 
-            display: flex; flex-direction: column; gap: 8px; align-items: flex-end; 
-        }
-        
-        .theme-switch {
-            background: var(--card-bg); border: 1px solid var(--card-border);
-            border-radius: 20px; padding: 4px; display: flex; align-items: center;
-            cursor: pointer; width: 120px; height: 32px; position: relative;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .switch-knob {
-            width: 26px; height: 26px; background: #fff; border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2); position: absolute;
-            left: 4px; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 2;
-        }
-        .switch-label {
-            width: 100%; text-align: center; font-size: 12px; font-weight: 600;
-            color: var(--text-main); z-index: 1; padding-left: 15px; pointer-events: none;
-            transition: opacity 0.2s; white-space: nowrap;
-        }
-        body.light-theme .switch-knob { transform: translateX(86px); background: #f1c40f; }
-        body.light-theme .switch-label { padding-left: 0; padding-right: 35px; }
+        #app-container { width: 100%; height: 100vh; margin: 0 auto; max-width: 500px; background: var(--bg-idle); display: flex; flex-direction: column; transition: background 0.6s ease; position: relative; }
+        #confetti-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
+        .screen { flex: 1; display: flex; flex-direction: column; padding: 24px; overflow: hidden; transition: opacity 0.3s, transform 0.3s; z-index: 10; }
 
-        .lang-btn {
-            background: var(--card-bg); border: 1px solid var(--card-border);
-            padding: 6px 12px; border-radius: 20px; font-size: 13px;
-            display: flex; align-items: center; gap: 5px; cursor: pointer;
-            color: var(--text-main); backdrop-filter: blur(5px); width: fit-content;
-        }
-
-        .card-grid {
-            flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
-            padding-bottom: 50px; display: flex; flex-direction: column; gap: 16px;
-        }
+        /* Home */
+        .header { margin-top: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .app-title { font-size: 28px; font-weight: 800; letter-spacing: 0.5px; }
+        .btn-lang-pill { background: var(--surface-glass); border-radius: 20px; padding: 6px 14px; display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 500; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); transition: 0.2s; }
+        .btn-lang-pill:active { transform: scale(0.95); background: var(--surface-glass-hover); }
+        .card-grid { flex: 1; overflow-y: auto; display: grid; gap: 14px; padding-bottom: 40px; }
         .card-grid::-webkit-scrollbar { display: none; }
+        .mode-card { background: var(--surface-glass); border-radius: 20px; padding: 22px; display: flex; align-items: center; gap: 18px; cursor: pointer; border: 1px solid rgba(255,255,255,0.05); transition: transform 0.2s; }
+        .mode-card:active { transform: scale(0.98); background: var(--surface-glass-hover); }
+        .card-icon-box { width: 48px; height: 48px; border-radius: 14px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; color: var(--card-color); }
+        .card-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+        .card-desc { font-size: 13px; color: var(--text-secondary); }
 
-        .scenario-card {
-            background-color: var(--card-bg); border-radius: 20px; padding: 24px;
-            cursor: pointer; border-left: 6px solid transparent; flex-shrink: 0;
-            transition: transform 0.1s, background-color 0.2s;
-            backdrop-filter: blur(10px); border: 1px solid var(--card-border);
-        }
-        .scenario-card:active { transform: scale(0.98); opacity: 0.8; }
-        .card-tabata { border-left-color: #ff453a; }
-        .card-hiit { border-left-color: #ff9f0a; }
-        .card-emom { border-left-color: #30d158; }
-        .card-rest { border-left-color: #004e92; }
-        .card-icon { font-size: 28px; margin-bottom: 10px; display: block; }
-        .card-title { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
-        .card-desc { font-size: 13px; color: var(--text-sub); line-height: 1.4; }
-
-        /* --- Timer Screen --- */
-        .nav-bar {
-            flex-shrink: 0; display: flex; align-items: center; justify-content: space-between;
-            height: 50px; margin-bottom: 10px; transition: opacity 0.3s; position: relative;
-        }
-        .nav-bar.locked .btn-nav { opacity: 0; pointer-events: none; }
+        /* Timer */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; height: 44px; margin-bottom: 10px; flex-shrink: 0; position: relative; }
+        .btn-back { background: none; border: none; color: #fff; font-size: 16px; display: flex; align-items: center; gap: 5px; opacity: 0.8; padding: 10px 0; z-index: 2; transition: opacity 0.3s; }
+        .btn-locked { opacity: 0.3; pointer-events: none; } 
+        .total-remain-badge { position: absolute; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); padding: 6px 16px; border-radius: 20px; font-size: 14px; font-variant-numeric: tabular-nums; color: #ddd; font-weight: 500; white-space: nowrap; z-index: 1; }
         
-        .btn-nav {
-            background: var(--card-bg); border: none; color: var(--text-main);
-            padding: 8px 16px; border-radius: 20px; font-size: 15px;
-            cursor: pointer; display: flex; align-items: center; gap: 5px;
-            backdrop-filter: blur(5px); z-index: 2;
-        }
-        .btn-info-circle {
-            width: 36px; height: 36px; border-radius: 50%; padding: 0;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: bold; font-family: serif; font-size: 18px;
-        }
-
-        .total-time-badge {
-            font-size: 15px; font-weight: 600; color: var(--text-main);
-            background: var(--card-bg); padding: 6px 14px; border-radius: 12px;
-            border: 1px solid var(--card-border); font-variant-numeric: tabular-nums;
-            position: absolute; left: 50%; transform: translateX(-50%); 
-            white-space: nowrap; z-index: 1;
-        }
-
-        .timer-content {
-            flex: 1; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; min-height: 0; z-index: 10;
-        }
-
-        .mode-badge {
-            background: var(--card-bg); padding: 6px 14px; border-radius: 12px;
-            font-size: 14px; margin-bottom: 10px; color: var(--text-main); 
-            border: 1px solid var(--card-border); backdrop-filter: blur(5px);
-        }
-
-        .status-text {
-            font-size: clamp(24px, 5vh, 40px); font-weight: 700;
-            margin-bottom: 5px; letter-spacing: 2px; text-shadow: 0 2px 15px rgba(0,0,0,0.3);
-        }
-        .timer-digits {
-            font-size: clamp(90px, 18vh, 160px); font-weight: 800;
-            font-variant-numeric: tabular-nums; line-height: 1; letter-spacing: -3px;
-            text-shadow: 0 4px 30px rgba(0,0,0,0.3); transition: transform 0.1s;
-        }
-        .pulse { animation: pulseAnim 0.8s infinite; color: #fff; }
-        @keyframes pulseAnim { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-
-        .rounds-text { 
-            margin-top: 15px; font-size: 20px; color: var(--text-sub); font-weight: 500; 
-            text-shadow: 0 1px 5px rgba(0,0,0,0.5);
-        }
-
-        .control-deck {
-            flex-shrink: 0; display: flex; gap: 10px;
-            margin-bottom: 20px; width: 100%; z-index: 10; transition: opacity 0.3s;
-        }
-        .deck-btn {
-            flex: 1; background: var(--btn-deck); border-radius: 16px;
-            padding: 12px 5px; border: 1px solid var(--card-border);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            cursor: pointer; transition: all 0.2s; backdrop-filter: blur(5px);
-        }
-        .deck-btn:active { opacity: 0.7; }
-        .deck-btn.active { border-color: rgba(255,255,255,0.8); background: rgba(255,255,255,0.3); }
-        .deck-btn.disabled { opacity: 0.3; pointer-events: none; filter: grayscale(1); }
-        .deck-label { font-size: 12px; color: var(--text-main); font-weight: 500; margin-top: 4px;}
-        .deck-sub { font-size: 10px; color: var(--text-sub); margin-top: 2px; }
-
-        .action-area {
-            flex-shrink: 0; margin-bottom: 30px; display: flex;
-            gap: 12px; width: 100%; height: 75px; z-index: 10;
-        }
-        .btn-action {
-            height: 100%; border-radius: 20px; border: none;
-            font-size: 18px; font-weight: 700; cursor: pointer;
-            transition: opacity 0.2s; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2); gap: 8px;
-        }
-        .btn-action:active { opacity: 0.8; transform: scale(0.98); }
-        .btn-reset { 
-            flex: 1; background: #2c2c2e; color: #ff453a; 
-            backdrop-filter: blur(10px); border: 2px solid rgba(255,69,58,0.2); font-size: 16px; 
-        }
-        .btn-start { flex: 2; background: #fff; color: #000; font-size: 20px;}
-        body.light-theme .btn-reset { background: #ecf0f1; }
-
-        /* Modal Overlay */
-        .modal-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); z-index: 100;
-            display: flex; justify-content: center; align-items: flex-end;
-            backdrop-filter: blur(8px);
-        }
-        .modal-content {
-            background: var(--modal-bg); color: var(--modal-text);
-            width: 100%; max-height: 90%;
-            border-top-left-radius: 24px; border-top-right-radius: 24px;
-            padding: 24px; box-sizing: border-box; overflow-y: auto;
-            animation: slideUp 0.3s ease;
-        }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .modal-title { font-size: 20px; font-weight: 700; }
-        .btn-close { background: none; border: none; color: #0a84ff; font-size: 16px; font-weight: 600; cursor: pointer;}
+        .timer-display { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; }
+        .timer-ring-svg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-90deg); width: 350px; height: 350px; pointer-events: none; z-index: 0; max-width: 90vw; max-height: 90vw; }
+        .ring-bg { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 6; }
+        .ring-progress { fill: none; stroke: var(--accent-color); stroke-width: 6; stroke-linecap: round; stroke-dasharray: 1005; stroke-dashoffset: 0; }
         
-        .lang-list { display: flex; flex-direction: column; gap: 10px; }
-        .lang-item {
-            padding: 15px; background: var(--lang-item-bg); border-radius: 12px;
-            font-size: 16px; cursor: pointer; display: flex; justify-content: space-between;
-        }
-        .lang-item.selected { border: 2px solid #0a84ff; color: #0a84ff; font-weight: bold; }
+        .status-text { font-size: clamp(28px, 6vw, 40px); font-weight: 800; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; z-index: 1; text-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        .timer-digits { font-size: clamp(70px, 18vw, 110px); font-weight: 700; z-index: 1; font-variant-numeric: tabular-nums; line-height: 1; text-shadow: 0 5px 30px rgba(0,0,0,0.4); }
+        .timer-sub { font-size: 20px; color: var(--text-secondary); margin-top: 15px; font-weight: 500; z-index: 1; }
 
-        /* Pro Info Styling */
-        .modal-body-text { font-size: 15px; line-height: 1.7; color: var(--modal-text); opacity: 0.9; }
-        .modal-body-text h3 { margin-bottom: 8px; font-size: 18px; color: #0a84ff; }
-        .modal-body-text ul { padding-left: 20px; margin-bottom: 15px; }
-        .modal-body-text li { margin-bottom: 5px; }
+        .controls-wrapper { background: var(--surface-glass); border-radius: 30px; padding: 20px; backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); z-index: 2; }
+        .tools-row { display: flex; gap: 10px; margin-bottom: 16px; height: 70px; }
+        .tool-btn { 
+            flex: 1; background: rgba(255,255,255,0.08); border: none; border-radius: 14px; 
+            padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+            color: #fff; transition: 0.2s; 
+        }
+        .tool-btn:active { background: rgba(255,255,255,0.2); }
+        .tool-btn.btn-active-green { background: rgba(48, 209, 88, 0.3) !important; border: 1px solid rgba(48, 209, 88, 0.5) !important; color: #fff !important; }
+        .tool-btn.disabled { opacity: 0.3; pointer-events: none; }
+        .tool-icon-wrap { height: 24px; display: flex; align-items: center; justify-content: center;}
+        .tool-label { font-size: 11px; opacity: 0.9; text-align: center; }
 
-        .modal-total-time {
-            text-align: center; margin-bottom: 20px; color: var(--text-sub); font-size: 14px;
-            background: var(--setting-row-bg); padding: 10px; border-radius: 10px;
-        }
-        .setting-group-title { font-size: 14px; color: #8e8e93; margin-bottom: 10px; margin-top: 20px; font-weight: 600; text-transform: uppercase;}
-        .setting-row {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 12px; padding: 12px; background: var(--setting-row-bg); border-radius: 12px;
-        }
-        .time-input-group { display: flex; align-items: center; gap: 5px; }
-        .input-num {
-            background: var(--input-bg); border: 1px solid var(--input-border); color: var(--modal-text);
-            width: 50px; padding: 8px 0; border-radius: 8px; text-align: center; font-size: 16px;
-        }
-        .time-label { font-size: 14px; color: var(--text-sub); }
-        .btn-restore {
-            width: 100%; padding: 15px; background: transparent;
-            border: 1px solid #ff453a; color: #ff453a;
-            border-radius: 12px; font-size: 16px; margin-top: 20px; margin-bottom: 20px; cursor: pointer;
-        }
+        .main-actions { display: flex; gap: 12px; height: 68px; }
+        .action-btn { height: 100%; border-radius: 18px; border: none; font-size: 18px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; color: #fff; }
+        .btn-stop { flex: 1; background: rgba(255, 59, 48, 0.2); color: #ff5b50; border: 1px solid rgba(255, 59, 48, 0.4); font-size: 16px; transition: opacity 0.3s; }
+        .btn-stop:active { background: rgba(255, 59, 48, 0.4); }
+        .btn-play { flex: 1.8; background: #fff; color: #000; box-shadow: 0 4px 20px rgba(255,255,255,0.25); }
+        .btn-play:active { transform: scale(0.97); opacity: 0.9; }
+
+        /* Modal */
+        .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); z-index: 999; display: flex; align-items: flex-end; opacity: 0; pointer-events: none; transition: 0.3s; }
+        .modal-overlay.open { opacity: 1; pointer-events: auto; }
+        .modal-sheet { width: 100%; background: #1c1c1e; border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 24px; max-height: 85%; overflow-y: auto; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 0 -5px 30px rgba(0,0,0,0.5); }
+        .modal-overlay.open .modal-sheet { transform: translateY(0); }
+        .sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .sheet-title { font-size: 20px; font-weight: bold; }
+        .sheet-close { color: #0A84FF; background: none; border: none; font-size: 16px; font-weight: 600; padding: 5px; }
+        .setting-row { display: flex; justify-content: space-between; align-items: center; background: #2c2c2e; padding: 16px; margin-bottom: 1px; }
+        .setting-row:first-of-type { border-top-left-radius: 12px; border-top-right-radius: 12px; }
+        .setting-row:last-of-type { border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; margin-bottom: 16px; }
+        .input-group { display: flex; align-items: center; gap: 8px; }
+        .nice-input { background: #000; border: 1px solid #444; color: #fff; width: 54px; padding: 10px 0; border-radius: 8px; text-align: center; font-size: 18px; font-weight: 600; }
+        .unit { font-size: 14px; color: #888; }
+        .total-est-box { background: #333; color: #ccc; text-align: center; padding: 10px; border-radius: 10px; margin-bottom: 20px; font-size: 15px; }
+
+        /* Rich Info Styles */
+        #info-content { color: #ddd; line-height: 1.6; font-size: 15px; }
+        #info-content h3 { color: var(--accent-color); margin-top: 0; margin-bottom: 12px; font-size: 22px; }
+        #info-content h4 { color: #fff; margin: 16px 0 8px 0; font-size: 16px; font-weight: 700; border-left: 3px solid var(--accent-color); padding-left: 10px; }
+        #info-content p { margin-bottom: 12px; color: rgba(255,255,255,0.8); }
+        #info-content ul { padding-left: 20px; margin-bottom: 16px; color: rgba(255,255,255,0.7); }
+        #info-content li { margin-bottom: 6px; }
+        #info-content strong { color: #fff; font-weight: 600; }
     </style>
 </head>
-<body class="">
+<body>
 
 <div id="app-container">
-    
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- Home -->
     <div id="home-screen" class="screen">
         <div class="header">
-            <div class="header-text">
-                <div class="app-title" data-i18n="app_title">SmartTimer</div>
-                <div class="app-subtitle" data-i18n="app_subtitle">選擇你的訓練模式</div>
-            </div>
-            <div class="header-controls">
-                <div class="theme-switch" onclick="toggleTheme()">
-                    <div class="switch-knob"></div>
-                    <span class="switch-label" id="theme-text">暗色風格</span>
-                </div>
-                <button class="lang-btn" onclick="openLangModal()">
-                    <span>🌐</span> <span id="lang-display">繁體中文</span>
-                </button>
+            <div class="app-title">SmartTimer</div>
+            <div class="btn-lang-pill" onclick="openLangModal()">
+                <svg class="icon-svg" viewBox="0 0 24 24" style="width:18px;height:18px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                <span data-i18n="btn_lang_text">Language / 語言</span>
             </div>
         </div>
 
         <div class="card-grid">
-            <div class="scenario-card card-tabata" onclick="selectMode('tabata')">
-                <span class="card-icon">🔥</span>
-                <div class="card-title" data-i18n="mode_tabata_title">極速燃脂 (Tabata)</div>
-                <div class="card-desc" data-i18n="mode_tabata_desc">Tabata 經典配置</div>
+            <div class="mode-card" style="--card-color: #FF3B30;" onclick="selectMode('tabata')">
+                <div class="card-icon-box"><svg class="icon-lg" viewBox="0 0 24 24"><path fill="currentColor" d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg></div>
+                <div><div class="card-title" data-i18n="mode_tabata_title">Tabata</div><div class="card-desc" data-i18n="mode_tabata_desc">20s Work / 10s Rest</div></div>
             </div>
-            <div class="scenario-card card-hiit" onclick="selectMode('hiit')">
-                <span class="card-icon">🏃</span>
-                <div class="card-title" data-i18n="mode_hiit_title">高強度間歇 (HIIT)</div>
-                <div class="card-desc" data-i18n="mode_hiit_desc">適合一般有氧循環</div>
+            <div class="mode-card" style="--card-color: #FF9F0A;" onclick="selectMode('hiit')">
+                <div class="card-icon-box"><svg class="icon-lg" viewBox="0 0 24 24"><path fill="currentColor" d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/></svg></div>
+                <div><div class="card-title" data-i18n="mode_hiit_title">HIIT</div><div class="card-desc" data-i18n="mode_hiit_desc">High Intensity Intervals</div></div>
             </div>
-            <div class="scenario-card card-emom" onclick="selectMode('emom')">
-                <span class="card-icon">⚡</span>
-                <div class="card-title" data-i18n="mode_emom_title">循環挑戰 (EMOM)</div>
-                <div class="card-desc" data-i18n="mode_emom_desc">每分鐘整點循環</div>
+            <div class="mode-card" style="--card-color: #30D158;" onclick="selectMode('emom')">
+                <div class="card-icon-box"><svg class="icon-lg" viewBox="0 0 24 24"><path fill="currentColor" d="M7 2v11h3v9l7-12h-4l4-8z"/></svg></div>
+                <div><div class="card-title" data-i18n="mode_emom_title">EMOM</div><div class="card-desc" data-i18n="mode_emom_desc">Every Minute on the Minute</div></div>
             </div>
-            <div class="scenario-card card-rest" onclick="selectMode('gym')">
-                <span class="card-icon">🏋️</span>
-                <div class="card-title" data-i18n="mode_gym_title">重量訓練 (Gym)</div>
-                <div class="card-desc" data-i18n="mode_gym_desc">含訓練時間與組間休息</div>
+            <div class="mode-card" style="--card-color: #0A84FF;" onclick="selectMode('gym')">
+                <div class="card-icon-box"><svg class="icon-lg" viewBox="0 0 24 24"><path fill="currentColor" d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14l1.43 1.43L2 7.71l1.43 1.43L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22 14.86 20.57 16.29 22 18.43 19.86 19.86 21.29 21.29 19.86l-1.43-1.43L22 16.29z"/></svg></div>
+                <div><div class="card-title" data-i18n="mode_gym_title">Gym / Weights</div><div class="card-desc" data-i18n="mode_gym_desc">Sets & Rest Timer</div></div>
             </div>
-            <div style="height: 20px;"></div>
         </div>
     </div>
 
+    <!-- Timer -->
     <div id="timer-screen" class="screen hidden">
-        <div class="nav-bar" id="navBar">
-            <button class="btn-nav" onclick="goBack()">❮ <span data-i18n="btn_back">返回</span></button>
-            <div class="total-time-badge" id="mainRemainingTime">--:--</div>
-            <button class="btn-nav btn-info-circle" onclick="openInfoModal()">i</button>
+        <div class="top-bar" id="navBar">
+            <button class="btn-back" id="btnBack" onclick="goBack()">
+                <svg class="icon-svg" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+                <span data-i18n="btn_back">Back</span>
+            </button>
+            <div class="total-remain-badge" id="totalRemainDisplay">Total: 00:00</div>
+            <button class="btn-back" style="justify-content: flex-end;" onclick="openInfoModal()">
+                <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+            </button>
         </div>
 
-        <div class="timer-content">
-            <div class="mode-badge" id="modeBadge">Tabata</div>
-            <div class="status-text" id="statusText">準備</div>
+        <div class="timer-display">
+            <svg class="timer-ring-svg" viewBox="0 0 360 360">
+                <circle class="ring-bg" cx="180" cy="180" r="160" />
+                <circle class="ring-progress" id="ringProgress" cx="180" cy="180" r="160" />
+            </svg>
+            <div class="status-text" id="statusText">READY</div>
             <div class="timer-digits" id="timerDigits">00:00</div>
-            <div class="rounds-text" id="roundsText">Round 1/8</div>
+            <div class="timer-sub" id="roundsText">Set 1 / 8</div>
         </div>
 
-        <div class="control-deck">
-            <div class="deck-btn" onclick="toggleSoundMode()">
-                <div class="deck-icon" id="btn-sound-icon">🔔</div>
-                <div class="deck-label" id="btn-sound-text" data-i18n="sound_beep">音效模式</div>
-            </div>
-            <div class="deck-btn lockable" id="btn-warmup" onclick="toggleWarmupDirect()">
-                <div class="deck-icon">🌡️</div>
-                <div class="deck-label" data-i18n="btn_warmup">暖身開關</div>
-                <div class="deck-sub" id="btn-warmup-sub">關閉</div>
-            </div>
-            <div class="deck-btn lockable" onclick="openSettings()">
-                <div class="deck-icon">⚙️</div>
-                <div class="deck-label" data-i18n="btn_custom">自定義</div>
-            </div>
-        </div>
-
-        <div class="action-area">
-            <button class="btn-action btn-reset" onclick="resetTimer()"><span data-i18n="btn_reset">⏹ 結束 / 重置</span></button>
-            <button class="btn-action btn-start" id="actionBtn" onclick="toggleTimerState()"><span data-i18n="btn_start">▶ 開始</span></button>
-        </div>
-    </div>
-
-    <div id="settings-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title" data-i18n="modal_settings_title">詳細設定</div>
-                <button class="btn-close" onclick="closeSettings()" data-i18n="btn_done">完成</button>
-            </div>
-            
-            <div class="modal-total-time" id="modalTotalTime">--:--</div>
-
-            <div class="setting-group-title" data-i18n="group_prep">前置準備</div>
-            <div class="setting-row">
-                <span class="setting-label" data-i18n="label_prep">準備時間</span>
-                <div class="time-input-group">
-                    <input type="number" class="input-num" id="set-prep-min" oninput="validateInput(this); liveUpdateTotal()">
-                    <span class="time-label" data-i18n="unit_min">分</span>
-                    <input type="number" class="input-num" id="set-prep-sec" oninput="validateInput(this); liveUpdateTotal()">
-                    <span class="time-label" data-i18n="unit_sec">秒</span>
-                </div>
-            </div>
-            <div class="setting-row">
-                <span class="setting-label" data-i18n="label_warmup">暖身時間</span>
-                <div class="time-input-group">
-                    <input type="number" class="input-num" id="set-warmup-min" oninput="validateInput(this); liveUpdateTotal()">
-                    <span class="time-label" data-i18n="unit_min">分</span>
-                    <input type="number" class="input-num" id="set-warmup-sec" oninput="validateInput(this); liveUpdateTotal()">
-                    <span class="time-label" data-i18n="unit_sec">秒</span>
-                </div>
+        <div class="controls-wrapper">
+            <div class="tools-row">
+                <button class="tool-btn" onclick="toggleSoundMode()">
+                    <div class="tool-icon-wrap" id="icon-sound"></div>
+                    <span class="tool-label" id="text-sound" data-i18n="sound_beep">Beep</span>
+                </button>
+                <button class="tool-btn lockable" id="btn-warmup" onclick="toggleWarmupDirect()">
+                    <div class="tool-icon-wrap"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M15 13V5c0-1.66-1.34-3-3-3S9 3.34 9 5v8c-1.21.91-2 2.37-2 4 0 2.76 2.24 5 5 5s5-2.24 5-5c0-1.63-.79-3.09-2-4zm-4-2V5c0-.55.45-1 1-1s1 .45 1 1v1h-1v1h1v1h-1v1h1v2H11z"/></svg></div>
+                    <span class="tool-label" id="text-warmup" data-i18n="btn_warmup_off">Warmup? (OFF)</span>
+                </button>
+                <button class="tool-btn lockable" onclick="openSettings()">
+                    <div class="tool-icon-wrap"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L3.16 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.58 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg></div>
+                    <span class="tool-label" data-i18n="btn_custom">Edit</span>
+                </button>
             </div>
 
-            <div class="setting-group-title" data-i18n="group_work">正式訓練</div>
-            <div class="setting-row" id="row-work">
-                <span class="setting-label" data-i18n="label_work">運動/訓練</span>
-                <div class="time-input-group">
-                    <input type="number" class="input-num" id="set-work-min" oninput="validateInput(this); liveUpdateTotal()">
-                    <span class="time-label" data-i18n="unit_min">分</span>
-                    <input type="number" class="input-num" id="set-work-sec" oninput="validateInput(this); liveUpdateTotal()">
-                    <span class="time-label" data-i18n="unit_sec">秒</span>
-                </div>
-            </div>
-            <div class="setting-row">
-                <span class="setting-label" data-i18n="label_rest">休息時間</span>
-                <div class="time-input-group">
-                    <input type="number" class="input-num" id="set-rest-min" oninput="validateInput(this); liveUpdateTotal()">
-                    <span class="time-label" data-i18n="unit_min">分</span>
-                    <input type="number" class="input-num" id="set-rest-sec" oninput="validateInput(this); liveUpdateTotal()">
-                    <span class="time-label" data-i18n="unit_sec">秒</span>
-                </div>
-            </div>
-            <div class="setting-row">
-                <span class="setting-label" data-i18n="label_rounds">總組數 (Rounds)</span>
-                <div class="time-input-group">
-                    <input type="number" class="input-num" id="set-rounds" oninput="validateInput(this); liveUpdateTotal()">
-                </div>
-            </div>
-
-            <button class="btn-restore" onclick="restoreDefaults()" data-i18n="btn_restore">↻ 還原預設值</button>
-        </div>
-    </div>
-
-    <div id="lang-modal" class="modal-overlay hidden">
-        <div class="modal-content" style="height:auto; max-height: 70%;">
-            <div class="modal-header">
-                <div class="modal-title" data-i18n="modal_lang_title">選擇語言</div>
-                <button class="btn-close" onclick="closeLangModal()">X</button>
-            </div>
-            <div class="lang-list">
-                <div class="lang-item" onclick="setLanguage('zh-TW')">繁體中文</div>
-                <div class="lang-item" onclick="setLanguage('zh-CN')">简体中文</div>
-                <div class="lang-item" onclick="setLanguage('en')">English</div>
-                <div class="lang-item" onclick="setLanguage('ja')">日本語</div>
-                <div class="lang-item" onclick="setLanguage('ko')">한국어</div>
+            <div class="main-actions">
+                <button class="action-btn btn-stop" id="btnReset" onclick="resetTimer()">
+                    <svg class="icon-svg" viewBox="0 0 24 24" style="width:20px;height:20px;"><path d="M6 6h12v12H6z"/></svg>
+                    <span data-i18n="btn_reset">End / Reset</span>
+                </button>
+                <button class="action-btn btn-play" id="actionBtn" onclick="toggleTimerState()">
+                    <span id="play-icon-wrap" style="display:flex; align-items:center; gap:6px;"></span>
+                </button>
             </div>
         </div>
     </div>
 
-    <div id="info-modal" class="modal-overlay hidden">
-        <div class="modal-content" style="height: auto; max-height: 70%;">
-            <div class="modal-header">
-                <div class="modal-title" id="info-title">關於</div>
-                <button class="btn-close" onclick="closeInfoModal()" data-i18n="btn_close">關閉</button>
-            </div>
-            <div class="modal-body-text" id="info-content"></div>
+    <!-- Modals -->
+    <div id="settings-modal" class="modal-overlay">
+        <div class="modal-sheet">
+            <div class="sheet-header"><div class="sheet-title" data-i18n="modal_settings_title">Settings</div><button class="sheet-close" onclick="closeSettings()" data-i18n="btn_done">Done</button></div>
+            <div class="total-est-box" id="modalTotalTime">Total: 00:00</div>
+            <div style="margin-bottom:10px; color:#888; font-size:12px; font-weight:700;" data-i18n="group_prep">PREPARATION</div>
+            <div class="setting-row"><span data-i18n="label_prep">Get Ready</span><div class="input-group"><input type="tel" class="nice-input" id="set-prep-min" oninput="sanitizeInput(this)" onblur="validateInput(this); liveUpdateTotal()"><span class="unit">m</span><input type="tel" class="nice-input" id="set-prep-sec" oninput="sanitizeInput(this)" onblur="validateInput(this); liveUpdateTotal()"><span class="unit">s</span></div></div>
+            <div class="setting-row"><span data-i18n="label_warmup">Warmup</span><div class="input-group"><input type="tel" class="nice-input" id="set-warmup-min" oninput="sanitizeInput(this)" onblur="validateInput(this); liveUpdateTotal()"><span class="unit">m</span><input type="tel" class="nice-input" id="set-warmup-sec" oninput="sanitizeInput(this)" onblur="validateInput(this); liveUpdateTotal()"><span class="unit">s</span></div></div>
+            <div style="margin-bottom:10px; margin-top:20px; color:#888; font-size:12px; font-weight:700;" data-i18n="group_work">WORKOUT</div>
+            <div class="setting-row" id="row-work"><span data-i18n="label_work">Work</span><div class="input-group"><input type="tel" class="nice-input" id="set-work-min" oninput="sanitizeInput(this)" onblur="validateInput(this); liveUpdateTotal()"><span class="unit">m</span><input type="tel" class="nice-input" id="set-work-sec" oninput="sanitizeInput(this)" onblur="validateInput(this); liveUpdateTotal()"><span class="unit">s</span></div></div>
+            <div class="setting-row"><span data-i18n="label_rest">Rest</span><div class="input-group"><input type="tel" class="nice-input" id="set-rest-min" oninput="sanitizeInput(this)" onblur="validateInput(this); liveUpdateTotal()"><span class="unit">m</span><input type="tel" class="nice-input" id="set-rest-sec" oninput="sanitizeInput(this)" onblur="validateInput(this); liveUpdateTotal()"><span class="unit">s</span></div></div>
+            <div class="setting-row"><span data-i18n="label_rounds">Rounds</span><div class="input-group"><input type="tel" class="nice-input" id="set-rounds" oninput="sanitizeInput(this)" onblur="validateInput(this); liveUpdateTotal()"></div></div>
+            <div style="text-align: center; margin-top: 30px;"><button onclick="restoreDefaults()" style="background:none; border:none; color: #ff5b50; font-size:14px; cursor:pointer;" data-i18n="btn_restore">Reset Defaults</button></div>
         </div>
     </div>
-
+    <div id="info-modal" class="modal-overlay"><div class="modal-sheet"><div class="sheet-header"><div class="sheet-title" id="info-title">About</div><button class="sheet-close" onclick="closeInfoModal()" data-i18n="btn_close">Close</button></div><div id="info-content"></div></div></div>
+    <div id="lang-modal" class="modal-overlay"><div class="modal-sheet"><div class="sheet-header"><div class="sheet-title" data-i18n="modal_lang_title">Language</div><button class="sheet-close" onclick="closeLangModal()">X</button></div><div style="display:grid; gap:10px;"><div onclick="setLanguage('en')" style="padding:16px; background:#2c2c2e; border-radius:12px; cursor:pointer; font-size:16px;">English</div><div onclick="setLanguage('zh-TW')" style="padding:16px; background:#2c2c2e; border-radius:12px; cursor:pointer; font-size:16px;">繁體中文 (Traditional Chinese)</div><div onclick="setLanguage('zh-CN')" style="padding:16px; background:#2c2c2e; border-radius:12px; cursor:pointer; font-size:16px;">简体中文 (Simplified Chinese)</div><div onclick="setLanguage('ja')" style="padding:16px; background:#2c2c2e; border-radius:12px; cursor:pointer; font-size:16px;">日本語 (Japanese)</div><div onclick="setLanguage('ko')" style="padding:16px; background:#2c2c2e; border-radius:12px; cursor:pointer; font-size:16px;">한국어 (Korean)</div></div></div></div>
 </div>
 
 <script>
-    // --- 5 Languages with Professional Content ---
+try {
     const translations = {
+        'en': {
+            btn_lang_text: "Language / 語言", mode_tabata_title: "Tabata", mode_tabata_desc: "20s Work / 10s Rest", mode_hiit_title: "HIIT", mode_hiit_desc: "High Intensity Intervals", mode_emom_title: "EMOM", mode_emom_desc: "Every Minute on the Minute", mode_gym_title: "Gym / Weights", mode_gym_desc: "Sets & Rest Timer", 
+            btn_back: "Back", btn_start: "Start", btn_pause: "Pause", btn_resume: "Resume", btn_reset: "End / Reset", btn_warmup_on: "Warmup? (ON)", btn_warmup_off: "Warmup? (OFF)", btn_custom: "Edit", btn_done: "Done", btn_restore: "Reset Defaults", btn_close: "Close", 
+            label_total_remain: "Total Left", label_total_est: "Est. Total", modal_settings_title: "Settings", modal_lang_title: "Language", group_prep: "Preparation", group_work: "Workout", label_prep: "Get Ready", label_warmup: "Warmup", label_work: "Work", label_rest: "Rest", label_rounds: "Rounds", 
+            sound_beep: "Beep", sound_voice: "Voice", sound_mute: "Mute", phase_prep: "GET READY", phase_warmup: "WARM UP", phase_work: "WORK", phase_gym_work: "WORKOUT", phase_rest: "REST", phase_gym_rest: "REST", phase_finish: "COMPLETE", phase_start_warmup: "Start Warmup", phase_start_work: "Start Work", phase_gym_start: "Start Training", phase_start_rest: "Rest Now", phase_finish_train: "Workout Complete",
+            info_tabata: `<h3>Tabata Protocol</h3><p>A specific form of HIIT developed by <strong>Dr. Izumi Tabata</strong>.</p><ul><li><strong>Ultra Intensity:</strong> 20s all-out.</li><li><strong>Short Rest:</strong> 10s rest.</li><li><strong>Duration:</strong> 4 mins total.</li></ul><p>Improves aerobic and anaerobic systems simultaneously.</p>`,
+            info_hiit: `<h3>HIIT</h3><p>High-Intensity Interval Training. Alternates short bursts of intense exercise with recovery.</p><p>Creates the <strong>Afterburn Effect (EPOC)</strong>, burning calories hours after workout.</p>`,
+            info_emom: `<h3>EMOM</h3><p><strong>Every Minute on the Minute</strong>.</p><ul><li>Start task at the start of every minute.</li><li>Remaining time is your rest.</li></ul><p>Challenges pacing and recovery speed.</p>`,
+            info_gym: `<h3>Gym / Weights</h3><p>Focus on the <strong>Rest Period</strong> between sets.</p><ul><li><strong>Hypertrophy:</strong> 60-90s rest.</li><li><strong>Strength:</strong> 3-5 mins rest.</li></ul>`
+        },
         'zh-TW': {
-            lang_name: "繁體中文",
-            app_title: "SmartTimer", app_subtitle: "選擇你的訓練模式",
-            mode_tabata_title: "極速燃脂 (Tabata)", mode_tabata_desc: "20秒運動 / 10秒休息",
-            mode_hiit_title: "高強度間歇 (HIIT)", mode_hiit_desc: "適合一般有氧循環",
-            mode_emom_title: "循環挑戰 (EMOM)", mode_emom_desc: "每分鐘整點循環",
-            mode_gym_title: "重量訓練 (Gym)", mode_gym_desc: "含訓練時間與組間休息",
-            btn_back: "返回", btn_reset: "⏹ 結束 / 重置", btn_start: "▶ 開始", btn_pause: "⏸ 暫停",
-            btn_warmup: "暖身開關", btn_custom: "自定義", btn_done: "完成", btn_restore: "↻ 還原預設值", btn_close: "關閉",
-            label_remaining: "剩餘", label_total_est: "預估時間總長", label_off: "關閉",
-            modal_settings_title: "詳細設定", modal_lang_title: "選擇語言",
-            group_prep: "前置準備", group_work: "正式訓練",
-            label_prep: "準備時間", label_warmup: "暖身時間", label_work: "運動/訓練", label_rest: "休息時間", label_rounds: "總組數",
-            unit_min: "分", unit_sec: "秒",
-            sound_beep: "音效模式", sound_voice: "人聲模式", sound_mute: "靜音模式",
-            phase_prep: "準備", phase_warmup: "暖身", phase_work: "運動中", phase_gym_work: "訓練中",
-            phase_rest: "休息 / 緩和", phase_gym_rest: "組間休息", phase_finish: "完成",
-            phase_start_warmup: "開始暖身", phase_start_work: "運動開始", phase_gym_start: "訓練開始", phase_start_rest: "休息一下", phase_finish_train: "訓練結束",
-            theme_dark: "暗色風格", theme_light: "亮色風格",
-            info_tabata: "<h3>Tabata 訓練法</h3><p>由日本田畑泉 (Izumi Tabata) 教授研發。核心是「20秒高強度運動 + 10秒休息」，重複8組，共4分鐘。</p><ul><li><b>優點：</b>能在極短時間內同時提升有氧與無氧能力。</li><li><b>強度：</b>必須達到最大攝氧量的 170% (全力衝刺)。</li></ul>",
-            info_hiit: "<h3>HIIT 高強度間歇</h3><p>交替進行「短時間高強度運動」與「短暫恢復期」。</p><ul><li><b>EPOC 效應：</b>運動後身體會持續消耗熱量 (後燃效應)。</li><li><b>適用：</b>跑步、單車、波比跳等全身性運動。</li></ul>",
-            info_emom: "<h3>EMOM 挑戰</h3><p>Every Minute on the Minute (每分鐘整點開始)。</p><ul><li><b>規則：</b>每分鐘開始時做指定次數動作，做完剩下的時間就是休息。</li><li><b>策略：</b>做得越快，休息越久，但心率越高；做得慢，休息少，容易力竭。</li></ul>",
-            info_gym: "<h3>重量訓練計時</h3><p>專為健身房重訓設計，包含「訓練時間 (Work)」與「組間休息 (Rest)」。</p><ul><li><b>ATP-PC 系統：</b>一般建議組間休息 90-120 秒，讓肌肉能量系統恢復。</li><li><b>節奏控制：</b>此模式可幫助你維持每組的訓練密度。</li></ul>"
+            btn_lang_text: "語言 / Language", mode_tabata_title: "Tabata 燃脂", mode_tabata_desc: "20秒運動 / 10秒休息", mode_hiit_title: "HIIT 間歇", mode_hiit_desc: "高強度有氧循環", mode_emom_title: "EMOM 挑戰", mode_emom_desc: "每分鐘整點循環", mode_gym_title: "重量訓練", mode_gym_desc: "組數與休息計時", 
+            btn_back: "返回", btn_start: "開始", btn_pause: "暫停", btn_resume: "繼續", btn_reset: "結束 / 重置", btn_warmup_on: "暖身? (開啟)", btn_warmup_off: "暖身? (關閉)", btn_custom: "設定", btn_done: "完成", btn_restore: "還原預設", btn_close: "關閉", 
+            label_total_remain: "剩餘", label_total_est: "預估總時長", modal_settings_title: "訓練設定", modal_lang_title: "語言選擇", group_prep: "準備階段", group_work: "訓練內容", label_prep: "倒數準備", label_warmup: "暖身時間", label_work: "運動時間", label_rest: "休息時間", label_rounds: "總組數", 
+            sound_beep: "音效", sound_voice: "語音", sound_mute: "靜音", phase_prep: "準備", phase_warmup: "暖身", phase_work: "運動", phase_gym_work: "訓練中", phase_rest: "休息", phase_gym_rest: "休息", phase_finish: "完成", phase_start_warmup: "開始暖身", phase_start_work: "開始運動", phase_gym_start: "開始訓練", phase_start_rest: "休息一下", phase_finish_train: "訓練結束",
+            info_tabata: `<h3>Tabata 訓練法</h3><p>由<strong>田畑泉博士</strong>研發。20秒極限衝刺 + 10秒休息，共 4 分鐘。</p><p>能同時提升有氧與無氧能力，並產生極高的後燃效應。</p>`,
+            info_hiit: `<h3>HIIT 高強度間歇</h3><p>透過劇烈心率波動，引發<strong>後燃效應 (EPOC)</strong>。</p><p>適合想在短時間內減脂、保留肌肉並提升心肺功能的人。</p>`,
+            info_emom: `<h3>EMOM 分鐘訓練</h3><p>源自 CrossFit。每分鐘整點開始做動作，做完剩下的時間即為休息。</p><p>強迫你在疲勞時仍保持動作效率。</p>`,
+            info_gym: `<h3>重量訓練計時</h3><p>重點在於<strong>組間休息</strong>的紀律。</p><ul><li><strong>肌肥大：</strong>休 60-90 秒。</li><li><strong>最大肌力：</strong>休 3-5 分鐘以恢復能量系統。</li></ul>`
         },
         'zh-CN': {
-            lang_name: "简体中文",
-            app_title: "SmartTimer", app_subtitle: "选择你的训练模式",
-            mode_tabata_title: "极速燃脂 (Tabata)", mode_tabata_desc: "20秒运动 / 10秒休息",
-            mode_hiit_title: "高强度间歇 (HIIT)", mode_hiit_desc: "适合一般有氧循环",
-            mode_emom_title: "循环挑战 (EMOM)", mode_emom_desc: "每分钟整点循环",
-            mode_gym_title: "重量训练 (Gym)", mode_gym_desc: "含训练时间与组间休息",
-            btn_back: "返回", btn_reset: "⏹ 结束 / 重置", btn_start: "▶ 开始", btn_pause: "⏸ 暂停",
-            btn_warmup: "热身开关", btn_custom: "自定义", btn_done: "完成", btn_restore: "↻ 还原默认值", btn_close: "关闭",
-            label_remaining: "剩余", label_total_est: "预估总时长", label_off: "关闭",
-            modal_settings_title: "详细设定", modal_lang_title: "选择语言",
-            group_prep: "前置准备", group_work: "正式训练",
-            label_prep: "准备时间", label_warmup: "热身时间", label_work: "运动/训练", label_rest: "休息时间", label_rounds: "总组数",
-            unit_min: "分", unit_sec: "秒",
-            sound_beep: "音效模式", sound_voice: "人声模式", sound_mute: "静音模式",
-            phase_prep: "准备", phase_warmup: "热身", phase_work: "运动中", phase_gym_work: "训练中",
-            phase_rest: "休息 / 缓和", phase_gym_rest: "组间休息", phase_finish: "完成",
-            phase_start_warmup: "开始热身", phase_start_work: "运动开始", phase_gym_start: "训练开始", phase_start_rest: "休息一下", phase_finish_train: "训练结束",
-            theme_dark: "暗色风格", theme_light: "亮色风格",
-            info_tabata: "<h3>Tabata 训练法</h3><p>由日本田畑泉 (Izumi Tabata) 教授研发。核心是「20秒高强度运动 + 10秒休息」，重复8组。</p><ul><li><b>优点：</b>极短时间内提升有氧与无氧能力。</li><li><b>强度：</b>需达到最大摄氧量的 170%。</li></ul>",
-            info_hiit: "<h3>HIIT 高强度间歇</h3><p>交替进行「高强度运动」与「短暂恢复」。</p><ul><li><b>EPOC 效应：</b>运动后持续消耗热量 (后燃效应)。</li><li><b>适用：</b>跑步、单车、波比跳等。</li></ul>",
-            info_emom: "<h3>EMOM 挑战</h3><p>Every Minute on the Minute。</p><ul><li><b>规则：</b>每分钟开始做指定动作，做完剩余时间即为休息。</li><li><b>策略：</b>做越快休息越久，但心率越高。</li></ul>",
-            info_gym: "<h3>重量训练计时</h3><p>包含「训练时间」与「组间休息」。</p><ul><li><b>能量恢复：</b>建议组间休息 90-120 秒以恢复 ATP-PC 系统。</li><li><b>节奏控制：</b>维持每组训练密度，避免休息过久。</li></ul>"
+            btn_lang_text: "语言 / Language", mode_tabata_title: "Tabata 燃脂", mode_tabata_desc: "20秒运动 / 10秒休息", mode_hiit_title: "HIIT 间歇", mode_hiit_desc: "高强度有氧循环", mode_emom_title: "EMOM 挑战", mode_emom_desc: "每分钟整点循环", mode_gym_title: "重量训练", mode_gym_desc: "组数与休息计时", 
+            btn_back: "返回", btn_start: "开始", btn_pause: "暂停", btn_resume: "继续", btn_reset: "结束 / 重置", btn_warmup_on: "热身? (开启)", btn_warmup_off: "热身? (关闭)", btn_custom: "设定", btn_done: "完成", btn_restore: "还原默认", btn_close: "关闭", 
+            label_total_remain: "剩余", label_total_est: "预估总时长", modal_settings_title: "训练设定", modal_lang_title: "语言选择", group_prep: "准备阶段", group_work: "训练内容", label_prep: "倒数准备", label_warmup: "热身时间", label_work: "运动时间", label_rest: "休息时间", label_rounds: "总组数", 
+            sound_beep: "音效", sound_voice: "人声", sound_mute: "静音", phase_prep: "准备", phase_warmup: "热身", phase_work: "运动", phase_gym_work: "训练中", phase_rest: "休息", phase_gym_rest: "休息", phase_finish: "完成", phase_start_warmup: "开始热身", phase_start_work: "开始运动", phase_gym_start: "开始训练", phase_start_rest: "休息一下", phase_finish_train: "训练结束",
+            info_tabata: `<h3>Tabata 训练法</h3><p>由<strong>田畑泉博士</strong>研发。20秒极限冲刺 + 10秒休息，共 4 分钟。</p><p>能同时提升有氧与无氧能力。</p>`,
+            info_hiit: `<h3>HIIT 高强度间歇</h3><p>通过剧烈心率波动，引发<strong>后燃效应 (EPOC)</strong>。</p><p>适合想在短时间内减脂、保留肌肉的人。</p>`,
+            info_emom: `<h3>EMOM 分钟训练</h3><p>每分钟整点开始做动作，做完剩下的时间即为休息。</p><p>强迫你在疲劳时仍保持动作效率。</p>`,
+            info_gym: `<h3>重量训练计时</h3><p>重点在于<strong>组间休息</strong>的纪律。</p><ul><li><strong>肌肥大：</strong>休 60-90 秒。</li><li><strong>最大肌力：</strong>休 3-5 分钟。</li></ul>`
         },
-        'en': {
-            lang_name: "English",
-            app_title: "SmartTimer", app_subtitle: "Select Workout Mode",
-            mode_tabata_title: "Tabata Burn", mode_tabata_desc: "20s Work / 10s Rest",
-            mode_hiit_title: "HIIT Intervals", mode_hiit_desc: "High Intensity Training",
-            mode_emom_title: "EMOM Challenge", mode_emom_desc: "Every Minute on the Minute",
-            mode_gym_title: "Weight Training", mode_gym_desc: "Sets & Rest Timer",
-            btn_back: "Back", btn_reset: "⏹ End / Reset", btn_start: "▶ Start", btn_pause: "⏸ Pause",
-            btn_warmup: "Warm-up", btn_custom: "Settings", btn_done: "Done", btn_restore: "↻ Reset Defaults", btn_close: "Close",
-            label_remaining: "Remain", label_total_est: "Est. Total Time", label_off: "Off",
-            modal_settings_title: "Settings", modal_lang_title: "Select Language",
-            group_prep: "Preparation", group_work: "Workout",
-            label_prep: "Get Ready", label_warmup: "Warm-up", label_work: "Work", label_rest: "Rest", label_rounds: "Rounds",
-            unit_min: "m", unit_sec: "s",
-            sound_beep: "Beep Mode", sound_voice: "Voice Mode", sound_mute: "Mute Mode",
-            phase_prep: "Get Ready", phase_warmup: "Warm Up", phase_work: "Work", phase_gym_work: "Training",
-            phase_rest: "Rest", phase_gym_rest: "Rest", phase_finish: "Done",
-            phase_start_warmup: "Start Warmup", phase_start_work: "Start Work", phase_gym_start: "Start Training", phase_start_rest: "Rest Now", phase_finish_train: "Workout Complete",
-            theme_dark: "Dark Mode", theme_light: "Light Mode",
-            info_tabata: "<h3>Tabata Protocol</h3><p>Developed by Dr. Izumi Tabata. 20s ultra-intense work + 10s rest, x8 rounds.</p><ul><li><b>Benefit:</b> Improves both aerobic and anaerobic systems.</li><li><b>Intensity:</b> Aim for 170% VO2 max.</li></ul>",
-            info_hiit: "<h3>HIIT Intervals</h3><p>High-Intensity Interval Training. Short bursts of intense activity mixed with recovery.</p><ul><li><b>EPOC:</b> Triggers the 'afterburn' effect, burning calories post-workout.</li></ul>",
-            info_emom: "<h3>EMOM Challenge</h3><p>Every Minute on the Minute.</p><ul><li><b>Rule:</b> Complete X reps at the start of the minute. Remaining time is rest.</li><li><b>Strategy:</b> Faster reps = more rest but higher heart rate.</li></ul>",
-            info_gym: "<h3>Weight Training</h3><p>Tracks 'Work Time' (Set) and 'Rest Time'.</p><ul><li><b>Recovery:</b> 90-120s rest is optimal for ATP-PC system recovery.</li><li><b>Focus:</b> Keeps your workout density consistent.</li></ul>"
+        'ja': { 
+            btn_lang_text: "言語 / Language", mode_tabata_title: "タバタ式", mode_tabata_desc: "20秒運動 / 10秒休憩", mode_hiit_title: "HIIT", mode_hiit_desc: "高強度インターバル", mode_emom_title: "EMOM", mode_emom_desc: "1分間ごとのセット", mode_gym_title: "筋トレ", mode_gym_desc: "セット＆休憩タイマー", 
+            btn_back: "戻る", btn_start: "開始", btn_pause: "一時停止", btn_resume: "再開", btn_reset: "終了 / リセット", btn_warmup_on: "準備運動? (オン)", btn_warmup_off: "準備運動? (オフ)", btn_custom: "設定", btn_done: "完了", btn_restore: "初期化", btn_close: "閉じる", 
+            label_total_remain: "残り時間", label_total_est: "合計時間", modal_settings_title: "設定", modal_lang_title: "言語", group_prep: "準備", group_work: "トレーニング", label_prep: "準備時間", label_warmup: "準備運動", label_work: "運動", label_rest: "休憩", label_rounds: "セット数", 
+            sound_beep: "ビープ音", sound_voice: "音声", sound_mute: "ミュート", phase_prep: "準備", phase_warmup: "準備運動", phase_work: "運動中", phase_gym_work: "トレーニング", phase_rest: "休憩", phase_gym_rest: "休憩", phase_finish: "完了", phase_start_warmup: "ウォームアップ開始", phase_start_work: "運動開始", phase_gym_start: "トレーニング開始", phase_start_rest: "休憩", phase_finish_train: "終了", 
+            info_tabata: `<h3>タバタ・プロトコル</h3><p><strong>田畑泉博士</strong>が考案。20秒全力+10秒休憩。</p><p>短時間で極めて高い脂肪燃焼効果が期待できます。</p>`,
+            info_hiit: `<h3>HIIT</h3><p>高強度インターバルトレーニング。</p><p>運動後もカロリー消費が続く<strong>アフターバーン効果</strong>を引き起こします。</p>`,
+            info_emom: `<h3>EMOM</h3><p>1分間ごとに決まったタスクを行うトレーニング。</p><p>早く終われば休憩時間が増えます。</p>`,
+            info_gym: `<h3>筋トレ休憩タイマー</h3><p>セット間の休憩を管理します。</p><ul><li><strong>筋肥大:</strong> 60〜90秒。</li><li><strong>筋力:</strong> 3〜5分。</li></ul>`
         },
-        'ja': {
-            lang_name: "日本語",
-            app_title: "SmartTimer", app_subtitle: "トレーニングモード選択",
-            mode_tabata_title: "タバタ式", mode_tabata_desc: "20秒運動 / 10秒休憩",
-            mode_hiit_title: "HIIT", mode_hiit_desc: "高強度インターバルトレーニング",
-            mode_emom_title: "EMOM", mode_emom_desc: "1分間ごとのセット",
-            mode_gym_title: "筋力トレーニング", mode_gym_desc: "セットと休憩のタイマー",
-            btn_back: "戻る", btn_reset: "⏹ 終了 / リセット", btn_start: "▶ 開始", btn_pause: "⏸ 一時停止",
-            btn_warmup: "ウォームアップ", btn_custom: "設定", btn_done: "完了", btn_restore: "↻ 初期化", btn_close: "閉じる",
-            label_remaining: "残り", label_total_est: "予想合計時間", label_off: "オフ",
-            modal_settings_title: "詳細設定", modal_lang_title: "言語選択",
-            group_prep: "準備", group_work: "トレーニング",
-            label_prep: "準備時間", label_warmup: "ウォームアップ", label_work: "運動", label_rest: "休憩", label_rounds: "セット数",
-            unit_min: "分", unit_sec: "秒",
-            sound_beep: "ビープ音", sound_voice: "音声ガイド", sound_mute: "ミュート",
-            phase_prep: "準備", phase_warmup: "ウォームアップ", phase_work: "運動中", phase_gym_work: "トレーニング中",
-            phase_rest: "休憩", phase_gym_rest: "セット間休憩", phase_finish: "完了",
-            phase_start_warmup: "ウォームアップ開始", phase_start_work: "運動開始", phase_gym_start: "トレーニング開始", phase_start_rest: "休憩してください", phase_finish_train: "トレーニング終了",
-            theme_dark: "ダークモード", theme_light: "ライトモード",
-            info_tabata: "<h3>タバタ式トレーニング</h3><p>立命館大学の田畑泉教授が考案。20秒の運動と10秒の休憩を8セット。</p><ul><li><b>効果：</b>有酸素・無酸素能力を同時に向上。</li><li><b>強度：</b>全力で追い込むことが重要です。</li></ul>",
-            info_hiit: "<h3>HIIT (高強度インターバル)</h3><p>高強度の運動と不完全回復を繰り返します。</p><ul><li><b>アフターバーン：</b>運動後もカロリー消費が続きます（EPOC効果）。</li></ul>",
-            info_emom: "<h3>EMOM (1分間走)</h3><p>1分ごとに決められた回数の動作を行います。</p><ul><li><b>ルール：</b>早く終われば残りは休憩。ペース配分が鍵となります。</li></ul>",
-            info_gym: "<h3>筋トレ用タイマー</h3><p>セット中の時間と休憩時間を管理。</p><ul><li><b>回復：</b>ATP-PC系の回復には90〜120秒の休憩が推奨されます。</li><li><b>集中：</b>だらだらと休憩するのを防ぎます。</li></ul>"
-        },
-        'ko': {
-            lang_name: "한국어",
-            app_title: "SmartTimer", app_subtitle: "운동 모드 선택",
-            mode_tabata_title: "타바타", mode_tabata_desc: "20초 운동 / 10초 휴식",
-            mode_hiit_title: "HIIT", mode_hiit_desc: "고강도 인터벌 트레이닝",
-            mode_emom_title: "EMOM", mode_emom_desc: "1분 단위 반복",
-            mode_gym_title: "웨이트 트레이닝", mode_gym_desc: "세트 및 휴식 타이머",
-            btn_back: "뒤로", btn_reset: "⏹ 종료 / 초기화", btn_start: "▶ 시작", btn_pause: "⏸ 일시정지",
-            btn_warmup: "웜업", btn_custom: "설정", btn_done: "완료", btn_restore: "↻ 초기화", btn_close: "닫기",
-            label_remaining: "남은 시간", label_total_est: "예상 총 시간", label_off: "꺼짐",
-            modal_settings_title: "상세 설정", modal_lang_title: "언어 선택",
-            group_prep: "준비", group_work: "운동",
-            label_prep: "준비 시간", label_warmup: "웜업 시간", label_work: "운동", label_rest: "휴식", label_rounds: "세트 수",
-            unit_min: "분", unit_sec: "초",
-            sound_beep: "비프음", sound_voice: "음성 모드", sound_mute: "무음",
-            phase_prep: "준비", phase_warmup: "웜업", phase_work: "운동 중", phase_gym_work: "트레이닝 중",
-            phase_rest: "휴식", phase_gym_rest: "세트 간 휴식", phase_finish: "완료",
-            phase_start_warmup: "웜업 시작", phase_start_work: "운동 시작", phase_gym_start: "트레이닝 시작", phase_start_rest: "휴식하세요", phase_finish_train: "운동 종료",
-            theme_dark: "다크 모드", theme_light: "라이트 모드",
-            info_tabata: "<h3>타바타 트레이닝</h3><p>20초 고강도 운동 + 10초 휴식, 8세트 반복.</p><ul><li><b>효과:</b> 단시간에 유산소 및 무산소 능력 향상.</li></ul>",
-            info_hiit: "<h3>HIIT (고강도 인터벌)</h3><p>짧은 시간의 고강도 운동과 휴식을 반복합니다.</p><ul><li><b>EPOC:</b> 운동 후에도 칼로리가 계속 소모됩니다.</li></ul>",
-            info_emom: "<h3>EMOM 챌린지</h3><p>1분마다 정해진 동작 수행.</p><ul><li><b>규칙:</b> 동작을 빨리 끝낼수록 휴식 시간이 길어집니다.</li></ul>",
-            info_gym: "<h3>웨이트 트레이닝</h3><p>세트 수행 시간과 휴식 시간을 관리.</p><ul><li><b>회복:</b> ATP-PC 시스템 회복을 위해 90~120초 휴식 권장.</li></ul>"
+        'ko': { 
+            btn_lang_text: "언어 / Language", mode_tabata_title: "타바타", mode_tabata_desc: "20초 운동 / 10초 휴식", mode_hiit_title: "HIIT", mode_hiit_desc: "고강도 인터벌", mode_emom_title: "EMOM", mode_emom_desc: "1분 단위 반복", mode_gym_title: "웨이트", mode_gym_desc: "세트 및 휴식", 
+            btn_back: "뒤로", btn_start: "시작", btn_pause: "일시정지", btn_resume: "계속", btn_reset: "종료 / 초기화", btn_warmup_on: "웜업? (켜짐)", btn_warmup_off: "웜업? (꺼짐)", btn_custom: "설정", btn_done: "완료", btn_restore: "초기화", btn_close: "닫기", 
+            label_total_remain: "남은 시간", label_total_est: "총 시간", modal_settings_title: "설정", modal_lang_title: "언어", group_prep: "준비", group_work: "운동", label_prep: "준비 시간", label_warmup: "웜업", label_work: "운동", label_rest: "휴식", label_rounds: "세트 수", 
+            sound_beep: "비프음", sound_voice: "음성", sound_mute: "무음", phase_prep: "준비", phase_warmup: "웜업", phase_work: "운동", phase_gym_work: "트레이닝", phase_rest: "휴식", phase_gym_rest: "휴식", phase_finish: "완료", phase_start_warmup: "웜업 시작", phase_start_work: "운동 시작", phase_gym_start: "트레이닝 시작", phase_start_rest: "휴식", phase_finish_train: "운동 종료", 
+            info_tabata: `<h3>타바타</h3><p>20초 운동 + 10초 휴식.</p><p>짧은 시간에 강력한 칼로리 소모 효과.</p>`,
+            info_hiit: `<h3>HIIT</h3><p>고강도 인터벌 트레이닝.</p><p>운동 후에도 칼로리를 태우는 애프터번 효과.</p>`,
+            info_emom: `<h3>EMOM</h3><p>1분마다 정해진 동작 수행.</p><p>빨리 끝내면 남은 시간은 휴식입니다.</p>`,
+            info_gym: `<h3>웨이트 타이머</h3><p>세트 간 휴식 시간 관리.</p><ul><li><strong>근비대:</strong> 60~90초.</li><li><strong>스트렝스:</strong> 3~5분.</li></ul>`
         }
     };
 
-    let currentLang = localStorage.getItem('smartTimerLang') || 'zh-TW';
+    let currentLang = localStorage.getItem('smartTimerLang');
+    if (!currentLang) {
+        const sysLang = navigator.language.toLowerCase();
+        if (sysLang.includes('zh')) { currentLang = (sysLang.includes('tw') || sysLang.includes('hk')) ? 'zh-TW' : 'zh-CN'; } 
+        else if (sysLang.includes('ja')) { currentLang = 'ja'; }
+        else if (sysLang.includes('ko')) { currentLang = 'ko'; }
+        else { currentLang = 'en'; }
+    }
 
-    // --- Helper Functions ---
     function t(key) { return translations[currentLang][key] || key; }
-    
-    // --- Modal Logic (Click Outside) ---
+
     document.querySelectorAll('.modal-overlay').forEach(el => {
         el.addEventListener('click', function(e) {
             if (e.target === this) {
@@ -591,91 +284,56 @@
         });
     });
 
-    // --- Input Safety (Clamping) ---
+    function sanitizeInput(el) { el.value = el.value.replace(/[^0-9]/g, ''); }
     function validateInput(el) {
-        // Remove leading zeros if user types
         if(el.value.length > 1 && el.value.startsWith('0')) el.value = parseInt(el.value);
-
-        let max = 99; // Default max for minutes
-        if(el.id.includes('sec')) max = 59; // Seconds max 59
-        if(el.id.includes('rounds')) max = 999; // Rounds max 999
-
-        let val = parseInt(el.value);
-        if(isNaN(val) || val < 0) val = 0;
-        if(val > max) val = max;
-        
-        el.value = val;
+        let max = 99; if(el.id.includes('sec')) max = 59; if(el.id.includes('rounds')) max = 999;
+        let val = parseInt(el.value); if(isNaN(val) || val < 0) val = 0; if(val > max) val = max; el.value = val;
     }
 
-    // --- App Core ---
     const AudioContext = window.AudioContext || window.webkitAudioContext;
-    let audioCtx = new AudioContext();
-    let soundMode = 'beep'; 
-
-    // Force Dark Mode Default if not set
-    if (!localStorage.getItem('smartTimerTheme')) {
-        localStorage.setItem('smartTimerTheme', 'dark');
-    }
-
-    function toggleTheme() {
-        document.body.classList.toggle('light-theme');
-        applyThemeText();
-        localStorage.setItem('smartTimerTheme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
-    }
-    function applyThemeText() {
-        const isLight = document.body.classList.contains('light-theme');
-        document.getElementById('theme-text').innerText = isLight ? t('theme_light') : t('theme_dark');
-    }
-    // Init theme
-    if (localStorage.getItem('smartTimerTheme') === 'light') {
-        document.body.classList.add('light-theme');
-    }
+    let audioCtx = null; let soundMode = 'beep'; let wakeLock = null; 
 
     const defaultPresets = {
-        tabata: { name: "Tabata", work: 20, rest: 10, rounds: 8, prep: 5, warmupOn: false, warmupTime: 60, type: 'interval' },
-        hiit:   { name: "HIIT",   work: 30, rest: 30, rounds: 10, prep: 5, warmupOn: true, warmupTime: 120, type: 'interval' },
-        emom:   { name: "EMOM",   work: 60, rest: 0, rounds: 10, prep: 5, warmupOn: false, warmupTime: 60, type: 'loop' },
-        gym:    { name: "Gym",    work: 40, rest: 90, rounds: 5, prep: 5, warmupOn: false, warmupTime: 0, type: 'interval' }
+        tabata: { name: "Tabata", work: 20, rest: 10, rounds: 8, prep: 5, warmupOn: false, warmupTime: 60, type: 'interval', color: '#FF3B30' },
+        hiit:   { name: "HIIT",   work: 30, rest: 30, rounds: 10, prep: 5, warmupOn: true, warmupTime: 120, type: 'interval', color: '#FF9F0A' },
+        emom:   { name: "EMOM",   work: 60, rest: 0, rounds: 10, prep: 5, warmupOn: false, warmupTime: 60, type: 'loop', color: '#30D158' },
+        gym:    { name: "Gym",    work: 40, rest: 90, rounds: 5, prep: 5, warmupOn: false, warmupTime: 0, type: 'interval', color: '#0A84FF' }
     };
     
-    let presets = JSON.parse(localStorage.getItem('myTimerSettingsV21')) || JSON.parse(JSON.stringify(defaultPresets));
+    // CHANGED KEY TO V33 TO RESET DATA AND PREVENT CRASHES
+    let presets = JSON.parse(localStorage.getItem('myTimerSettingsV33')) || JSON.parse(JSON.stringify(defaultPresets));
     let currentMode = 'tabata';
-    let state = { phase: 'idle', timeLeft: 0, currentRound: 1, isRunning: false, timerId: null };
+    
+    let state = { phase: 'idle', timeLeft: 0, currentRound: 1, isRunning: false, timerId: null, endTime: 0, remainingMs: 0, phaseDuration: 0 };
+    let totalEndTime = 0; 
     let totalRemainingSeconds = 0;
+    let ringFrameId = null;
 
-    // --- Lang Functions ---
-    function openLangModal() {
-        playClick(); document.getElementById('lang-modal').classList.remove('hidden');
-        document.querySelectorAll('.lang-item').forEach(el => el.classList.remove('selected'));
+    async function toggleWakeLock(active) {
+        if ('wakeLock' in navigator) {
+            try {
+                if (active && !wakeLock) wakeLock = await navigator.wakeLock.request('screen');
+                else if (!active && wakeLock) { await wakeLock.release(); wakeLock = null; }
+            } catch (err) { console.log('Wake Lock Error:', err); }
+        }
     }
-    function closeLangModal() { playClick(); document.getElementById('lang-modal').classList.add('hidden'); }
+
+    function openLangModal() { playClick(); document.getElementById('lang-modal').classList.add('open'); }
+    function closeLangModal() { playClick(); document.getElementById('lang-modal').classList.remove('open'); }
     function setLanguage(lang) {
-        currentLang = lang;
-        localStorage.setItem('smartTimerLang', lang);
-        applyLanguage();
-        closeLangModal();
+        currentLang = lang; localStorage.setItem('smartTimerLang', lang);
+        applyLanguage(); closeLangModal();
     }
     function applyLanguage() {
-        document.getElementById('lang-display').innerText = translations[currentLang].lang_name;
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
             if(t(key)) el.innerText = t(key);
         });
-        applyThemeText();
-        updateSoundUI();
-        updateWarmupUI();
-        if(state.phase === 'idle') {
-            document.getElementById('statusText').innerText = t('phase_prep');
-            document.getElementById('actionBtn').innerText = t('btn_start');
-        }
-        if(state.isRunning) document.getElementById('actionBtn').innerText = t('btn_pause');
-        
-        // Update Title
-        let titleKey = 'mode_' + currentMode + '_title';
-        document.getElementById('modeBadge').innerText = t(titleKey);
+        updateSoundUI(); updateWarmupUI(); updateActionBtnState();
+        if(state.phase === 'idle') updateDisplay();
     }
 
-    // --- Info Modal ---
     function openInfoModal() {
         playClick();
         const infoTitle = document.getElementById('info-title');
@@ -684,326 +342,386 @@
         else if(currentMode === 'hiit') { infoTitle.innerText = t('mode_hiit_title'); infoContent.innerHTML = t('info_hiit'); }
         else if(currentMode === 'emom') { infoTitle.innerText = t('mode_emom_title'); infoContent.innerHTML = t('info_emom'); }
         else if(currentMode === 'gym') { infoTitle.innerText = t('mode_gym_title'); infoContent.innerHTML = t('info_gym'); }
-        document.getElementById('info-modal').classList.remove('hidden');
+        document.getElementById('info-modal').classList.add('open');
     }
-    function closeInfoModal() { playClick(); document.getElementById('info-modal').classList.add('hidden'); }
+    function closeInfoModal() { playClick(); document.getElementById('info-modal').classList.remove('open'); }
 
-    // --- Time Utils ---
-    function calculateTotalDuration(p) {
-        let total = 0;
-        total += p.prep;
-        if(p.warmupOn) total += p.warmupTime;
-        if(p.type === 'countdown') total += p.rest;
-        else total += (p.work + p.rest) * p.rounds;
-        return total;
-    }
     function formatTime(seconds) {
-        if(seconds < 0) seconds = 0;
+        if(isNaN(seconds) || seconds < 0) seconds = 0;
         const m = Math.floor(seconds / 60).toString().padStart(2, '0');
         const s = (seconds % 60).toString().padStart(2, '0');
         return `${m}:${s}`;
     }
-    function updateRemainingUI() {
-        document.getElementById('mainRemainingTime').innerText = `${t('label_remaining')} ${formatTime(totalRemainingSeconds)}`;
-    }
-    function updateTotalTimeUI() {
-        const p = presets[currentMode];
-        const total = calculateTotalDuration(p);
-        totalRemainingSeconds = total; 
-        document.getElementById('mainRemainingTime').innerText = `${t('label_remaining')} ${formatTime(total)}`;
-        document.getElementById('modalTotalTime').innerText = `${t('label_total_est')}: ${formatTime(total)}`;
-    }
+
     function getTimeFromInputs(idPrefix) {
-        const min = Math.max(0, parseInt(document.getElementById(idPrefix + '-min').value) || 0);
-        const sec = Math.max(0, parseInt(document.getElementById(idPrefix + '-sec').value) || 0);
+        const min = parseInt(document.getElementById(idPrefix + '-min').value) || 0;
+        const sec = parseInt(document.getElementById(idPrefix + '-sec').value) || 0;
         return (min * 60) + sec;
     }
+    function calculateTotalFromInputs() {
+        const p = presets[currentMode];
+        const prep = getTimeFromInputs('set-prep');
+        const warmup = getTimeFromInputs('set-warmup');
+        const work = getTimeFromInputs('set-work');
+        const rest = getTimeFromInputs('set-rest');
+        const rounds = Math.max(1, parseInt(document.getElementById('set-rounds').value) || 1);
+        
+        let total = prep;
+        if(p.warmupOn) total += warmup;
+        if(p.type === 'countdown') total += rest;
+        else total += (work + rest) * rounds;
+        return total;
+    }
     function liveUpdateTotal() {
-        const tempP = {
-            prep: getTimeFromInputs('set-prep'),
-            warmupOn: presets[currentMode].warmupOn,
-            warmupTime: getTimeFromInputs('set-warmup'),
-            work: getTimeFromInputs('set-work'),
-            rest: getTimeFromInputs('set-rest'),
-            rounds: Math.max(1, parseInt(document.getElementById('set-rounds').value) || 1),
-            type: presets[currentMode].type
-        };
-        const total = calculateTotalDuration(tempP);
+        if(!document.getElementById('set-prep-min')) return; // Safety
+        const total = calculateTotalFromInputs();
         document.getElementById('modalTotalTime').innerText = `${t('label_total_est')}: ${formatTime(total)}`;
     }
-
-    // --- Logic ---
+    
     function selectMode(mode) {
         playClick();
         currentMode = mode;
-        const p = presets[mode];
-        document.getElementById('home-screen').classList.add('hidden');
-        document.getElementById('timer-screen').classList.remove('hidden');
-        document.getElementById('modeBadge').innerText = t('mode_' + mode + '_title');
+        const home = document.getElementById('home-screen');
+        const timer = document.getElementById('timer-screen');
+        home.classList.add('hidden');
+        timer.classList.remove('hidden');
+        const color = presets[mode].color || '#fff';
+        document.documentElement.style.setProperty('--accent-color', color);
         updateSoundUI(); updateWarmupUI(); resetTimer(false);
     }
 
     function goBack() {
+        if (state.phase !== 'idle' && state.phase !== 'finished') return;
         playClick();
-        clearInterval(state.timerId);
-        state.isRunning = false;
+        clearInterval(state.timerId); state.isRunning = false; toggleWakeLock(false);
+        cancelAnimationFrame(ringFrameId);
         document.getElementById('timer-screen').classList.add('hidden');
         document.getElementById('home-screen').classList.remove('hidden');
         document.getElementById('app-container').style.background = 'var(--bg-idle)';
-        document.body.classList.remove('active-mode');
     }
 
-    function setControlsLocked(locked) {
-        const navBar = document.getElementById('navBar');
-        if (locked) navBar.classList.add('locked'); else navBar.classList.remove('locked');
-        document.querySelectorAll('.lockable').forEach(btn => {
-            if (locked) btn.classList.add('disabled'); else btn.classList.remove('disabled');
-        });
+    function updateSafeguards() {
+        const back = document.getElementById('btnBack');
+        const reset = document.getElementById('btnReset');
+        const locks = document.querySelectorAll('.lockable');
+
+        const isIdle = (state.phase === 'idle');
+        const isFinished = (state.phase === 'finished');
+        const isPaused = !state.isRunning && !isIdle && !isFinished;
+
+        // Back: Idle or Finished ONLY
+        if (isIdle || isFinished) { back.classList.remove('btn-locked'); } 
+        else { back.classList.add('btn-locked'); }
+
+        // Reset: Paused or Finished ONLY (Not Idle)
+        if (isPaused || isFinished) { reset.classList.remove('btn-locked'); } 
+        else { reset.classList.add('btn-locked'); }
+
+        // Edit/Warmup: Idle or Finished ONLY
+        if (isIdle || isFinished) { locks.forEach(b => b.classList.remove('disabled')); } 
+        else { locks.forEach(b => b.classList.add('disabled')); }
     }
 
     function resetTimer(playAudio = true) {
         if(playAudio) playClick();
         clearInterval(state.timerId);
-        state.isRunning = false;
-        state.currentRound = 1;
-        state.phase = 'idle';
-        setControlsLocked(false);
-        document.body.classList.remove('active-mode');
-        document.getElementById('timerDigits').classList.remove('pulse');
-
+        cancelAnimationFrame(ringFrameId);
+        state.isRunning = false; state.currentRound = 1; state.phase = 'idle'; state.remainingMs = 0;
+        
+        toggleWakeLock(false);
+        
         const p = presets[currentMode];
-        if (p.prep > 0) state.timeLeft = p.prep;
-        else if (p.warmupOn) state.timeLeft = p.warmupTime;
-        else state.timeLeft = p.work;
+        if (p.prep > 0) { state.timeLeft = p.prep; state.phaseDuration = p.prep; }
+        else if (p.warmupOn) { state.timeLeft = p.warmupTime; state.phaseDuration = p.warmupTime; }
+        else { state.timeLeft = p.work; state.phaseDuration = p.work; }
 
-        document.getElementById('actionBtn').innerText = t('btn_start'); 
-        updateTotalTimeUI(); updateDisplay();
+        let total = p.prep;
+        if(p.warmupOn) total += p.warmupTime;
+        if(p.type !== 'countdown') total += (p.work + p.rest) * p.rounds;
+        totalRemainingSeconds = total;
+
+        updateSafeguards(); 
+        updateActionBtnState(); updateDisplay();
+    }
+
+    function updateActionBtnState() {
+        const wrapper = document.getElementById('play-icon-wrap');
+        if(state.isRunning) {
+            wrapper.innerHTML = `<svg class="icon-svg" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg><span>${t('btn_pause')}</span>`;
+        } else {
+             let txt = (state.phase === 'idle' || state.phase === 'finished') ? t('btn_start') : t('btn_resume');
+             wrapper.innerHTML = `<svg class="icon-svg" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg><span>${txt}</span>`;
+        }
     }
 
     function toggleTimerState() {
+        if(!audioCtx) audioCtx = new AudioContext();
+        if(audioCtx.state === 'suspended') audioCtx.resume();
         playClick();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const btn = document.getElementById('actionBtn');
-        const p = presets[currentMode];
 
         if (state.isRunning) {
-            clearInterval(state.timerId);
-            state.isRunning = false;
-            btn.innerText = t('btn_start'); 
-            document.getElementById('timerDigits').classList.remove('pulse');
+            // PAUSE
+            clearInterval(state.timerId); state.isRunning = false;
+            cancelAnimationFrame(ringFrameId);
+            if(state.endTime > 0) state.remainingMs = Math.max(0, state.endTime - Date.now());
+            if(totalEndTime > 0) totalRemainingSeconds = Math.ceil((totalEndTime - Date.now())/1000);
+            toggleWakeLock(false); updateSafeguards(); updateActionBtnState();
         } else {
-            setControlsLocked(true);
-            document.body.classList.add('active-mode');
+            // START
+            toggleWakeLock(true);
+            if(state.phase === 'finished') { state.phase = 'idle'; resetTimer(false); state.isRunning = true; } 
+            else { state.isRunning = true; }
+            updateSafeguards(); updateActionBtnState();
             
-            if(state.phase === 'finished') resetTimer(false);
-            state.isRunning = true;
-            btn.innerText = t('btn_pause');
-            
+            const p = presets[currentMode];
             if(state.phase === 'idle') {
-                if (p.prep > 0) { state.phase = 'prep'; state.timeLeft = p.prep; announce(t('phase_prep'), "start"); }
-                else if (p.warmupOn) { state.phase = 'warmup'; state.timeLeft = p.warmupTime; announce(t('phase_start_warmup'), "start"); }
-                else { 
-                    state.phase = 'work'; state.timeLeft = p.work; announce(t('phase_start_work'), "start");
-                }
+                if (p.prep > 0) { state.phase = 'prep'; state.timeLeft = p.prep; state.phaseDuration = p.prep; announce(t('phase_prep'), "start"); }
+                else if (p.warmupOn) { state.phase = 'warmup'; state.timeLeft = p.warmupTime; state.phaseDuration = p.warmupTime; announce(t('phase_start_warmup'), "start"); }
+                else { state.phase = 'work'; state.timeLeft = p.work; state.phaseDuration = p.work; announce(t('phase_start_work'), "start"); }
             }
-            state.timerId = setInterval(tick, 1000);
+
+            const durationMs = (state.remainingMs > 0) ? state.remainingMs : (state.timeLeft * 1000);
+            state.endTime = Date.now() + durationMs; state.remainingMs = 0;
+            totalEndTime = Date.now() + (totalRemainingSeconds * 1000);
+
+            state.timerId = setInterval(tick, 100); 
+            updateRingLoop(); 
             updateDisplay();
         }
     }
 
+    function updateRingLoop() {
+        if(!state.isRunning) return;
+        const now = Date.now();
+        const leftMs = Math.max(0, state.endTime - now);
+        const totalMs = state.phaseDuration * 1000;
+        const ring = document.getElementById('ringProgress');
+        const totalLength = 1005; 
+        
+        if(totalMs <= 0) { ring.style.strokeDashoffset = totalLength; } 
+        else { const ratio = leftMs / totalMs; ring.style.strokeDashoffset = totalLength * (1 - ratio); }
+        ringFrameId = requestAnimationFrame(updateRingLoop);
+    }
+
     function tick() {
-        if (totalRemainingSeconds > 0) {
-            totalRemainingSeconds--;
-            updateRemainingUI();
+        const now = Date.now();
+        const diff = state.endTime - now;
+        const totalDiff = totalEndTime - now;
+        totalRemainingSeconds = Math.max(0, Math.ceil(totalDiff / 1000));
+
+        if (diff <= 0) {
+            state.timeLeft = 0; cancelAnimationFrame(ringFrameId); 
+            document.getElementById('ringProgress').style.strokeDashoffset = 1005; 
+            document.getElementById('timerDigits').innerText = "00:00"; 
+            clearInterval(state.timerId); nextPhase(); return;
         }
-        if (state.timeLeft > 0) {
-            state.timeLeft--;
-        }
-        if (state.timeLeft === 0) {
-            nextPhase();
-        } else {
-             if (state.timeLeft <= 3) {
-                 document.getElementById('timerDigits').classList.add('pulse');
+
+        const newTimeLeft = Math.ceil(diff / 1000);
+        if (newTimeLeft !== state.timeLeft) {
+            state.timeLeft = newTimeLeft;
+            if (state.timeLeft <= 3) {
                  if(soundMode==='beep') announce("", "tick");
                  if(soundMode==='voice') speak(state.timeLeft);
-             } else {
-                 document.getElementById('timerDigits').classList.remove('pulse');
-             }
+            }
+            updateDisplay();
         }
-        updateDisplay();
+        document.getElementById('totalRemainDisplay').innerText = `${t('label_total_remain')}: ${formatTime(totalRemainingSeconds)}`;
     }
 
     function nextPhase() {
-        document.getElementById('timerDigits').classList.remove('pulse');
+        clearInterval(state.timerId);
         const p = presets[currentMode];
-        
+        let nextT = 0; let nextType = ''; let txt = ''; let nextP = '';
+
         if (state.phase === 'prep') {
-            if (p.warmupOn) { state.phase = 'warmup'; state.timeLeft = p.warmupTime; announce(t('phase_start_warmup'), "start"); }
-            else { state.phase = 'work'; state.timeLeft = p.work; announce(t('phase_start_work'), "start"); }
+            if (p.warmupOn) { nextP = 'warmup'; nextT = p.warmupTime; txt = t('phase_start_warmup'); nextType = 'start'; } 
+            else { nextP = 'work'; nextT = p.work; txt = t('phase_start_work'); nextType = 'start'; }
         }
         else if (state.phase === 'warmup') {
-            state.phase = 'work'; state.timeLeft = p.work; announce(t('phase_start_work'), "start");
+            nextP = 'work'; nextT = p.work; txt = t('phase_start_work'); nextType = 'start';
         }
         else if (state.phase === 'work') {
-            if (p.type === 'loop') finishRound(p);
-            else { state.phase = 'rest'; state.timeLeft = p.rest; announce(t('phase_start_rest'), "rest"); }
+            if (p.type === 'loop') { finishRound(p); return; }
+            else { nextP = 'rest'; nextT = p.rest; txt = t('phase_start_rest'); nextType = 'rest'; }
         }
         else if (state.phase === 'rest') {
-            finishRound(p);
+            finishRound(p); return;
+        }
+
+        if (nextT > 0) {
+             state.phase = nextP; state.timeLeft = nextT; state.phaseDuration = nextT;
+             announce(txt, nextType);
+             startTimerLoop();
+        } else if (nextT === 0 && nextP !== '') {
+            state.phase = nextP; state.timeLeft = 0; nextPhase(); 
         }
     }
 
     function finishRound(p) {
         if (state.currentRound < p.rounds) {
-            state.currentRound++; state.phase = 'work'; state.timeLeft = p.work;
+            state.currentRound++; 
+            state.phase = 'work'; state.timeLeft = p.work; state.phaseDuration = p.work;
             announce(t(currentMode === 'gym' ? 'phase_gym_start' : 'phase_start_work'), "start");
+            startTimerLoop();
         } else { finishAll(); }
+    }
+    
+    function startTimerLoop() {
+        state.endTime = Date.now() + (state.timeLeft * 1000);
+        updateDisplay();
+        state.timerId = setInterval(tick, 100);
+        updateRingLoop(); 
     }
 
     function finishAll() {
-        state.phase = 'finished'; announce(t('phase_finish_train'), "finish");
-        clearInterval(state.timerId); state.isRunning = false;
-        document.getElementById('actionBtn').innerText = t('btn_done');
-        document.getElementById('mainRemainingTime').innerText = t('label_remaining') + " 00:00"; 
-        setControlsLocked(false);
-        document.getElementById('timerDigits').classList.remove('pulse');
+        state.phase = 'finished'; state.timeLeft = 0; totalRemainingSeconds = 0;
+        announce(t('phase_finish_train'), "finish");
+        state.isRunning = false; toggleWakeLock(false);
+        cancelAnimationFrame(ringFrameId);
+        updateSafeguards(); updateActionBtnState(); updateDisplay(); startConfetti(); 
+    }
+
+    function startConfetti() {
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        const colors = ['#ff3b30', '#ff9f0a', '#30d158', '#0a84ff', '#bf5af2', '#64d2ff', '#ffffff'];
+        let particles = [];
+        for(let i=0; i<100; i++) {
+            particles.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height - canvas.height, w: Math.random()*8+4, h: Math.random()*8+4, color: colors[Math.floor(Math.random()*colors.length)], speed: Math.random()*3+2, angle: Math.random()*360, spin: Math.random()*0.2-0.1 });
+        }
+        function draw() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            let active = false;
+            particles.forEach(p => {
+                p.y += p.speed; p.angle += p.spin;
+                if(p.y < canvas.height) active = true;
+                ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.angle); ctx.fillStyle = p.color; ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h); ctx.restore();
+            });
+            if(active) requestAnimationFrame(draw); else ctx.clearRect(0,0,canvas.width,canvas.height);
+        }
+        draw();
     }
 
     function updateDisplay() {
-        const m = Math.floor(state.timeLeft / 60).toString().padStart(2, '0');
-        const s = (state.timeLeft % 60).toString().padStart(2, '0');
-        document.getElementById('timerDigits').innerText = `${m}:${s}`;
-        
         const p = presets[currentMode];
-        document.getElementById('roundsText').innerText = `${t('label_rounds')} ${state.currentRound} / ${p.rounds}`;
+        if(!p) return; 
+
+        document.getElementById('timerDigits').innerText = formatTime(state.timeLeft);
+        document.getElementById('totalRemainDisplay').innerText = `${t('label_total_remain')}: ${formatTime(totalRemainingSeconds)}`;
         
+        const ring = document.getElementById('ringProgress');
+        const totalLength = 1005; const duration = state.phaseDuration > 0 ? state.phaseDuration : 1;
+        let ratio = state.timeLeft / duration; if(ratio > 1) ratio = 1; if(ratio < 0) ratio = 0;
+        const offset = totalLength * (1 - ratio);
+        
+        if (state.phase === 'finished') ring.style.strokeDashoffset = totalLength; 
+        else if(!state.isRunning) ring.style.strokeDashoffset = offset; 
+        
+        if(state.phase === 'rest') ring.style.stroke = '#00ff00';
+        else if(state.phase === 'warmup' || state.phase === 'prep') ring.style.stroke = '#BF5AF2';
+        else ring.style.stroke = p.color || '#fff';
+
+        document.getElementById('roundsText').innerText = `${t('label_rounds')} ${state.currentRound} / ${p.rounds}`;
         const statusEl = document.getElementById('statusText');
         const container = document.getElementById('app-container');
-        let text = '';
+        let text = '', bg = 'var(--bg-idle)';
 
-        if (state.phase === 'idle') { container.style.background = 'var(--bg-idle)'; text = t('phase_prep'); }
-        else if (state.phase === 'prep') { container.style.background = 'var(--bg-prep)'; text = t('phase_prep'); }
-        else if (state.phase === 'warmup') { container.style.background = 'var(--bg-warmup)'; text = t('phase_warmup'); }
-        else if (state.phase === 'work') { 
-            if(currentMode === 'gym') { container.style.background = 'var(--bg-gym-work)'; text = t('phase_gym_work'); }
-            else { container.style.background = 'var(--bg-work)'; text = t('phase_work'); }
-        } else if (state.phase === 'rest') { 
-            container.style.background = 'var(--bg-rest)'; 
-            text = (currentMode === 'gym') ? t('phase_gym_rest') : t('phase_rest');
-        } 
-        else if (state.phase === 'finished') { 
-            container.style.background = 'var(--bg-finish)'; text = t('phase_finish'); 
-            statusEl.style.color = '#333'; document.getElementById('timerDigits').style.color = '#333'; return; 
-        }
+        if (state.phase === 'idle') { text = t('phase_prep'); bg = 'var(--bg-idle)'; }
+        else if (state.phase === 'prep') { text = t('phase_prep'); bg = 'var(--bg-idle)'; }
+        else if (state.phase === 'warmup') { text = t('phase_warmup'); bg = 'var(--bg-warmup)'; }
+        else if (state.phase === 'work') { text = (currentMode === 'gym') ? t('phase_gym_work') : t('phase_work'); bg = 'var(--bg-work)'; }
+        else if (state.phase === 'rest') { text = (currentMode === 'gym') ? t('phase_gym_rest') : t('phase_rest'); bg = 'var(--bg-rest)'; }
+        else if (state.phase === 'finished') { text = t('phase_finish'); bg = 'var(--bg-finish)'; }
         
-        if(state.phase !== 'finished') {
-             statusEl.style.color = '#fff'; document.getElementById('timerDigits').style.color = '#fff';
-        }
-        statusEl.innerText = text;
+        statusEl.innerText = text; container.style.background = bg;
     }
 
     function toggleSoundMode() {
         playClick();
-        if (soundMode === 'beep') soundMode = 'voice';
-        else if (soundMode === 'voice') soundMode = 'mute';
-        else soundMode = 'beep';
+        if (soundMode === 'beep') soundMode = 'voice'; else if (soundMode === 'voice') soundMode = 'mute'; else soundMode = 'beep';
         updateSoundUI();
         if(soundMode === 'voice') speak(t('sound_voice')); else if(soundMode === 'beep') playTone(800, 0.1);
     }
     function updateSoundUI() {
-        const icon = document.getElementById('btn-sound-icon');
-        const text = document.getElementById('btn-sound-text');
-        if (soundMode === 'voice') { icon.innerText = '🗣️'; text.innerText = t('sound_voice'); }
-        else if (soundMode === 'beep') { icon.innerText = '🔔'; text.innerText = t('sound_beep'); }
-        else { icon.innerText = '🔕'; text.innerText = t('sound_mute'); }
+        const text = document.getElementById('text-sound'); const icon = document.getElementById('icon-sound');
+        if (soundMode === 'voice') { text.innerText = t('sound_voice'); icon.innerHTML='<svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>';}
+        else if (soundMode === 'beep') { text.innerText = t('sound_beep'); icon.innerHTML='<svg class="icon-svg" viewBox="0 0 24 24"><path d="M7.58 4.08L6.15 2.65C3.75 4.48 2.17 7.3 2.03 10.5h2c.15-2.65 1.51-4.97 3.55-6.42zm12.39 6.42h2c-.15-3.2-1.73-6.02-4.12-7.85l-1.42 1.43c2.02 1.45 3.39 3.77 3.54 6.42zM18 11c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2v-5zm-6 11c.14 0 .27-.01.4-.04.65-.14 1.18-.58 1.44-1.18.1-.24.16-.49.16-.78h-4c0 .35.08.67.2.96.23.56.74.98 1.4 1.04h.4z"/></svg>';}
+        else { text.innerText = t('sound_mute'); icon.innerHTML='<svg class="icon-svg" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73 4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>';}
     }
 
     function toggleWarmupDirect() {
         if(document.getElementById('btn-warmup').classList.contains('disabled')) return;
         playClick(); const p = presets[currentMode]; p.warmupOn = !p.warmupOn;
-        savePresets(); updateWarmupUI(); updateTotalTimeUI(); resetTimer(false);
+        savePresets(); updateWarmupUI(); resetTimer(false);
     }
     function updateWarmupUI() {
-        const p = presets[currentMode];
-        const btn = document.getElementById('btn-warmup');
-        const sub = document.getElementById('btn-warmup-sub');
-        if(p.warmupOn) { btn.classList.add('active'); sub.innerText = formatTime(p.warmupTime); } 
-        else { btn.classList.remove('active'); sub.innerText = t('label_off'); }
+        const p = presets[currentMode]; const btn = document.getElementById('btn-warmup'); const txtEl = document.getElementById('text-warmup');
+        if(p.warmupOn) { btn.classList.add('btn-active-green'); txtEl.innerText = t('btn_warmup_on'); } 
+        else { btn.classList.remove('btn-active-green'); txtEl.innerText = t('btn_warmup_off'); }
     }
     
     function openSettings() { 
         if(document.querySelectorAll('.lockable')[0].classList.contains('disabled')) return;
-        playClick(); document.getElementById('settings-modal').classList.remove('hidden'); loadSettingsToUI(); liveUpdateTotal(); 
+        playClick(); document.getElementById('settings-modal').classList.add('open'); loadSettingsToUI(); liveUpdateTotal();
     }
-    function closeSettings() { playClick(); saveSettingsFromUI(); document.getElementById('settings-modal').classList.add('hidden'); updateWarmupUI(); resetTimer(false); }
+    function closeSettings() { playClick(); saveSettingsFromUI(); document.getElementById('settings-modal').classList.remove('open'); updateWarmupUI(); resetTimer(false); }
     
     function loadSettingsToUI() {
         const p = presets[currentMode];
-        const setInputs = (id, totalSec) => {
-            document.getElementById(id + '-min').value = Math.floor(totalSec / 60);
-            document.getElementById(id + '-sec').value = totalSec % 60;
-        };
-        setInputs('set-prep', p.prep);
-        setInputs('set-warmup', p.warmupTime);
-        setInputs('set-work', p.work);
-        setInputs('set-rest', p.rest);
-        document.getElementById('set-rounds').value = p.rounds;
-        
-        if(p.type === 'countdown') document.getElementById('row-work').classList.add('hidden');
-        else document.getElementById('row-work').classList.remove('hidden');
+        const setVal = (id, val) => document.getElementById(id).value = val;
+        setVal('set-prep-min', Math.floor(p.prep/60)); setVal('set-prep-sec', p.prep%60);
+        setVal('set-warmup-min', Math.floor(p.warmupTime/60)); setVal('set-warmup-sec', p.warmupTime%60);
+        setVal('set-work-min', Math.floor(p.work/60)); setVal('set-work-sec', p.work%60);
+        setVal('set-rest-min', Math.floor(p.rest/60)); setVal('set-rest-sec', p.rest%60);
+        setVal('set-rounds', p.rounds);
+        document.getElementById('row-work').style.display = (p.type === 'countdown') ? 'none' : 'flex';
     }
 
     function saveSettingsFromUI() {
         const p = presets[currentMode];
-        p.prep = getTimeFromInputs('set-prep');
-        p.warmupTime = getTimeFromInputs('set-warmup');
-        p.work = getTimeFromInputs('set-work');
-        p.rest = getTimeFromInputs('set-rest');
-        p.rounds = Math.max(1, parseInt(document.getElementById('set-rounds').value) || 1);
+        p.prep = getTimeFromInputs('set-prep'); p.warmupTime = getTimeFromInputs('set-warmup');
+        p.work = getTimeFromInputs('set-work'); p.rest = getTimeFromInputs('set-rest');
+        p.rounds = Math.max(1, parseInt(document.getElementById('set-rounds').value));
         savePresets();
     }
     
-    function savePresets() { localStorage.setItem('myTimerSettingsV21', JSON.stringify(presets)); }
+    function savePresets() { localStorage.setItem('myTimerSettingsV33', JSON.stringify(presets)); }
     function restoreDefaults() {
-        if(confirm("Restore defaults?")) { playClick(); presets[currentMode] = JSON.parse(JSON.stringify(defaultPresets[currentMode])); savePresets(); loadSettingsToUI(); updateWarmupUI(); resetTimer(false); }
+        if(confirm("Restore defaults?")) { playClick(); presets[currentMode] = JSON.parse(JSON.stringify(defaultPresets[currentMode])); savePresets(); loadSettingsToUI(); liveUpdateTotal(); }
     }
+
     function playClick() {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
+        if(!audioCtx) audioCtx = new AudioContext(); if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-        osc.frequency.value = 1200; osc.type = 'triangle';
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.start(); gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-        osc.stop(audioCtx.currentTime + 0.05);
+        osc.frequency.value = 1200; osc.type = 'triangle'; osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); gain.gain.setValueAtTime(0.02, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05); osc.stop(audioCtx.currentTime + 0.05);
     }
     function announce(text, type) {
         if (soundMode === 'mute') return;
         if (soundMode === 'voice') speak(text);
         else {
-            if (type === 'start') playTone(880, 0.4);
-            else if (type === 'rest') playTone(440, 0.4);
-            else if (type === 'tick') playTone(600, 0.05);
-            else if (type === 'finish') { playTone(880, 0.1); setTimeout(()=>playTone(880,0.1), 150); }
+            if (type === 'start') playTone(880, 0.4); else if (type === 'rest') playTone(440, 0.4);
+            else if (type === 'tick') playTone(600, 0.05); else if (type === 'finish') { playTone(880, 0.1); setTimeout(()=>playTone(880,0.1), 150); }
         }
     }
     function speak(text) {
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-            const u = new SpeechSynthesisUtterance(text); u.rate = 1.1; 
-            u.lang = currentLang; 
-            window.speechSynthesis.speak(u);
-        }
+        if ('speechSynthesis' in window) { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.rate = 1.1; u.lang = currentLang; window.speechSynthesis.speak(u); }
     }
     function playTone(freq, duration) {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
+        if(!audioCtx) audioCtx = new AudioContext(); if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
         osc.frequency.value = freq; osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.start(); gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-        osc.stop(audioCtx.currentTime + duration);
+        osc.start(); gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration); osc.stop(audioCtx.currentTime + duration);
     }
     
-    applyLanguage(); // Init
+    // STARTUP SEQUENCE
+    applyLanguage();
+    updateSafeguards(); // Force correct button state on load
+
+} catch(err) {
+    alert("Application Error: " + err.message + ". Please clear browser cache.");
+}
 </script>
 </body>
 </html>
