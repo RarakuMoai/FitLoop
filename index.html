@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SmartTimer V36: Zero Lag</title>
+    <title>SmartTimer V37: Stable & Pulse</title>
     <style>
         :root {
             --bg-body: #000000;
@@ -22,7 +22,6 @@
             --safe-bottom: env(safe-area-inset-bottom, 20px);
         }
         
-        /* 關鍵修正：touch-action: manipulation 消除點擊延遲 */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
         
         html, body { 
@@ -44,10 +43,8 @@
             margin: 0 auto; max-width: 500px; 
             background: var(--bg-idle); 
             display: flex; flex-direction: column; 
-            /* 調整背景過渡時間，讓它跟按鈕反應更同步，稍微加快一點 */
-            transition: background 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+            transition: background 0.5s ease; 
             position: relative; 
-            will-change: background; /* 提示瀏覽器進行 GPU 加速 */
         }
 
         #confetti-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
@@ -90,7 +87,7 @@
             gap: 12px; 
             cursor: pointer; 
             border: 1px solid rgba(255,255,255,0.05); 
-            transition: transform 0.1s; /* 加快按壓反應 */
+            transition: transform 0.1s; 
             min-height: 140px; 
             position: relative;
             overflow: hidden;
@@ -100,7 +97,7 @@
             background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 50%);
             opacity: 0.5; pointer-events: none;
         }
-        .mode-card:active { transform: scale(0.96); background: var(--surface-glass-hover); transition: 0s; /* 按下瞬間無延遲 */ }
+        .mode-card:active { transform: scale(0.96); background: var(--surface-glass-hover); transition: 0s; }
         
         .card-icon-box { 
             width: 44px; height: 44px; 
@@ -124,7 +121,7 @@
         .timer-display { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; min-height: 0; }
         .timer-ring-svg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-90deg); width: 350px; height: 350px; pointer-events: none; z-index: 0; max-width: 80vw; max-height: 80vw; }
         .ring-bg { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 6; }
-        .ring-progress { fill: none; stroke: var(--accent-color); stroke-width: 6; stroke-linecap: round; stroke-dasharray: 1005; stroke-dashoffset: 0; transition: stroke-dashoffset 0.1s linear; /* 平滑化進度條 */ }
+        .ring-progress { fill: none; stroke: var(--accent-color); stroke-width: 6; stroke-linecap: round; stroke-dasharray: 1005; stroke-dashoffset: 0; transition: stroke-dashoffset 0.1s linear; }
         
         .status-text { font-size: clamp(28px, 6vw, 40px); font-weight: 800; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; z-index: 1; text-shadow: 0 4px 20px rgba(0,0,0,0.5); }
         .timer-digits { font-size: clamp(70px, 18vw, 110px); font-weight: 700; z-index: 1; font-variant-numeric: tabular-nums; line-height: 1; text-shadow: 0 5px 30px rgba(0,0,0,0.4); }
@@ -154,10 +151,19 @@
 
         .main-actions { display: flex; gap: 12px; height: 68px; }
         .action-btn { height: 100%; border-radius: 18px; border: none; font-size: 18px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.1s; color: #fff; will-change: transform; }
+        
         .btn-stop { flex: 1; background: rgba(255, 59, 48, 0.2); color: #ff5b50; border: 1px solid rgba(255, 59, 48, 0.4); font-size: 16px; transition: opacity 0.3s, transform 0.1s; }
         .btn-stop:active { background: rgba(255, 59, 48, 0.4); transform: scale(0.96); }
         .btn-play { flex: 1.8; background: #fff; color: #000; box-shadow: 0 4px 20px rgba(255,255,255,0.25); }
         .btn-play:active { transform: scale(0.96); opacity: 0.9; transition: 0s; }
+
+        /* 關鍵新增：呼吸燈動畫 */
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.6); }
+            70% { box-shadow: 0 0 0 12px rgba(255, 59, 48, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0); }
+        }
+        .btn-pulse { animation: pulse-red 2s infinite; border-color: rgba(255, 59, 48, 0.8); background: rgba(255, 59, 48, 0.3); }
 
         /* Modal */
         .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); z-index: 999; display: flex; align-items: flex-end; opacity: 0; pointer-events: none; transition: 0.3s; }
@@ -256,7 +262,7 @@
                     <span class="tool-label" id="text-warmup" data-i18n="btn_warmup_off">Warmup? (OFF)</span>
                 </button>
                 <button class="tool-btn lockable" onclick="openSettings()">
-                    <div class="tool-icon-wrap"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg></div>
+                    <div class="tool-icon-wrap"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg></div>
                     <span class="tool-label" data-i18n="btn_custom">Edit</span>
                 </button>
             </div>
@@ -385,8 +391,8 @@ try {
         gym:    { name: "Gym",    work: 40, rest: 90, rounds: 5, prep: 5, warmupOn: false, warmupTime: 0, type: 'interval', color: '#0A84FF' }
     };
     
-    // CHANGED KEY TO V35 TO RESET DATA AND PREVENT CRASHES
-    let presets = JSON.parse(localStorage.getItem('myTimerSettingsV35')) || JSON.parse(JSON.stringify(defaultPresets));
+    // CHANGED KEY TO V37
+    let presets = JSON.parse(localStorage.getItem('myTimerSettingsV37')) || JSON.parse(JSON.stringify(defaultPresets));
     let currentMode = 'tabata';
     
     let state = { phase: 'idle', timeLeft: 0, currentRound: 1, isRunning: false, timerId: null, endTime: 0, remainingMs: 0, phaseDuration: 0 };
@@ -494,7 +500,13 @@ try {
         const isPaused = !state.isRunning && !isIdle && !isFinished;
 
         if (isIdle || isFinished) { back.classList.remove('btn-locked'); } else { back.classList.add('btn-locked'); }
-        if (isPaused || isFinished) { reset.classList.remove('btn-locked'); } else { reset.classList.add('btn-locked'); }
+        if (isPaused || isFinished) { 
+            reset.classList.remove('btn-locked'); 
+            reset.classList.add('btn-pulse'); // Add Breathing Effect
+        } else { 
+            reset.classList.add('btn-locked'); 
+            reset.classList.remove('btn-pulse'); // Remove Breathing Effect
+        }
         if (isIdle || isFinished) { locks.forEach(b => b.classList.remove('disabled')); } else { locks.forEach(b => b.classList.add('disabled')); }
     }
 
@@ -530,54 +542,46 @@ try {
         }
     }
 
-    // 關鍵優化：UI 優先，音效延後
     function toggleTimerState() {
-        // 1. 立即更新 UI 狀態
-        const wasRunning = state.isRunning;
-        state.isRunning = !wasRunning;
-        updateActionBtnState();
-        updateSafeguards();
+        // 1. Audio Resume (Must be first for mobile Safari)
+        if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+        playClick();
 
-        // 2. 延遲執行沈重任務，讓 UI 先渲染
-        setTimeout(() => {
-            if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if(audioCtx.state === 'suspended') audioCtx.resume();
+        // 2. Logic & UI Update (Synchronous to fix locking delay)
+        if (state.isRunning) {
+            // PAUSE
+            clearInterval(state.timerId); 
+            state.isRunning = false;
+            cancelAnimationFrame(ringFrameId);
+            if(state.endTime > 0) state.remainingMs = Math.max(0, state.endTime - Date.now());
+            if(totalEndTime > 0) totalRemainingSeconds = Math.ceil((totalEndTime - Date.now())/1000);
+            toggleWakeLock(false);
+        } else {
+            // START
+            toggleWakeLock(true);
+            if(state.phase === 'finished') { state.phase = 'idle'; resetTimer(false); state.isRunning = true; } 
+            else { state.isRunning = true; }
             
-            // 播放點擊音效
-            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-            osc.frequency.value = 1200; osc.type = 'triangle'; osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start(); gain.gain.setValueAtTime(0.02, audioCtx.currentTime); 
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05); 
-            osc.stop(audioCtx.currentTime + 0.05);
-
-            if (wasRunning) {
-                // PAUSE LOGIC
-                clearInterval(state.timerId);
-                cancelAnimationFrame(ringFrameId);
-                if(state.endTime > 0) state.remainingMs = Math.max(0, state.endTime - Date.now());
-                if(totalEndTime > 0) totalRemainingSeconds = Math.ceil((totalEndTime - Date.now())/1000);
-                toggleWakeLock(false);
-            } else {
-                // START LOGIC
-                toggleWakeLock(true);
-                if(state.phase === 'finished') { state.phase = 'idle'; resetTimer(false); state.isRunning = true; updateActionBtnState(); updateSafeguards(); }
-                
-                const p = presets[currentMode];
-                if(state.phase === 'idle') {
-                    if (p.prep > 0) { state.phase = 'prep'; state.timeLeft = p.prep; state.phaseDuration = p.prep; announce(t('phase_prep'), "start"); }
-                    else if (p.warmupOn) { state.phase = 'warmup'; state.timeLeft = p.warmupTime; state.phaseDuration = p.warmupTime; announce(t('phase_start_warmup'), "start"); }
-                    else { state.phase = 'work'; state.timeLeft = p.work; state.phaseDuration = p.work; announce(t('phase_start_work'), "start"); }
-                }
-
-                const durationMs = (state.remainingMs > 0) ? state.remainingMs : (state.timeLeft * 1000);
-                state.endTime = Date.now() + durationMs; state.remainingMs = 0;
-                totalEndTime = Date.now() + (totalRemainingSeconds * 1000);
-
-                state.timerId = setInterval(tick, 100); 
-                updateRingLoop(); 
-                updateDisplay();
+            const p = presets[currentMode];
+            if(state.phase === 'idle') {
+                if (p.prep > 0) { state.phase = 'prep'; state.timeLeft = p.prep; state.phaseDuration = p.prep; announce(t('phase_prep'), "start"); }
+                else if (p.warmupOn) { state.phase = 'warmup'; state.timeLeft = p.warmupTime; state.phaseDuration = p.warmupTime; announce(t('phase_start_warmup'), "start"); }
+                else { state.phase = 'work'; state.timeLeft = p.work; state.phaseDuration = p.work; announce(t('phase_start_work'), "start"); }
             }
-        }, 0);
+
+            const durationMs = (state.remainingMs > 0) ? state.remainingMs : (state.timeLeft * 1000);
+            state.endTime = Date.now() + durationMs; state.remainingMs = 0;
+            totalEndTime = Date.now() + (totalRemainingSeconds * 1000);
+
+            state.timerId = setInterval(tick, 100); 
+            updateRingLoop(); 
+        }
+        
+        // 3. Finalize UI
+        updateSafeguards(); 
+        updateActionBtnState(); 
+        updateDisplay();
     }
 
     function updateRingLoop() {
@@ -776,13 +780,12 @@ try {
         savePresets();
     }
     
-    function savePresets() { localStorage.setItem('myTimerSettingsV35', JSON.stringify(presets)); }
+    function savePresets() { localStorage.setItem('myTimerSettingsV37', JSON.stringify(presets)); }
     function restoreDefaults() {
         if(confirm("Restore defaults?")) { playClick(); presets[currentMode] = JSON.parse(JSON.stringify(defaultPresets[currentMode])); savePresets(); loadSettingsToUI(); liveUpdateTotal(); }
     }
 
     function playClick() {
-        // 重複利用 AudioContext，不要一直 New
         if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
@@ -790,22 +793,15 @@ try {
         osc.start(); gain.gain.setValueAtTime(0.02, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05); osc.stop(audioCtx.currentTime + 0.05);
     }
     function announce(text, type) {
-        // 使用 setTimeout(0) 讓語音合成不卡主執行緒
-        setTimeout(() => {
-            if (soundMode === 'mute') return;
-            if (soundMode === 'voice') speak(text);
-            else {
-                if (type === 'start') playTone(880, 0.4); else if (type === 'rest') playTone(440, 0.4);
-                else if (type === 'tick') playTone(600, 0.05); else if (type === 'finish') { playTone(880, 0.1); setTimeout(()=>playTone(880,0.1), 150); }
-            }
-        }, 0);
+        if (soundMode === 'mute') return;
+        if (soundMode === 'voice') speak(text);
+        else {
+            if (type === 'start') playTone(880, 0.4); else if (type === 'rest') playTone(440, 0.4);
+            else if (type === 'tick') playTone(600, 0.05); else if (type === 'finish') { playTone(880, 0.1); setTimeout(()=>playTone(880,0.1), 150); }
+        }
     }
     function speak(text) {
-        if ('speechSynthesis' in window) { 
-            window.speechSynthesis.cancel(); 
-            const u = new SpeechSynthesisUtterance(text); u.rate = 1.1; u.lang = currentLang; 
-            window.speechSynthesis.speak(u); 
-        }
+        if ('speechSynthesis' in window) { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.rate = 1.1; u.lang = currentLang; window.speechSynthesis.speak(u); }
     }
     function playTone(freq, duration) {
         if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
