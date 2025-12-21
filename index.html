@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SmartTimer V38: Audio Engine</title>
+    <title>FitLoop</title>
     <style>
         :root {
             --bg-body: #000000;
@@ -43,7 +43,7 @@
             margin: 0 auto; max-width: 500px; 
             background: var(--bg-idle); 
             display: flex; flex-direction: column; 
-            transition: background 0.3s ease-out; /* 加快背景反應速度 */
+            transition: background 0.3s ease-out; 
             position: relative; 
             will-change: background;
         }
@@ -59,7 +59,8 @@
 
         /* Home Header */
         .header { margin-top: 10px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
-        .app-title { font-size: 28px; font-weight: 800; letter-spacing: 0.5px; }
+        /* 品牌名稱更新 */
+        .app-title { font-size: 28px; font-weight: 800; letter-spacing: 0.5px; font-style: italic; }
         .btn-lang-pill { background: var(--surface-glass); border-radius: 20px; padding: 6px 14px; display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 500; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); transition: 0.2s; }
         .btn-lang-pill:active { transform: scale(0.95); background: var(--surface-glass-hover); }
 
@@ -201,7 +202,7 @@
     <!-- Home -->
     <div id="home-screen" class="screen">
         <div class="header">
-            <div class="app-title">SmartTimer</div>
+            <div class="app-title">FitLoop</div>
             <div class="btn-lang-pill" onclick="openLangModal()">
                 <svg class="icon-svg" viewBox="0 0 24 24" style="width:18px;height:18px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
                 <span data-i18n="btn_lang_text">Language</span>
@@ -262,7 +263,7 @@
                     <span class="tool-label" id="text-warmup" data-i18n="btn_warmup_off">Warmup? (OFF)</span>
                 </button>
                 <button class="tool-btn lockable" onclick="openSettings()">
-                    <div class="tool-icon-wrap"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg></div>
+                    <div class="tool-icon-wrap"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c.59-.24 1.13-.58 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg></div>
                     <span class="tool-label" data-i18n="btn_custom">Edit</span>
                 </button>
             </div>
@@ -383,7 +384,7 @@ try {
         }
     };
 
-    let currentLang = localStorage.getItem('smartTimerLang');
+    let currentLang = localStorage.getItem('fitloopLang');
     if (!currentLang) {
         const sysLang = navigator.language.toLowerCase();
         if (sysLang.includes('zh')) { currentLang = (sysLang.includes('tw') || sysLang.includes('hk')) ? 'zh-TW' : 'zh-CN'; } 
@@ -420,8 +421,8 @@ try {
         gym:    { name: "Gym",    work: 40, rest: 90, rounds: 5, prep: 5, warmupOn: false, warmupTime: 0, type: 'interval', color: '#0A84FF' }
     };
     
-    // CHANGED KEY TO V38
-    let presets = JSON.parse(localStorage.getItem('myTimerSettingsV38')) || JSON.parse(JSON.stringify(defaultPresets));
+    // CHANGED KEY TO fitloopSettings
+    let presets = JSON.parse(localStorage.getItem('fitloopSettings')) || JSON.parse(JSON.stringify(defaultPresets));
     let currentMode = 'tabata';
     
     let state = { phase: 'idle', timeLeft: 0, currentRound: 1, isRunning: false, timerId: null, endTime: 0, remainingMs: 0, phaseDuration: 0 };
@@ -441,7 +442,7 @@ try {
     function openLangModal() { playClick(); document.getElementById('lang-modal').classList.add('open'); }
     function closeLangModal() { playClick(); document.getElementById('lang-modal').classList.remove('open'); }
     function setLanguage(lang) {
-        currentLang = lang; localStorage.setItem('smartTimerLang', lang);
+        currentLang = lang; localStorage.setItem('fitloopLang', lang);
         applyLanguage(); closeLangModal();
     }
     function applyLanguage() {
@@ -809,7 +810,7 @@ try {
         savePresets();
     }
     
-    function savePresets() { localStorage.setItem('myTimerSettingsV38', JSON.stringify(presets)); }
+    function savePresets() { localStorage.setItem('fitloopSettings', JSON.stringify(presets)); }
     function restoreDefaults() {
         if(confirm("Restore defaults?")) { playClick(); presets[currentMode] = JSON.parse(JSON.stringify(defaultPresets[currentMode])); savePresets(); loadSettingsToUI(); liveUpdateTotal(); }
     }
