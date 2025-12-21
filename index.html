@@ -2,416 +2,1008 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HIIT 間歇訓練計時器</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>SmartTimer V21: Pro Content & Limits</title>
     <style>
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            background-color: #222;
-            color: white;
-            transition: background-color 0.3s;
-            overflow: hidden; /* 防止整體頁面捲動 */
+        :root {
+            /* 暗色主題 (預設) */
+            --text-main: #ffffff;
+            --text-sub: rgba(255, 255, 255, 0.6);
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --card-border: rgba(255, 255, 255, 0.05);
+            --btn-deck: rgba(0, 0, 0, 0.3);
+            
+            --bg-idle: linear-gradient(135deg, #1e1e1e 0%, #3a3a3a 100%);
+            --bg-prep: linear-gradient(135deg, #d35400 0%, #e67e22 100%);
+            --bg-warmup: linear-gradient(135deg, #6c3483 0%, #8e44ad 100%);
+            --bg-work: linear-gradient(135deg, #922b21 0%, #c0392b 100%);
+            --bg-gym-work: linear-gradient(135deg, #001f3f 0%, #003366 100%);
+            --bg-rest: linear-gradient(135deg, #145a32 0%, #27ae60 100%);
+            --bg-finish: linear-gradient(135deg, #2c3e50 0%, #4ca1af 100%);
+
+            /* Modal */
+            --modal-bg: #2c2c2e;
+            --modal-text: #ffffff;
+            --input-bg: #1c1c1e;
+            --input-border: #444;
+            --setting-row-bg: #3a3a3c;
+            --lang-item-bg: #3a3a3c;
         }
 
-        /* 設定頁面樣式 */
-        #setup-screen {
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            height: 100%;
-            overflow-y: auto; /* 允許設定頁內容捲動 */
-        }
-        .input-group {
-            background: #333;
-            padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .input-group label {
-            display: block;
-            font-size: 1.1rem;
-            margin-bottom: 10px;
-            color: #ccc;
-            font-weight: bold;
-        }
-        .time-inputs {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        input[type="number"] {
-            width: 100%;
-            padding: 10px;
-            font-size: 1.2rem;
-            border: none;
-            background: #444;
-            color: white;
-            border-radius: 8px;
-            text-align: center;
-            -moz-appearance: textfield; /* Firefox 移除箭頭 */
-        }
-        input[type="number"]::-webkit-outer-spin-button,
-        input[type="number"]::-webkit-inner-spin-button {
-            -webkit-appearance: none; /* Chrome/Safari 移除箭頭 */
-            margin: 0;
+        /* 亮色主題 */
+        body.light-theme {
+            --text-main: #2c3e50;
+            --text-sub: rgba(0, 0, 0, 0.6);
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --card-border: rgba(0, 0, 0, 0.05);
+            --btn-deck: rgba(255, 255, 255, 0.8);
+            --bg-idle: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            
+            --modal-bg: #ffffff;
+            --modal-text: #333333;
+            --input-bg: #f0f0f0;
+            --input-border: #ccc;
+            --setting-row-bg: #f8f9fa;
+            --lang-item-bg: #f0f0f0;
         }
 
-        .unit { font-size: 0.9rem; color: #888; white-space: nowrap; }
+        body.light-theme.active-mode {
+            --text-main: #ffffff;
+            --text-sub: rgba(255, 255, 255, 0.8);
+            --btn-deck: rgba(0, 0, 0, 0.2);
+            --card-bg: rgba(0, 0, 0, 0.2);
+        }
+
+        html, body {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: #000; color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+            overflow: hidden; -webkit-user-select: none; user-select: none;
+            display: flex; justify-content: center; transition: color 0.3s;
+        }
+
+        #app-container {
+            width: 100%; max-width: 480px; height: 100dvh;
+            background: var(--bg-idle);
+            display: flex; flex-direction: column;
+            position: relative; box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            transition: background 0.5s ease;
+        }
+
+        .hidden { display: none !important; }
+        .screen {
+            flex: 1; display: flex; flex-direction: column;
+            height: 100%; box-sizing: border-box; padding: 20px 20px 0 20px;
+            overflow: hidden;
+        }
+
+        /* --- Header --- */
+        .header { 
+            flex-shrink: 0; margin-top: 20px; margin-bottom: 20px; 
+            display: flex; justify-content: space-between; align-items: flex-start;
+        }
+        .header-text { display: flex; flex-direction: column; width: 50%; }
+        .app-title { font-size: 28px; font-weight: 800; margin-bottom: 5px; line-height: 1.2;}
+        .app-subtitle { font-size: 14px; color: var(--text-sub); }
         
-        #total-display {
-            text-align: center;
-            font-size: 1.2rem;
-            margin-top: 10px;
-            color: #4cd964;
-            font-weight: bold;
-            padding-bottom: 20px;
-        }
-
-        /* 運動頁面樣式 */
-        #timer-screen {
-            display: none; /* 預設隱藏 */
-            height: 100%;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            text-align: center;
-            padding: 20px;
-        }
-        #status-text { font-size: 2.5rem; font-weight: bold; margin-bottom: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-        #main-timer { font-size: 22vw; /* 自適應字體大小 */ font-weight: bold; font-variant-numeric: tabular-nums; line-height: 1; margin: 10px 0; }
-        @media (min-width: 600px) { #main-timer { font-size: 8rem; } }
-        
-        #sub-info { font-size: 1.5rem; margin-top: 5px; opacity: 0.9; font-weight: 500;}
-        
-        /* 按鈕樣式 */
-        .btn {
-            width: 100%;
-            padding: 18px;
-            font-size: 1.3rem;
-            font-weight: bold;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: transform 0.1s;
-            -webkit-user-select: none;
-            user-select: none;
-        }
-        .btn:active { transform: scale(0.96); }
-        .btn-start { background: #007aff; color: white; margin-bottom: 30px; }
-        
-        /* 暫停按鈕 (固定底部) */
-        #btn-pause { 
-            position: absolute; bottom: 40px; width: 80%; 
-            background: rgba(255,255,255,0.2); border: 2px solid white; color: white;
-            backdrop-filter: blur(5px);
-        }
-
-        /* 結束時的按鈕 (原本隱藏) */
-        #btn-home {
-            display: none;
-            background: white; 
-            color: #2980b9; 
-            width: 80%;
-            margin-top: 30px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            animation: popIn 0.5s ease-out;
-        }
-
-        @keyframes popIn {
-            0% { transform: scale(0.5); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
+        .header-controls { 
+            display: flex; flex-direction: column; gap: 8px; align-items: flex-end; 
         }
         
-        /* 暫停選單 */
-        #pause-overlay {
-            display: none;
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.85);
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-            z-index: 10;
-            backdrop-filter: blur(5px);
+        .theme-switch {
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 20px; padding: 4px; display: flex; align-items: center;
+            cursor: pointer; width: 120px; height: 32px; position: relative;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
         }
-        .btn-resume { background: #34c759; color: white; width: 80%; }
-        .btn-stop { background: #ff3b30; color: white; width: 80%; }
+        .switch-knob {
+            width: 26px; height: 26px; background: #fff; border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2); position: absolute;
+            left: 4px; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 2;
+        }
+        .switch-label {
+            width: 100%; text-align: center; font-size: 12px; font-weight: 600;
+            color: var(--text-main); z-index: 1; padding-left: 15px; pointer-events: none;
+            transition: opacity 0.2s; white-space: nowrap;
+        }
+        body.light-theme .switch-knob { transform: translateX(86px); background: #f1c40f; }
+        body.light-theme .switch-label { padding-left: 0; padding-right: 35px; }
 
-        /* 背景顏色類別 */
-        .bg-setup { background-color: #222; }
-        .bg-warmup { background-color: #27ae60; } /* 綠色 */
-        .bg-work { background-color: #c0392b; }   /* 紅色 */
-        .bg-rest { background-color: #27ae60; }   /* 綠色 */
-        .bg-finished { background-color: #2980b9; } /* 藍色 */
+        .lang-btn {
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            padding: 6px 12px; border-radius: 20px; font-size: 13px;
+            display: flex; align-items: center; gap: 5px; cursor: pointer;
+            color: var(--text-main); backdrop-filter: blur(5px); width: fit-content;
+        }
+
+        .card-grid {
+            flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+            padding-bottom: 50px; display: flex; flex-direction: column; gap: 16px;
+        }
+        .card-grid::-webkit-scrollbar { display: none; }
+
+        .scenario-card {
+            background-color: var(--card-bg); border-radius: 20px; padding: 24px;
+            cursor: pointer; border-left: 6px solid transparent; flex-shrink: 0;
+            transition: transform 0.1s, background-color 0.2s;
+            backdrop-filter: blur(10px); border: 1px solid var(--card-border);
+        }
+        .scenario-card:active { transform: scale(0.98); opacity: 0.8; }
+        .card-tabata { border-left-color: #ff453a; }
+        .card-hiit { border-left-color: #ff9f0a; }
+        .card-emom { border-left-color: #30d158; }
+        .card-rest { border-left-color: #004e92; }
+        .card-icon { font-size: 28px; margin-bottom: 10px; display: block; }
+        .card-title { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+        .card-desc { font-size: 13px; color: var(--text-sub); line-height: 1.4; }
+
+        /* --- Timer Screen --- */
+        .nav-bar {
+            flex-shrink: 0; display: flex; align-items: center; justify-content: space-between;
+            height: 50px; margin-bottom: 10px; transition: opacity 0.3s; position: relative;
+        }
+        .nav-bar.locked .btn-nav { opacity: 0; pointer-events: none; }
+        
+        .btn-nav {
+            background: var(--card-bg); border: none; color: var(--text-main);
+            padding: 8px 16px; border-radius: 20px; font-size: 15px;
+            cursor: pointer; display: flex; align-items: center; gap: 5px;
+            backdrop-filter: blur(5px); z-index: 2;
+        }
+        .btn-info-circle {
+            width: 36px; height: 36px; border-radius: 50%; padding: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-family: serif; font-size: 18px;
+        }
+
+        .total-time-badge {
+            font-size: 15px; font-weight: 600; color: var(--text-main);
+            background: var(--card-bg); padding: 6px 14px; border-radius: 12px;
+            border: 1px solid var(--card-border); font-variant-numeric: tabular-nums;
+            position: absolute; left: 50%; transform: translateX(-50%); 
+            white-space: nowrap; z-index: 1;
+        }
+
+        .timer-content {
+            flex: 1; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; min-height: 0; z-index: 10;
+        }
+
+        .mode-badge {
+            background: var(--card-bg); padding: 6px 14px; border-radius: 12px;
+            font-size: 14px; margin-bottom: 10px; color: var(--text-main); 
+            border: 1px solid var(--card-border); backdrop-filter: blur(5px);
+        }
+
+        .status-text {
+            font-size: clamp(24px, 5vh, 40px); font-weight: 700;
+            margin-bottom: 5px; letter-spacing: 2px; text-shadow: 0 2px 15px rgba(0,0,0,0.3);
+        }
+        .timer-digits {
+            font-size: clamp(90px, 18vh, 160px); font-weight: 800;
+            font-variant-numeric: tabular-nums; line-height: 1; letter-spacing: -3px;
+            text-shadow: 0 4px 30px rgba(0,0,0,0.3); transition: transform 0.1s;
+        }
+        .pulse { animation: pulseAnim 0.8s infinite; color: #fff; }
+        @keyframes pulseAnim { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+        .rounds-text { 
+            margin-top: 15px; font-size: 20px; color: var(--text-sub); font-weight: 500; 
+            text-shadow: 0 1px 5px rgba(0,0,0,0.5);
+        }
+
+        .control-deck {
+            flex-shrink: 0; display: flex; gap: 10px;
+            margin-bottom: 20px; width: 100%; z-index: 10; transition: opacity 0.3s;
+        }
+        .deck-btn {
+            flex: 1; background: var(--btn-deck); border-radius: 16px;
+            padding: 12px 5px; border: 1px solid var(--card-border);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s; backdrop-filter: blur(5px);
+        }
+        .deck-btn:active { opacity: 0.7; }
+        .deck-btn.active { border-color: rgba(255,255,255,0.8); background: rgba(255,255,255,0.3); }
+        .deck-btn.disabled { opacity: 0.3; pointer-events: none; filter: grayscale(1); }
+        .deck-label { font-size: 12px; color: var(--text-main); font-weight: 500; margin-top: 4px;}
+        .deck-sub { font-size: 10px; color: var(--text-sub); margin-top: 2px; }
+
+        .action-area {
+            flex-shrink: 0; margin-bottom: 30px; display: flex;
+            gap: 12px; width: 100%; height: 75px; z-index: 10;
+        }
+        .btn-action {
+            height: 100%; border-radius: 20px; border: none;
+            font-size: 18px; font-weight: 700; cursor: pointer;
+            transition: opacity 0.2s; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); gap: 8px;
+        }
+        .btn-action:active { opacity: 0.8; transform: scale(0.98); }
+        .btn-reset { 
+            flex: 1; background: #2c2c2e; color: #ff453a; 
+            backdrop-filter: blur(10px); border: 2px solid rgba(255,69,58,0.2); font-size: 16px; 
+        }
+        .btn-start { flex: 2; background: #fff; color: #000; font-size: 20px;}
+        body.light-theme .btn-reset { background: #ecf0f1; }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 100;
+            display: flex; justify-content: center; align-items: flex-end;
+            backdrop-filter: blur(8px);
+        }
+        .modal-content {
+            background: var(--modal-bg); color: var(--modal-text);
+            width: 100%; max-height: 90%;
+            border-top-left-radius: 24px; border-top-right-radius: 24px;
+            padding: 24px; box-sizing: border-box; overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .modal-title { font-size: 20px; font-weight: 700; }
+        .btn-close { background: none; border: none; color: #0a84ff; font-size: 16px; font-weight: 600; cursor: pointer;}
+        
+        .lang-list { display: flex; flex-direction: column; gap: 10px; }
+        .lang-item {
+            padding: 15px; background: var(--lang-item-bg); border-radius: 12px;
+            font-size: 16px; cursor: pointer; display: flex; justify-content: space-between;
+        }
+        .lang-item.selected { border: 2px solid #0a84ff; color: #0a84ff; font-weight: bold; }
+
+        /* Pro Info Styling */
+        .modal-body-text { font-size: 15px; line-height: 1.7; color: var(--modal-text); opacity: 0.9; }
+        .modal-body-text h3 { margin-bottom: 8px; font-size: 18px; color: #0a84ff; }
+        .modal-body-text ul { padding-left: 20px; margin-bottom: 15px; }
+        .modal-body-text li { margin-bottom: 5px; }
+
+        .modal-total-time {
+            text-align: center; margin-bottom: 20px; color: var(--text-sub); font-size: 14px;
+            background: var(--setting-row-bg); padding: 10px; border-radius: 10px;
+        }
+        .setting-group-title { font-size: 14px; color: #8e8e93; margin-bottom: 10px; margin-top: 20px; font-weight: 600; text-transform: uppercase;}
+        .setting-row {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 12px; padding: 12px; background: var(--setting-row-bg); border-radius: 12px;
+        }
+        .time-input-group { display: flex; align-items: center; gap: 5px; }
+        .input-num {
+            background: var(--input-bg); border: 1px solid var(--input-border); color: var(--modal-text);
+            width: 50px; padding: 8px 0; border-radius: 8px; text-align: center; font-size: 16px;
+        }
+        .time-label { font-size: 14px; color: var(--text-sub); }
+        .btn-restore {
+            width: 100%; padding: 15px; background: transparent;
+            border: 1px solid #ff453a; color: #ff453a;
+            border-radius: 12px; font-size: 16px; margin-top: 20px; margin-bottom: 20px; cursor: pointer;
+        }
     </style>
 </head>
-<body>
+<body class="">
 
-<div id="setup-screen">
-    <h2 style="text-align:center; margin-bottom: 5px;">間歇訓練設定</h2>
-    <div class="input-group">
-        <label>1. 熱身時間 (準備)</label>
-        <div class="time-inputs">
-            <input type="number" id="warmMin" value="1" min="0" oninput="calcTotal()"> <span class="unit">分</span>
-            <input type="number" id="warmSec" value="0" min="0" max="59" oninput="calcTotal()"> <span class="unit">秒</span>
-        </div>
-    </div>
-
-    <div class="input-group">
-        <label style="color: #ff5e57;">2. 運動/衝刺時間 (紅)</label>
-        <div class="time-inputs">
-            <input type="number" id="workMin" value="1" min="0" oninput="calcTotal()"> <span class="unit">分</span>
-            <input type="number" id="workSec" value="0" min="0" max="59" oninput="calcTotal()"> <span class="unit">秒</span>
-        </div>
-    </div>
-
-    <div class="input-group">
-        <label style="color: #2ecc71;">3. 緩和/休息時間 (綠)</label>
-        <div class="time-inputs">
-            <input type="number" id="restMin" value="1" min="0" oninput="calcTotal()"> <span class="unit">分</span>
-            <input type="number" id="restSec" value="0" min="0" max="59" oninput="calcTotal()"> <span class="unit">秒</span>
-        </div>
-    </div>
-
-    <div class="input-group">
-        <label>4. 輪次 (衝刺+緩和算1輪)</label>
-        <div class="time-inputs">
-            <input type="number" id="rounds" value="10" min="1" oninput="calcTotal()"> <span class="unit">次</span>
-        </div>
-    </div>
-
-    <div id="total-display">預估總長度: 21:00</div>
-    <button class="btn btn-start" onclick="startWorkout()">開始訓練</button>
-</div>
-
-<div id="timer-screen">
-    <div id="status-text">熱身</div>
-    <div id="main-timer">00:00</div>
-    <div id="sub-info">準備開始</div>
+<div id="app-container">
     
-    <button id="btn-pause" class="btn" onclick="pauseWorkout()">暫 停</button>
-    <button id="btn-home" class="btn" onclick="stopWorkout()">回到設定頁面</button>
+    <div id="home-screen" class="screen">
+        <div class="header">
+            <div class="header-text">
+                <div class="app-title" data-i18n="app_title">SmartTimer</div>
+                <div class="app-subtitle" data-i18n="app_subtitle">選擇你的訓練模式</div>
+            </div>
+            <div class="header-controls">
+                <div class="theme-switch" onclick="toggleTheme()">
+                    <div class="switch-knob"></div>
+                    <span class="switch-label" id="theme-text">暗色風格</span>
+                </div>
+                <button class="lang-btn" onclick="openLangModal()">
+                    <span>🌐</span> <span id="lang-display">繁體中文</span>
+                </button>
+            </div>
+        </div>
 
-    <div id="pause-overlay">
-        <h2 style="font-size: 2rem; margin-bottom: 20px;">已暫停</h2>
-        <button class="btn btn-resume" onclick="resumeWorkout()">繼續</button>
-        <button class="btn btn-stop" onclick="stopWorkout()">結束訓練</button>
+        <div class="card-grid">
+            <div class="scenario-card card-tabata" onclick="selectMode('tabata')">
+                <span class="card-icon">🔥</span>
+                <div class="card-title" data-i18n="mode_tabata_title">極速燃脂 (Tabata)</div>
+                <div class="card-desc" data-i18n="mode_tabata_desc">Tabata 經典配置</div>
+            </div>
+            <div class="scenario-card card-hiit" onclick="selectMode('hiit')">
+                <span class="card-icon">🏃</span>
+                <div class="card-title" data-i18n="mode_hiit_title">高強度間歇 (HIIT)</div>
+                <div class="card-desc" data-i18n="mode_hiit_desc">適合一般有氧循環</div>
+            </div>
+            <div class="scenario-card card-emom" onclick="selectMode('emom')">
+                <span class="card-icon">⚡</span>
+                <div class="card-title" data-i18n="mode_emom_title">循環挑戰 (EMOM)</div>
+                <div class="card-desc" data-i18n="mode_emom_desc">每分鐘整點循環</div>
+            </div>
+            <div class="scenario-card card-rest" onclick="selectMode('gym')">
+                <span class="card-icon">🏋️</span>
+                <div class="card-title" data-i18n="mode_gym_title">重量訓練 (Gym)</div>
+                <div class="card-desc" data-i18n="mode_gym_desc">含訓練時間與組間休息</div>
+            </div>
+            <div style="height: 20px;"></div>
+        </div>
     </div>
+
+    <div id="timer-screen" class="screen hidden">
+        <div class="nav-bar" id="navBar">
+            <button class="btn-nav" onclick="goBack()">❮ <span data-i18n="btn_back">返回</span></button>
+            <div class="total-time-badge" id="mainRemainingTime">--:--</div>
+            <button class="btn-nav btn-info-circle" onclick="openInfoModal()">i</button>
+        </div>
+
+        <div class="timer-content">
+            <div class="mode-badge" id="modeBadge">Tabata</div>
+            <div class="status-text" id="statusText">準備</div>
+            <div class="timer-digits" id="timerDigits">00:00</div>
+            <div class="rounds-text" id="roundsText">Round 1/8</div>
+        </div>
+
+        <div class="control-deck">
+            <div class="deck-btn" onclick="toggleSoundMode()">
+                <div class="deck-icon" id="btn-sound-icon">🔔</div>
+                <div class="deck-label" id="btn-sound-text" data-i18n="sound_beep">音效模式</div>
+            </div>
+            <div class="deck-btn lockable" id="btn-warmup" onclick="toggleWarmupDirect()">
+                <div class="deck-icon">🌡️</div>
+                <div class="deck-label" data-i18n="btn_warmup">暖身開關</div>
+                <div class="deck-sub" id="btn-warmup-sub">關閉</div>
+            </div>
+            <div class="deck-btn lockable" onclick="openSettings()">
+                <div class="deck-icon">⚙️</div>
+                <div class="deck-label" data-i18n="btn_custom">自定義</div>
+            </div>
+        </div>
+
+        <div class="action-area">
+            <button class="btn-action btn-reset" onclick="resetTimer()"><span data-i18n="btn_reset">⏹ 結束 / 重置</span></button>
+            <button class="btn-action btn-start" id="actionBtn" onclick="toggleTimerState()"><span data-i18n="btn_start">▶ 開始</span></button>
+        </div>
+    </div>
+
+    <div id="settings-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" data-i18n="modal_settings_title">詳細設定</div>
+                <button class="btn-close" onclick="closeSettings()" data-i18n="btn_done">完成</button>
+            </div>
+            
+            <div class="modal-total-time" id="modalTotalTime">--:--</div>
+
+            <div class="setting-group-title" data-i18n="group_prep">前置準備</div>
+            <div class="setting-row">
+                <span class="setting-label" data-i18n="label_prep">準備時間</span>
+                <div class="time-input-group">
+                    <input type="number" class="input-num" id="set-prep-min" oninput="validateInput(this); liveUpdateTotal()">
+                    <span class="time-label" data-i18n="unit_min">分</span>
+                    <input type="number" class="input-num" id="set-prep-sec" oninput="validateInput(this); liveUpdateTotal()">
+                    <span class="time-label" data-i18n="unit_sec">秒</span>
+                </div>
+            </div>
+            <div class="setting-row">
+                <span class="setting-label" data-i18n="label_warmup">暖身時間</span>
+                <div class="time-input-group">
+                    <input type="number" class="input-num" id="set-warmup-min" oninput="validateInput(this); liveUpdateTotal()">
+                    <span class="time-label" data-i18n="unit_min">分</span>
+                    <input type="number" class="input-num" id="set-warmup-sec" oninput="validateInput(this); liveUpdateTotal()">
+                    <span class="time-label" data-i18n="unit_sec">秒</span>
+                </div>
+            </div>
+
+            <div class="setting-group-title" data-i18n="group_work">正式訓練</div>
+            <div class="setting-row" id="row-work">
+                <span class="setting-label" data-i18n="label_work">運動/訓練</span>
+                <div class="time-input-group">
+                    <input type="number" class="input-num" id="set-work-min" oninput="validateInput(this); liveUpdateTotal()">
+                    <span class="time-label" data-i18n="unit_min">分</span>
+                    <input type="number" class="input-num" id="set-work-sec" oninput="validateInput(this); liveUpdateTotal()">
+                    <span class="time-label" data-i18n="unit_sec">秒</span>
+                </div>
+            </div>
+            <div class="setting-row">
+                <span class="setting-label" data-i18n="label_rest">休息時間</span>
+                <div class="time-input-group">
+                    <input type="number" class="input-num" id="set-rest-min" oninput="validateInput(this); liveUpdateTotal()">
+                    <span class="time-label" data-i18n="unit_min">分</span>
+                    <input type="number" class="input-num" id="set-rest-sec" oninput="validateInput(this); liveUpdateTotal()">
+                    <span class="time-label" data-i18n="unit_sec">秒</span>
+                </div>
+            </div>
+            <div class="setting-row">
+                <span class="setting-label" data-i18n="label_rounds">總組數 (Rounds)</span>
+                <div class="time-input-group">
+                    <input type="number" class="input-num" id="set-rounds" oninput="validateInput(this); liveUpdateTotal()">
+                </div>
+            </div>
+
+            <button class="btn-restore" onclick="restoreDefaults()" data-i18n="btn_restore">↻ 還原預設值</button>
+        </div>
+    </div>
+
+    <div id="lang-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="height:auto; max-height: 70%;">
+            <div class="modal-header">
+                <div class="modal-title" data-i18n="modal_lang_title">選擇語言</div>
+                <button class="btn-close" onclick="closeLangModal()">X</button>
+            </div>
+            <div class="lang-list">
+                <div class="lang-item" onclick="setLanguage('zh-TW')">繁體中文</div>
+                <div class="lang-item" onclick="setLanguage('zh-CN')">简体中文</div>
+                <div class="lang-item" onclick="setLanguage('en')">English</div>
+                <div class="lang-item" onclick="setLanguage('ja')">日本語</div>
+                <div class="lang-item" onclick="setLanguage('ko')">한국어</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="info-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="height: auto; max-height: 70%;">
+            <div class="modal-header">
+                <div class="modal-title" id="info-title">關於</div>
+                <button class="btn-close" onclick="closeInfoModal()" data-i18n="btn_close">關閉</button>
+            </div>
+            <div class="modal-body-text" id="info-content"></div>
+        </div>
+    </div>
+
 </div>
 
 <script>
-    let intervalTimer = null;
-    let currentPhase = 'warmup'; 
-    let currentRound = 1;
-    let maxRounds = 10;
-    let phaseTimeLeft = 0;
-    let cfg = {};
-    // 初始化 AudioContext
-    let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    // --- 5 Languages with Professional Content ---
+    const translations = {
+        'zh-TW': {
+            lang_name: "繁體中文",
+            app_title: "SmartTimer", app_subtitle: "選擇你的訓練模式",
+            mode_tabata_title: "極速燃脂 (Tabata)", mode_tabata_desc: "20秒運動 / 10秒休息",
+            mode_hiit_title: "高強度間歇 (HIIT)", mode_hiit_desc: "適合一般有氧循環",
+            mode_emom_title: "循環挑戰 (EMOM)", mode_emom_desc: "每分鐘整點循環",
+            mode_gym_title: "重量訓練 (Gym)", mode_gym_desc: "含訓練時間與組間休息",
+            btn_back: "返回", btn_reset: "⏹ 結束 / 重置", btn_start: "▶ 開始", btn_pause: "⏸ 暫停",
+            btn_warmup: "暖身開關", btn_custom: "自定義", btn_done: "完成", btn_restore: "↻ 還原預設值", btn_close: "關閉",
+            label_remaining: "剩餘", label_total_est: "預估時間總長", label_off: "關閉",
+            modal_settings_title: "詳細設定", modal_lang_title: "選擇語言",
+            group_prep: "前置準備", group_work: "正式訓練",
+            label_prep: "準備時間", label_warmup: "暖身時間", label_work: "運動/訓練", label_rest: "休息時間", label_rounds: "總組數",
+            unit_min: "分", unit_sec: "秒",
+            sound_beep: "音效模式", sound_voice: "人聲模式", sound_mute: "靜音模式",
+            phase_prep: "準備", phase_warmup: "暖身", phase_work: "運動中", phase_gym_work: "訓練中",
+            phase_rest: "休息 / 緩和", phase_gym_rest: "組間休息", phase_finish: "完成",
+            phase_start_warmup: "開始暖身", phase_start_work: "運動開始", phase_gym_start: "訓練開始", phase_start_rest: "休息一下", phase_finish_train: "訓練結束",
+            theme_dark: "暗色風格", theme_light: "亮色風格",
+            info_tabata: "<h3>Tabata 訓練法</h3><p>由日本田畑泉 (Izumi Tabata) 教授研發。核心是「20秒高強度運動 + 10秒休息」，重複8組，共4分鐘。</p><ul><li><b>優點：</b>能在極短時間內同時提升有氧與無氧能力。</li><li><b>強度：</b>必須達到最大攝氧量的 170% (全力衝刺)。</li></ul>",
+            info_hiit: "<h3>HIIT 高強度間歇</h3><p>交替進行「短時間高強度運動」與「短暫恢復期」。</p><ul><li><b>EPOC 效應：</b>運動後身體會持續消耗熱量 (後燃效應)。</li><li><b>適用：</b>跑步、單車、波比跳等全身性運動。</li></ul>",
+            info_emom: "<h3>EMOM 挑戰</h3><p>Every Minute on the Minute (每分鐘整點開始)。</p><ul><li><b>規則：</b>每分鐘開始時做指定次數動作，做完剩下的時間就是休息。</li><li><b>策略：</b>做得越快，休息越久，但心率越高；做得慢，休息少，容易力竭。</li></ul>",
+            info_gym: "<h3>重量訓練計時</h3><p>專為健身房重訓設計，包含「訓練時間 (Work)」與「組間休息 (Rest)」。</p><ul><li><b>ATP-PC 系統：</b>一般建議組間休息 90-120 秒，讓肌肉能量系統恢復。</li><li><b>節奏控制：</b>此模式可幫助你維持每組的訓練密度。</li></ul>"
+        },
+        'zh-CN': {
+            lang_name: "简体中文",
+            app_title: "SmartTimer", app_subtitle: "选择你的训练模式",
+            mode_tabata_title: "极速燃脂 (Tabata)", mode_tabata_desc: "20秒运动 / 10秒休息",
+            mode_hiit_title: "高强度间歇 (HIIT)", mode_hiit_desc: "适合一般有氧循环",
+            mode_emom_title: "循环挑战 (EMOM)", mode_emom_desc: "每分钟整点循环",
+            mode_gym_title: "重量训练 (Gym)", mode_gym_desc: "含训练时间与组间休息",
+            btn_back: "返回", btn_reset: "⏹ 结束 / 重置", btn_start: "▶ 开始", btn_pause: "⏸ 暂停",
+            btn_warmup: "热身开关", btn_custom: "自定义", btn_done: "完成", btn_restore: "↻ 还原默认值", btn_close: "关闭",
+            label_remaining: "剩余", label_total_est: "预估总时长", label_off: "关闭",
+            modal_settings_title: "详细设定", modal_lang_title: "选择语言",
+            group_prep: "前置准备", group_work: "正式训练",
+            label_prep: "准备时间", label_warmup: "热身时间", label_work: "运动/训练", label_rest: "休息时间", label_rounds: "总组数",
+            unit_min: "分", unit_sec: "秒",
+            sound_beep: "音效模式", sound_voice: "人声模式", sound_mute: "静音模式",
+            phase_prep: "准备", phase_warmup: "热身", phase_work: "运动中", phase_gym_work: "训练中",
+            phase_rest: "休息 / 缓和", phase_gym_rest: "组间休息", phase_finish: "完成",
+            phase_start_warmup: "开始热身", phase_start_work: "运动开始", phase_gym_start: "训练开始", phase_start_rest: "休息一下", phase_finish_train: "训练结束",
+            theme_dark: "暗色风格", theme_light: "亮色风格",
+            info_tabata: "<h3>Tabata 训练法</h3><p>由日本田畑泉 (Izumi Tabata) 教授研发。核心是「20秒高强度运动 + 10秒休息」，重复8组。</p><ul><li><b>优点：</b>极短时间内提升有氧与无氧能力。</li><li><b>强度：</b>需达到最大摄氧量的 170%。</li></ul>",
+            info_hiit: "<h3>HIIT 高强度间歇</h3><p>交替进行「高强度运动」与「短暂恢复」。</p><ul><li><b>EPOC 效应：</b>运动后持续消耗热量 (后燃效应)。</li><li><b>适用：</b>跑步、单车、波比跳等。</li></ul>",
+            info_emom: "<h3>EMOM 挑战</h3><p>Every Minute on the Minute。</p><ul><li><b>规则：</b>每分钟开始做指定动作，做完剩余时间即为休息。</li><li><b>策略：</b>做越快休息越久，但心率越高。</li></ul>",
+            info_gym: "<h3>重量训练计时</h3><p>包含「训练时间」与「组间休息」。</p><ul><li><b>能量恢复：</b>建议组间休息 90-120 秒以恢复 ATP-PC 系统。</li><li><b>节奏控制：</b>维持每组训练密度，避免休息过久。</li></ul>"
+        },
+        'en': {
+            lang_name: "English",
+            app_title: "SmartTimer", app_subtitle: "Select Workout Mode",
+            mode_tabata_title: "Tabata Burn", mode_tabata_desc: "20s Work / 10s Rest",
+            mode_hiit_title: "HIIT Intervals", mode_hiit_desc: "High Intensity Training",
+            mode_emom_title: "EMOM Challenge", mode_emom_desc: "Every Minute on the Minute",
+            mode_gym_title: "Weight Training", mode_gym_desc: "Sets & Rest Timer",
+            btn_back: "Back", btn_reset: "⏹ End / Reset", btn_start: "▶ Start", btn_pause: "⏸ Pause",
+            btn_warmup: "Warm-up", btn_custom: "Settings", btn_done: "Done", btn_restore: "↻ Reset Defaults", btn_close: "Close",
+            label_remaining: "Remain", label_total_est: "Est. Total Time", label_off: "Off",
+            modal_settings_title: "Settings", modal_lang_title: "Select Language",
+            group_prep: "Preparation", group_work: "Workout",
+            label_prep: "Get Ready", label_warmup: "Warm-up", label_work: "Work", label_rest: "Rest", label_rounds: "Rounds",
+            unit_min: "m", unit_sec: "s",
+            sound_beep: "Beep Mode", sound_voice: "Voice Mode", sound_mute: "Mute Mode",
+            phase_prep: "Get Ready", phase_warmup: "Warm Up", phase_work: "Work", phase_gym_work: "Training",
+            phase_rest: "Rest", phase_gym_rest: "Rest", phase_finish: "Done",
+            phase_start_warmup: "Start Warmup", phase_start_work: "Start Work", phase_gym_start: "Start Training", phase_start_rest: "Rest Now", phase_finish_train: "Workout Complete",
+            theme_dark: "Dark Mode", theme_light: "Light Mode",
+            info_tabata: "<h3>Tabata Protocol</h3><p>Developed by Dr. Izumi Tabata. 20s ultra-intense work + 10s rest, x8 rounds.</p><ul><li><b>Benefit:</b> Improves both aerobic and anaerobic systems.</li><li><b>Intensity:</b> Aim for 170% VO2 max.</li></ul>",
+            info_hiit: "<h3>HIIT Intervals</h3><p>High-Intensity Interval Training. Short bursts of intense activity mixed with recovery.</p><ul><li><b>EPOC:</b> Triggers the 'afterburn' effect, burning calories post-workout.</li></ul>",
+            info_emom: "<h3>EMOM Challenge</h3><p>Every Minute on the Minute.</p><ul><li><b>Rule:</b> Complete X reps at the start of the minute. Remaining time is rest.</li><li><b>Strategy:</b> Faster reps = more rest but higher heart rate.</li></ul>",
+            info_gym: "<h3>Weight Training</h3><p>Tracks 'Work Time' (Set) and 'Rest Time'.</p><ul><li><b>Recovery:</b> 90-120s rest is optimal for ATP-PC system recovery.</li><li><b>Focus:</b> Keeps your workout density consistent.</li></ul>"
+        },
+        'ja': {
+            lang_name: "日本語",
+            app_title: "SmartTimer", app_subtitle: "トレーニングモード選択",
+            mode_tabata_title: "タバタ式", mode_tabata_desc: "20秒運動 / 10秒休憩",
+            mode_hiit_title: "HIIT", mode_hiit_desc: "高強度インターバルトレーニング",
+            mode_emom_title: "EMOM", mode_emom_desc: "1分間ごとのセット",
+            mode_gym_title: "筋力トレーニング", mode_gym_desc: "セットと休憩のタイマー",
+            btn_back: "戻る", btn_reset: "⏹ 終了 / リセット", btn_start: "▶ 開始", btn_pause: "⏸ 一時停止",
+            btn_warmup: "ウォームアップ", btn_custom: "設定", btn_done: "完了", btn_restore: "↻ 初期化", btn_close: "閉じる",
+            label_remaining: "残り", label_total_est: "予想合計時間", label_off: "オフ",
+            modal_settings_title: "詳細設定", modal_lang_title: "言語選択",
+            group_prep: "準備", group_work: "トレーニング",
+            label_prep: "準備時間", label_warmup: "ウォームアップ", label_work: "運動", label_rest: "休憩", label_rounds: "セット数",
+            unit_min: "分", unit_sec: "秒",
+            sound_beep: "ビープ音", sound_voice: "音声ガイド", sound_mute: "ミュート",
+            phase_prep: "準備", phase_warmup: "ウォームアップ", phase_work: "運動中", phase_gym_work: "トレーニング中",
+            phase_rest: "休憩", phase_gym_rest: "セット間休憩", phase_finish: "完了",
+            phase_start_warmup: "ウォームアップ開始", phase_start_work: "運動開始", phase_gym_start: "トレーニング開始", phase_start_rest: "休憩してください", phase_finish_train: "トレーニング終了",
+            theme_dark: "ダークモード", theme_light: "ライトモード",
+            info_tabata: "<h3>タバタ式トレーニング</h3><p>立命館大学の田畑泉教授が考案。20秒の運動と10秒の休憩を8セット。</p><ul><li><b>効果：</b>有酸素・無酸素能力を同時に向上。</li><li><b>強度：</b>全力で追い込むことが重要です。</li></ul>",
+            info_hiit: "<h3>HIIT (高強度インターバル)</h3><p>高強度の運動と不完全回復を繰り返します。</p><ul><li><b>アフターバーン：</b>運動後もカロリー消費が続きます（EPOC効果）。</li></ul>",
+            info_emom: "<h3>EMOM (1分間走)</h3><p>1分ごとに決められた回数の動作を行います。</p><ul><li><b>ルール：</b>早く終われば残りは休憩。ペース配分が鍵となります。</li></ul>",
+            info_gym: "<h3>筋トレ用タイマー</h3><p>セット中の時間と休憩時間を管理。</p><ul><li><b>回復：</b>ATP-PC系の回復には90〜120秒の休憩が推奨されます。</li><li><b>集中：</b>だらだらと休憩するのを防ぎます。</li></ul>"
+        },
+        'ko': {
+            lang_name: "한국어",
+            app_title: "SmartTimer", app_subtitle: "운동 모드 선택",
+            mode_tabata_title: "타바타", mode_tabata_desc: "20초 운동 / 10초 휴식",
+            mode_hiit_title: "HIIT", mode_hiit_desc: "고강도 인터벌 트레이닝",
+            mode_emom_title: "EMOM", mode_emom_desc: "1분 단위 반복",
+            mode_gym_title: "웨이트 트레이닝", mode_gym_desc: "세트 및 휴식 타이머",
+            btn_back: "뒤로", btn_reset: "⏹ 종료 / 초기화", btn_start: "▶ 시작", btn_pause: "⏸ 일시정지",
+            btn_warmup: "웜업", btn_custom: "설정", btn_done: "완료", btn_restore: "↻ 초기화", btn_close: "닫기",
+            label_remaining: "남은 시간", label_total_est: "예상 총 시간", label_off: "꺼짐",
+            modal_settings_title: "상세 설정", modal_lang_title: "언어 선택",
+            group_prep: "준비", group_work: "운동",
+            label_prep: "준비 시간", label_warmup: "웜업 시간", label_work: "운동", label_rest: "휴식", label_rounds: "세트 수",
+            unit_min: "분", unit_sec: "초",
+            sound_beep: "비프음", sound_voice: "음성 모드", sound_mute: "무음",
+            phase_prep: "준비", phase_warmup: "웜업", phase_work: "운동 중", phase_gym_work: "트레이닝 중",
+            phase_rest: "휴식", phase_gym_rest: "세트 간 휴식", phase_finish: "완료",
+            phase_start_warmup: "웜업 시작", phase_start_work: "운동 시작", phase_gym_start: "트레이닝 시작", phase_start_rest: "휴식하세요", phase_finish_train: "운동 종료",
+            theme_dark: "다크 모드", theme_light: "라이트 모드",
+            info_tabata: "<h3>타바타 트레이닝</h3><p>20초 고강도 운동 + 10초 휴식, 8세트 반복.</p><ul><li><b>효과:</b> 단시간에 유산소 및 무산소 능력 향상.</li></ul>",
+            info_hiit: "<h3>HIIT (고강도 인터벌)</h3><p>짧은 시간의 고강도 운동과 휴식을 반복합니다.</p><ul><li><b>EPOC:</b> 운동 후에도 칼로리가 계속 소모됩니다.</li></ul>",
+            info_emom: "<h3>EMOM 챌린지</h3><p>1분마다 정해진 동작 수행.</p><ul><li><b>규칙:</b> 동작을 빨리 끝낼수록 휴식 시간이 길어집니다.</li></ul>",
+            info_gym: "<h3>웨이트 트레이닝</h3><p>세트 수행 시간과 휴식 시간을 관리.</p><ul><li><b>회복:</b> ATP-PC 시스템 회복을 위해 90~120초 휴식 권장.</li></ul>"
+        }
+    };
 
-    calcTotal();
+    let currentLang = localStorage.getItem('smartTimerLang') || 'zh-TW';
 
-    function calcTotal() {
-        const wm = parseInt(document.getElementById('warmMin').value) || 0;
-        const ws = parseInt(document.getElementById('warmSec').value) || 0;
-        const km = parseInt(document.getElementById('workMin').value) || 0;
-        const ks = parseInt(document.getElementById('workSec').value) || 0;
-        const rm = parseInt(document.getElementById('restMin').value) || 0;
-        const rs = parseInt(document.getElementById('restSec').value) || 0;
-        const r = parseInt(document.getElementById('rounds').value) || 1;
+    // --- Helper Functions ---
+    function t(key) { return translations[currentLang][key] || key; }
+    
+    // --- Modal Logic (Click Outside) ---
+    document.querySelectorAll('.modal-overlay').forEach(el => {
+        el.addEventListener('click', function(e) {
+            if (e.target === this) {
+                if(this.id === 'settings-modal') closeSettings();
+                if(this.id === 'info-modal') closeInfoModal();
+                if(this.id === 'lang-modal') closeLangModal();
+            }
+        });
+    });
+
+    // --- Input Safety (Clamping) ---
+    function validateInput(el) {
+        // Remove leading zeros if user types
+        if(el.value.length > 1 && el.value.startsWith('0')) el.value = parseInt(el.value);
+
+        let max = 99; // Default max for minutes
+        if(el.id.includes('sec')) max = 59; // Seconds max 59
+        if(el.id.includes('rounds')) max = 999; // Rounds max 999
+
+        let val = parseInt(el.value);
+        if(isNaN(val) || val < 0) val = 0;
+        if(val > max) val = max;
         
-        // 熱身 + (運動+休息)*輪數
-        const total = (wm*60+ws) + ((km*60+ks)+(rm*60+rs))*r;
-        document.getElementById('total-display').innerText = `預估總長度: ${formatTime(total)}`;
+        el.value = val;
     }
 
-    function formatTime(sec) {
-        if (sec < 0) sec = 0; 
-        let m = Math.floor(sec / 60);
-        let s = sec % 60;
-        return `${m}:${s < 10 ? '0' : ''}${s}`;
+    // --- App Core ---
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = new AudioContext();
+    let soundMode = 'beep'; 
+
+    // Force Dark Mode Default if not set
+    if (!localStorage.getItem('smartTimerTheme')) {
+        localStorage.setItem('smartTimerTheme', 'dark');
     }
 
-    // 播放提示音
-    function playBeep(type) {
-        // 確保 AudioContext 處於運行狀態 (瀏覽器政策限制)
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
+    function toggleTheme() {
+        document.body.classList.toggle('light-theme');
+        applyThemeText();
+        localStorage.setItem('smartTimerTheme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
+    }
+    function applyThemeText() {
+        const isLight = document.body.classList.contains('light-theme');
+        document.getElementById('theme-text').innerText = isLight ? t('theme_light') : t('theme_dark');
+    }
+    // Init theme
+    if (localStorage.getItem('smartTimerTheme') === 'light') {
+        document.body.classList.add('light-theme');
+    }
+
+    const defaultPresets = {
+        tabata: { name: "Tabata", work: 20, rest: 10, rounds: 8, prep: 5, warmupOn: false, warmupTime: 60, type: 'interval' },
+        hiit:   { name: "HIIT",   work: 30, rest: 30, rounds: 10, prep: 5, warmupOn: true, warmupTime: 120, type: 'interval' },
+        emom:   { name: "EMOM",   work: 60, rest: 0, rounds: 10, prep: 5, warmupOn: false, warmupTime: 60, type: 'loop' },
+        gym:    { name: "Gym",    work: 40, rest: 90, rounds: 5, prep: 5, warmupOn: false, warmupTime: 0, type: 'interval' }
+    };
+    
+    let presets = JSON.parse(localStorage.getItem('myTimerSettingsV21')) || JSON.parse(JSON.stringify(defaultPresets));
+    let currentMode = 'tabata';
+    let state = { phase: 'idle', timeLeft: 0, currentRound: 1, isRunning: false, timerId: null };
+    let totalRemainingSeconds = 0;
+
+    // --- Lang Functions ---
+    function openLangModal() {
+        playClick(); document.getElementById('lang-modal').classList.remove('hidden');
+        document.querySelectorAll('.lang-item').forEach(el => el.classList.remove('selected'));
+    }
+    function closeLangModal() { playClick(); document.getElementById('lang-modal').classList.add('hidden'); }
+    function setLanguage(lang) {
+        currentLang = lang;
+        localStorage.setItem('smartTimerLang', lang);
+        applyLanguage();
+        closeLangModal();
+    }
+    function applyLanguage() {
+        document.getElementById('lang-display').innerText = translations[currentLang].lang_name;
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if(t(key)) el.innerText = t(key);
+        });
+        applyThemeText();
+        updateSoundUI();
+        updateWarmupUI();
+        if(state.phase === 'idle') {
+            document.getElementById('statusText').innerText = t('phase_prep');
+            document.getElementById('actionBtn').innerText = t('btn_start');
         }
-
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-
-        const now = audioCtx.currentTime;
-
-        if (type === 'high') { 
-            // 運動開始：高音
-            osc.frequency.setValueAtTime(880, now); 
-            osc.type = 'square';
-            gain.gain.setValueAtTime(0.1, now);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
-            osc.start(now); 
-            osc.stop(now + 0.6);
-        } else if (type === 'low') { 
-            // 休息/熱身：低音
-            osc.frequency.setValueAtTime(440, now);
-            osc.type = 'sine';
-            gain.gain.setValueAtTime(0.1, now);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-            osc.start(now); 
-            osc.stop(now + 0.4);
-        } else if (type === 'end') { 
-            // 結束音效：三聲
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(523.25, now); // Do
-            gain.gain.setValueAtTime(0.1, now);
-            osc.start(now); 
-            osc.stop(now + 0.2);
-
-            const osc2 = audioCtx.createOscillator();
-            const gain2 = audioCtx.createGain();
-            osc2.connect(gain2); gain2.connect(audioCtx.destination);
-            osc2.type = 'triangle';
-            osc2.frequency.setValueAtTime(659.25, now + 0.25); // Mi
-            gain2.gain.setValueAtTime(0.1, now + 0.25);
-            osc2.start(now + 0.25); osc2.stop(now + 0.45);
-
-            const osc3 = audioCtx.createOscillator();
-            const gain3 = audioCtx.createGain();
-            osc3.connect(gain3); gain3.connect(audioCtx.destination);
-            osc3.type = 'triangle';
-            osc3.frequency.setValueAtTime(783.99, now + 0.5); // Sol
-            gain3.gain.setValueAtTime(0.1, now + 0.5);
-            gain3.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
-            osc3.start(now + 0.5); osc3.stop(now + 1.5);
-        }
+        if(state.isRunning) document.getElementById('actionBtn').innerText = t('btn_pause');
+        
+        // Update Title
+        let titleKey = 'mode_' + currentMode + '_title';
+        document.getElementById('modeBadge').innerText = t(titleKey);
     }
 
-    function startWorkout() {
-        // 讀取設定
-        cfg = {
-            warm: (parseInt(document.getElementById('warmMin').value)||0)*60 + (parseInt(document.getElementById('warmSec').value)||0),
-            work: (parseInt(document.getElementById('workMin').value)||0)*60 + (parseInt(document.getElementById('workSec').value)||0),
-            rest: (parseInt(document.getElementById('restMin').value)||0)*60 + (parseInt(document.getElementById('restSec').value)||0),
-            rounds: parseInt(document.getElementById('rounds').value)||1
+    // --- Info Modal ---
+    function openInfoModal() {
+        playClick();
+        const infoTitle = document.getElementById('info-title');
+        const infoContent = document.getElementById('info-content');
+        if(currentMode === 'tabata') { infoTitle.innerText = t('mode_tabata_title'); infoContent.innerHTML = t('info_tabata'); }
+        else if(currentMode === 'hiit') { infoTitle.innerText = t('mode_hiit_title'); infoContent.innerHTML = t('info_hiit'); }
+        else if(currentMode === 'emom') { infoTitle.innerText = t('mode_emom_title'); infoContent.innerHTML = t('info_emom'); }
+        else if(currentMode === 'gym') { infoTitle.innerText = t('mode_gym_title'); infoContent.innerHTML = t('info_gym'); }
+        document.getElementById('info-modal').classList.remove('hidden');
+    }
+    function closeInfoModal() { playClick(); document.getElementById('info-modal').classList.add('hidden'); }
+
+    // --- Time Utils ---
+    function calculateTotalDuration(p) {
+        let total = 0;
+        total += p.prep;
+        if(p.warmupOn) total += p.warmupTime;
+        if(p.type === 'countdown') total += p.rest;
+        else total += (p.work + p.rest) * p.rounds;
+        return total;
+    }
+    function formatTime(seconds) {
+        if(seconds < 0) seconds = 0;
+        const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const s = (seconds % 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
+    }
+    function updateRemainingUI() {
+        document.getElementById('mainRemainingTime').innerText = `${t('label_remaining')} ${formatTime(totalRemainingSeconds)}`;
+    }
+    function updateTotalTimeUI() {
+        const p = presets[currentMode];
+        const total = calculateTotalDuration(p);
+        totalRemainingSeconds = total; 
+        document.getElementById('mainRemainingTime').innerText = `${t('label_remaining')} ${formatTime(total)}`;
+        document.getElementById('modalTotalTime').innerText = `${t('label_total_est')}: ${formatTime(total)}`;
+    }
+    function getTimeFromInputs(idPrefix) {
+        const min = Math.max(0, parseInt(document.getElementById(idPrefix + '-min').value) || 0);
+        const sec = Math.max(0, parseInt(document.getElementById(idPrefix + '-sec').value) || 0);
+        return (min * 60) + sec;
+    }
+    function liveUpdateTotal() {
+        const tempP = {
+            prep: getTimeFromInputs('set-prep'),
+            warmupOn: presets[currentMode].warmupOn,
+            warmupTime: getTimeFromInputs('set-warmup'),
+            work: getTimeFromInputs('set-work'),
+            rest: getTimeFromInputs('set-rest'),
+            rounds: Math.max(1, parseInt(document.getElementById('set-rounds').value) || 1),
+            type: presets[currentMode].type
         };
+        const total = calculateTotalDuration(tempP);
+        document.getElementById('modalTotalTime').innerText = `${t('label_total_est')}: ${formatTime(total)}`;
+    }
 
-        // UI 切換
-        document.getElementById('setup-screen').style.display = 'none';
-        document.getElementById('timer-screen').style.display = 'flex';
-        document.getElementById('pause-overlay').style.display = 'none';
-        
-        document.getElementById('btn-pause').style.display = 'block';
-        document.getElementById('btn-home').style.display = 'none';
-        
-        currentRound = 1;
-        maxRounds = cfg.rounds;
-        
-        // 喚醒音效引擎
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
+    // --- Logic ---
+    function selectMode(mode) {
+        playClick();
+        currentMode = mode;
+        const p = presets[mode];
+        document.getElementById('home-screen').classList.add('hidden');
+        document.getElementById('timer-screen').classList.remove('hidden');
+        document.getElementById('modeBadge').innerText = t('mode_' + mode + '_title');
+        updateSoundUI(); updateWarmupUI(); resetTimer(false);
+    }
 
-        // 決定初始階段
-        if (cfg.warm > 0) {
-            setPhase('warmup');
-            playBeep('low');
+    function goBack() {
+        playClick();
+        clearInterval(state.timerId);
+        state.isRunning = false;
+        document.getElementById('timer-screen').classList.add('hidden');
+        document.getElementById('home-screen').classList.remove('hidden');
+        document.getElementById('app-container').style.background = 'var(--bg-idle)';
+        document.body.classList.remove('active-mode');
+    }
+
+    function setControlsLocked(locked) {
+        const navBar = document.getElementById('navBar');
+        if (locked) navBar.classList.add('locked'); else navBar.classList.remove('locked');
+        document.querySelectorAll('.lockable').forEach(btn => {
+            if (locked) btn.classList.add('disabled'); else btn.classList.remove('disabled');
+        });
+    }
+
+    function resetTimer(playAudio = true) {
+        if(playAudio) playClick();
+        clearInterval(state.timerId);
+        state.isRunning = false;
+        state.currentRound = 1;
+        state.phase = 'idle';
+        setControlsLocked(false);
+        document.body.classList.remove('active-mode');
+        document.getElementById('timerDigits').classList.remove('pulse');
+
+        const p = presets[currentMode];
+        if (p.prep > 0) state.timeLeft = p.prep;
+        else if (p.warmupOn) state.timeLeft = p.warmupTime;
+        else state.timeLeft = p.work;
+
+        document.getElementById('actionBtn').innerText = t('btn_start'); 
+        updateTotalTimeUI(); updateDisplay();
+    }
+
+    function toggleTimerState() {
+        playClick();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const btn = document.getElementById('actionBtn');
+        const p = presets[currentMode];
+
+        if (state.isRunning) {
+            clearInterval(state.timerId);
+            state.isRunning = false;
+            btn.innerText = t('btn_start'); 
+            document.getElementById('timerDigits').classList.remove('pulse');
         } else {
-            setPhase('work');
-            // 如果沒有熱身直接開始，這裡會在 setPhase 裡發聲
+            setControlsLocked(true);
+            document.body.classList.add('active-mode');
+            
+            if(state.phase === 'finished') resetTimer(false);
+            state.isRunning = true;
+            btn.innerText = t('btn_pause');
+            
+            if(state.phase === 'idle') {
+                if (p.prep > 0) { state.phase = 'prep'; state.timeLeft = p.prep; announce(t('phase_prep'), "start"); }
+                else if (p.warmupOn) { state.phase = 'warmup'; state.timeLeft = p.warmupTime; announce(t('phase_start_warmup'), "start"); }
+                else { 
+                    state.phase = 'work'; state.timeLeft = p.work; announce(t('phase_start_work'), "start");
+                }
+            }
+            state.timerId = setInterval(tick, 1000);
+            updateDisplay();
         }
-
-        intervalTimer = setInterval(tick, 1000);
-    }
-
-    function setPhase(phase) {
-        currentPhase = phase;
-        if (phase === 'warmup') {
-            phaseTimeLeft = cfg.warm;
-            updateUI('熱身時間', 'bg-warmup', `準備進入第 1 輪`);
-        } else if (phase === 'work') {
-            phaseTimeLeft = cfg.work;
-            updateUI('🔥 全力衝刺', 'bg-work', `第 ${currentRound} / ${maxRounds} 輪`);
-            playBeep('high');
-        } else if (phase === 'rest') {
-            phaseTimeLeft = cfg.rest;
-            updateUI('😌 緩和休息', 'bg-rest', `第 ${currentRound} 輪完成`);
-            playBeep('low');
-        } else if (phase === 'finished') {
-            clearInterval(intervalTimer);
-            phaseTimeLeft = 0;
-            document.getElementById('main-timer').innerText = "00:00";
-            updateUI('🎉 訓練結束', 'bg-finished', '太厲害了！完成這次訓練');
-            document.getElementById('btn-pause').style.display = 'none';
-            document.getElementById('btn-home').style.display = 'block';
-            playBeep('end');
-        }
-        
-        if (phase !== 'finished') {
-            document.getElementById('main-timer').innerText = formatTime(phaseTimeLeft);
-        }
-    }
-
-    function updateUI(status, bgClass, subInfo) {
-        document.getElementById('status-text').innerText = status;
-        document.body.className = bgClass;
-        document.getElementById('sub-info').innerText = subInfo;
     }
 
     function tick() {
-        if (phaseTimeLeft > 0) {
-            phaseTimeLeft--;
-            document.getElementById('main-timer').innerText = formatTime(phaseTimeLeft);
-        } else {
-            nextPhase();
+        if (totalRemainingSeconds > 0) {
+            totalRemainingSeconds--;
+            updateRemainingUI();
         }
+        if (state.timeLeft > 0) {
+            state.timeLeft--;
+        }
+        if (state.timeLeft === 0) {
+            nextPhase();
+        } else {
+             if (state.timeLeft <= 3) {
+                 document.getElementById('timerDigits').classList.add('pulse');
+                 if(soundMode==='beep') announce("", "tick");
+                 if(soundMode==='voice') speak(state.timeLeft);
+             } else {
+                 document.getElementById('timerDigits').classList.remove('pulse');
+             }
+        }
+        updateDisplay();
     }
 
     function nextPhase() {
-        if (currentPhase === 'warmup') {
-            setPhase('work');
-        } else if (currentPhase === 'work') {
-            // 如果是最後一輪且不需要最後休息，可以直接結束 (此處邏輯設定為一定有休息)
-            setPhase('rest');
-        } else if (currentPhase === 'rest') {
-            if (currentRound < maxRounds) {
-                currentRound++;
-                setPhase('work');
-            } else {
-                setPhase('finished');
-            }
+        document.getElementById('timerDigits').classList.remove('pulse');
+        const p = presets[currentMode];
+        
+        if (state.phase === 'prep') {
+            if (p.warmupOn) { state.phase = 'warmup'; state.timeLeft = p.warmupTime; announce(t('phase_start_warmup'), "start"); }
+            else { state.phase = 'work'; state.timeLeft = p.work; announce(t('phase_start_work'), "start"); }
+        }
+        else if (state.phase === 'warmup') {
+            state.phase = 'work'; state.timeLeft = p.work; announce(t('phase_start_work'), "start");
+        }
+        else if (state.phase === 'work') {
+            if (p.type === 'loop') finishRound(p);
+            else { state.phase = 'rest'; state.timeLeft = p.rest; announce(t('phase_start_rest'), "rest"); }
+        }
+        else if (state.phase === 'rest') {
+            finishRound(p);
         }
     }
 
-    function pauseWorkout() {
-        clearInterval(intervalTimer);
-        document.getElementById('pause-overlay').style.display = 'flex';
+    function finishRound(p) {
+        if (state.currentRound < p.rounds) {
+            state.currentRound++; state.phase = 'work'; state.timeLeft = p.work;
+            announce(t(currentMode === 'gym' ? 'phase_gym_start' : 'phase_start_work'), "start");
+        } else { finishAll(); }
     }
 
-    function resumeWorkout() {
-        document.getElementById('pause-overlay').style.display = 'none';
-        intervalTimer = setInterval(tick, 1000);
+    function finishAll() {
+        state.phase = 'finished'; announce(t('phase_finish_train'), "finish");
+        clearInterval(state.timerId); state.isRunning = false;
+        document.getElementById('actionBtn').innerText = t('btn_done');
+        document.getElementById('mainRemainingTime').innerText = t('label_remaining') + " 00:00"; 
+        setControlsLocked(false);
+        document.getElementById('timerDigits').classList.remove('pulse');
+    }
+
+    function updateDisplay() {
+        const m = Math.floor(state.timeLeft / 60).toString().padStart(2, '0');
+        const s = (state.timeLeft % 60).toString().padStart(2, '0');
+        document.getElementById('timerDigits').innerText = `${m}:${s}`;
+        
+        const p = presets[currentMode];
+        document.getElementById('roundsText').innerText = `${t('label_rounds')} ${state.currentRound} / ${p.rounds}`;
+        
+        const statusEl = document.getElementById('statusText');
+        const container = document.getElementById('app-container');
+        let text = '';
+
+        if (state.phase === 'idle') { container.style.background = 'var(--bg-idle)'; text = t('phase_prep'); }
+        else if (state.phase === 'prep') { container.style.background = 'var(--bg-prep)'; text = t('phase_prep'); }
+        else if (state.phase === 'warmup') { container.style.background = 'var(--bg-warmup)'; text = t('phase_warmup'); }
+        else if (state.phase === 'work') { 
+            if(currentMode === 'gym') { container.style.background = 'var(--bg-gym-work)'; text = t('phase_gym_work'); }
+            else { container.style.background = 'var(--bg-work)'; text = t('phase_work'); }
+        } else if (state.phase === 'rest') { 
+            container.style.background = 'var(--bg-rest)'; 
+            text = (currentMode === 'gym') ? t('phase_gym_rest') : t('phase_rest');
+        } 
+        else if (state.phase === 'finished') { 
+            container.style.background = 'var(--bg-finish)'; text = t('phase_finish'); 
+            statusEl.style.color = '#333'; document.getElementById('timerDigits').style.color = '#333'; return; 
+        }
+        
+        if(state.phase !== 'finished') {
+             statusEl.style.color = '#fff'; document.getElementById('timerDigits').style.color = '#fff';
+        }
+        statusEl.innerText = text;
+    }
+
+    function toggleSoundMode() {
+        playClick();
+        if (soundMode === 'beep') soundMode = 'voice';
+        else if (soundMode === 'voice') soundMode = 'mute';
+        else soundMode = 'beep';
+        updateSoundUI();
+        if(soundMode === 'voice') speak(t('sound_voice')); else if(soundMode === 'beep') playTone(800, 0.1);
+    }
+    function updateSoundUI() {
+        const icon = document.getElementById('btn-sound-icon');
+        const text = document.getElementById('btn-sound-text');
+        if (soundMode === 'voice') { icon.innerText = '🗣️'; text.innerText = t('sound_voice'); }
+        else if (soundMode === 'beep') { icon.innerText = '🔔'; text.innerText = t('sound_beep'); }
+        else { icon.innerText = '🔕'; text.innerText = t('sound_mute'); }
+    }
+
+    function toggleWarmupDirect() {
+        if(document.getElementById('btn-warmup').classList.contains('disabled')) return;
+        playClick(); const p = presets[currentMode]; p.warmupOn = !p.warmupOn;
+        savePresets(); updateWarmupUI(); updateTotalTimeUI(); resetTimer(false);
+    }
+    function updateWarmupUI() {
+        const p = presets[currentMode];
+        const btn = document.getElementById('btn-warmup');
+        const sub = document.getElementById('btn-warmup-sub');
+        if(p.warmupOn) { btn.classList.add('active'); sub.innerText = formatTime(p.warmupTime); } 
+        else { btn.classList.remove('active'); sub.innerText = t('label_off'); }
+    }
+    
+    function openSettings() { 
+        if(document.querySelectorAll('.lockable')[0].classList.contains('disabled')) return;
+        playClick(); document.getElementById('settings-modal').classList.remove('hidden'); loadSettingsToUI(); liveUpdateTotal(); 
+    }
+    function closeSettings() { playClick(); saveSettingsFromUI(); document.getElementById('settings-modal').classList.add('hidden'); updateWarmupUI(); resetTimer(false); }
+    
+    function loadSettingsToUI() {
+        const p = presets[currentMode];
+        const setInputs = (id, totalSec) => {
+            document.getElementById(id + '-min').value = Math.floor(totalSec / 60);
+            document.getElementById(id + '-sec').value = totalSec % 60;
+        };
+        setInputs('set-prep', p.prep);
+        setInputs('set-warmup', p.warmupTime);
+        setInputs('set-work', p.work);
+        setInputs('set-rest', p.rest);
+        document.getElementById('set-rounds').value = p.rounds;
+        
+        if(p.type === 'countdown') document.getElementById('row-work').classList.add('hidden');
+        else document.getElementById('row-work').classList.remove('hidden');
+    }
+
+    function saveSettingsFromUI() {
+        const p = presets[currentMode];
+        p.prep = getTimeFromInputs('set-prep');
+        p.warmupTime = getTimeFromInputs('set-warmup');
+        p.work = getTimeFromInputs('set-work');
+        p.rest = getTimeFromInputs('set-rest');
+        p.rounds = Math.max(1, parseInt(document.getElementById('set-rounds').value) || 1);
+        savePresets();
+    }
+    
+    function savePresets() { localStorage.setItem('myTimerSettingsV21', JSON.stringify(presets)); }
+    function restoreDefaults() {
+        if(confirm("Restore defaults?")) { playClick(); presets[currentMode] = JSON.parse(JSON.stringify(defaultPresets[currentMode])); savePresets(); loadSettingsToUI(); updateWarmupUI(); resetTimer(false); }
+    }
+    function playClick() {
         if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+        osc.frequency.value = 1200; osc.type = 'triangle';
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+        osc.stop(audioCtx.currentTime + 0.05);
     }
-
-    function stopWorkout() {
-        clearInterval(intervalTimer);
-        document.getElementById('timer-screen').style.display = 'none';
-        document.getElementById('setup-screen').style.display = 'flex';
-        document.body.className = 'bg-setup';
+    function announce(text, type) {
+        if (soundMode === 'mute') return;
+        if (soundMode === 'voice') speak(text);
+        else {
+            if (type === 'start') playTone(880, 0.4);
+            else if (type === 'rest') playTone(440, 0.4);
+            else if (type === 'tick') playTone(600, 0.05);
+            else if (type === 'finish') { playTone(880, 0.1); setTimeout(()=>playTone(880,0.1), 150); }
+        }
     }
+    function speak(text) {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(text); u.rate = 1.1; 
+            u.lang = currentLang; 
+            window.speechSynthesis.speak(u);
+        }
+    }
+    function playTone(freq, duration) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+        osc.frequency.value = freq; osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.stop(audioCtx.currentTime + duration);
+    }
+    
+    applyLanguage(); // Init
 </script>
-
 </body>
 </html>
