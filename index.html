@@ -12,7 +12,7 @@
             --safe-bottom: env(safe-area-inset-bottom, 20px);
             --safe-top: env(safe-area-inset-top, 0px);
             
-            /* [UPDATED] Dark Mode - "Titanium" Gradient */
+            /* Dark Mode (Default) - "Titanium" Gradient */
             --bg-body: #121212;
             --bg-gradient: linear-gradient(160deg, #2c3e50 0%, #000000 120%);
             
@@ -28,7 +28,7 @@
             --accent-color: #0A84FF;
             --shadow-soft: 0 12px 40px rgba(0, 0, 0, 0.5);
             
-            /* State Colors - Subtle Overlays */
+            /* State Colors */
             --state-bg-idle: transparent;
             --state-bg-work: rgba(120, 10, 10, 0.65); 
             --state-bg-rest: rgba(10, 80, 20, 0.65);  
@@ -36,10 +36,9 @@
             --state-bg-finish: rgba(20, 60, 120, 0.65);
         }
 
-        /* Light Mode */
+        /* Light Mode - "Morning Mist" Gradient */
         [data-theme="light"] {
             --bg-body: #F2F4F7;
-            /* [UPDATED] Light Mode - "Morning Mist" Gradient */
             --bg-gradient: linear-gradient(160deg, #E0EAFC 0%, #CFDEF3 100%);
             
             --glass-surface: rgba(255, 255, 255, 0.65);
@@ -67,7 +66,7 @@
             width: 100%; height: 100%; 
             background-color: var(--bg-body); 
             background-image: var(--bg-gradient);
-            background-attachment: fixed; /* Fix gradient on scroll */
+            background-attachment: fixed;
             color: var(--text-primary); 
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif; 
             overflow: hidden; 
@@ -425,7 +424,7 @@
 
 <script>
 /**
- * FitLoop Pro - Fixed Version v3.2 (Visuals + Total Calc Fix)
+ * FitLoop Pro - Fixed Version v3.3 (Stable)
  */
 const App = (function() {
     'use strict';
@@ -488,7 +487,7 @@ const App = (function() {
             info_gym: `<h3>重量訓練計時</h3><p>重點在於<strong>組間休息</strong>的紀律。</p><ul><li><strong>肌肥大：</strong>休 60-90 秒。</li><li><strong>最大肌力：</strong>休 3-5 分鐘以恢復能量系統。</li></ul>`
         },
         'zh-CN': {
-            btn_lang_text: "简中", mode_tabata_title: "Tabata 燃脂", mode_tabata_desc: "20秒运动 / 10秒休息", mode_hiit_title: "HIIT 间歇", mode_hiit_desc: "高强度有氧循环", mode_emom_title: "EMOM 挑战", mode_emom_desc: "每分钟整点循环", mode_gym_title: "重量训练", mode_gym_desc: "组数与休息计时", 
+            btn_lang_text: "简中", mode_tabata_title: "Tabata 燃脂", mode_tabata_desc: "20秒運動 / 10秒休息", mode_hiit_title: "HIIT 间歇", mode_hiit_desc: "高强度有氧循环", mode_emom_title: "EMOM 挑战", mode_emom_desc: "每分钟整点循环", mode_gym_title: "重量训练", mode_gym_desc: "组数与休息计时", 
             btn_back: "返回", btn_start: "开始", btn_pause: "暂停", btn_resume: "继续", btn_reset: "结束 / 重置", btn_warmup_on: "热身? (开启)", btn_warmup_off: "热身? (关闭)", btn_custom: "设定", btn_done: "完成", btn_restore: "还原默认", btn_close: "关闭", 
             label_total_remain: "剩余", label_total_est: "预估总时长", modal_settings_title: "训练设定", modal_lang_title: "语言选择", group_prep: "准备阶段", group_work: "训练内容", label_prep: "倒数准备", label_warmup: "热身时间", label_work: "运动时间", label_rest: "休息时间", label_rounds: "总组数", 
             sound_beep: "音效", sound_voice: "人声", sound_mute: "静音", phase_prep: "准备", phase_warmup: "热身", phase_work: "运动", phase_gym_work: "训练中", phase_rest: "休息", phase_gym_rest: "休息", phase_finish: "完成", phase_start_warmup: "开始热身", phase_start_work: "开始运动", phase_gym_start: "开始训练", phase_start_rest: "休息一下", phase_finish_train: "训练结束",
@@ -555,6 +554,7 @@ const App = (function() {
     let wakeLock = null;
     let confettiActive = false;
     let lastToggleTime = 0;
+    let lastThemeToggleTime = 0; // Debounce for theme
 
     let state = { phase: 'idle', timeLeft: 0, currentRound: 1, isRunning: false, timerId: null, endTime: 0, remainingMs: 0, phaseDuration: 0 };
     let totalRemainingSeconds = 0;
@@ -594,12 +594,8 @@ const App = (function() {
         });
 
         // Add first-touch listener to unlock audio context
-        document.body.addEventListener('touchstart', function() {
-            AudioEngine.resume();
-        }, { once: true });
-        document.body.addEventListener('click', function() {
-            AudioEngine.resume();
-        }, { once: true });
+        document.body.addEventListener('touchstart', function() { AudioEngine.resume(); }, { once: true });
+        document.body.addEventListener('click', function() { AudioEngine.resume(); }, { once: true });
 
         document.addEventListener('visibilitychange', handleVisibilityChange);
 
@@ -633,6 +629,10 @@ const App = (function() {
     }
 
     function toggleTheme() {
+        const now = Date.now();
+        if (now - lastThemeToggleTime < 500) return; // Debounce theme switch
+        lastThemeToggleTime = now;
+
         playClick();
         currentTheme = (currentTheme === 'dark') ? 'light' : 'dark';
         localStorage.setItem('fitloopTheme', currentTheme);
@@ -816,15 +816,14 @@ const App = (function() {
         const p = presets[currentMode];
         p.prep = Number(p.prep); p.work = Number(p.work); p.rest = Number(p.rest); p.warmupTime = Number(p.warmupTime);
 
-        // Reset state values
         if (p.prep > 0) { state.timeLeft = p.prep; state.phaseDuration = p.prep; }
         else if (p.warmupOn) { state.timeLeft = p.warmupTime; state.phaseDuration = p.warmupTime; }
         else { state.timeLeft = p.work; state.phaseDuration = p.work; }
 
-        updateSafeguards(); updateActionBtnState(); 
-        
-        // [FIXED] Manually trigger display update to ensure total time is recalculated fresh
-        updateDisplay();
+        // [FIXED] Force correct total calc on reset
+        totalRemainingSeconds = calcTotalDuration(p);
+
+        updateSafeguards(); updateActionBtnState(); updateDisplay();
     }
 
     function toggleTimerState() {
