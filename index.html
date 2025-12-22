@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#000000">
+    <meta name="theme-color" content="#1a1a1a">
     <meta name="description" content="FitLoop - Pro Interval Timer">
     <title>FitLoop Pro</title>
     <style>
@@ -12,17 +12,14 @@
             --safe-bottom: env(safe-area-inset-bottom, 20px);
             --safe-top: env(safe-area-inset-top, 0px);
             
-            /* Dark Mode (Default) */
-            --bg-body: #050505;
-            --bg-gradient: 
-                radial-gradient(circle at 0% 0%, rgba(20, 30, 48, 0.4) 0%, transparent 50%), 
-                radial-gradient(circle at 100% 100%, rgba(40, 20, 40, 0.3) 0%, transparent 50%),
-                linear-gradient(180deg, #050505 0%, #000000 100%);
+            /* [UPDATED] Dark Mode - "Titanium" Gradient */
+            --bg-body: #121212;
+            --bg-gradient: linear-gradient(160deg, #2c3e50 0%, #000000 120%);
             
-            --glass-surface: rgba(30, 30, 30, 0.5);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --glass-highlight: rgba(255, 255, 255, 0.12);
-            --glass-blur: 24px;
+            --glass-surface: rgba(30, 30, 30, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-highlight: rgba(255, 255, 255, 0.15);
+            --glass-blur: 30px;
             
             --text-primary: #ffffff;
             --text-secondary: rgba(255, 255, 255, 0.75);
@@ -31,10 +28,10 @@
             --accent-color: #0A84FF;
             --shadow-soft: 0 12px 40px rgba(0, 0, 0, 0.5);
             
-            /* [UPDATED] Dark Mode State Colors - Stronger but Deep */
+            /* State Colors - Subtle Overlays */
             --state-bg-idle: transparent;
-            --state-bg-work: rgba(120, 10, 10, 0.65); /* 深紅，高顯色 */
-            --state-bg-rest: rgba(10, 80, 20, 0.65);  /* 深綠，高顯色 */
+            --state-bg-work: rgba(120, 10, 10, 0.65); 
+            --state-bg-rest: rgba(10, 80, 20, 0.65);  
             --state-bg-warmup: rgba(80, 20, 100, 0.65);
             --state-bg-finish: rgba(20, 60, 120, 0.65);
         }
@@ -42,10 +39,8 @@
         /* Light Mode */
         [data-theme="light"] {
             --bg-body: #F2F4F7;
-            --bg-gradient: 
-                radial-gradient(circle at 0% 0%, rgba(200, 220, 255, 0.4) 0%, transparent 60%), 
-                radial-gradient(circle at 100% 100%, rgba(255, 230, 200, 0.4) 0%, transparent 60%),
-                linear-gradient(180deg, #FFFFFF 0%, #F2F4F7 100%);
+            /* [UPDATED] Light Mode - "Morning Mist" Gradient */
+            --bg-gradient: linear-gradient(160deg, #E0EAFC 0%, #CFDEF3 100%);
             
             --glass-surface: rgba(255, 255, 255, 0.65);
             --glass-border: rgba(255, 255, 255, 0.4);
@@ -58,7 +53,6 @@
             
             --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.08);
             
-            /* [UPDATED] Light Mode State Colors - More Visible */
             --state-bg-idle: transparent;
             --state-bg-work: rgba(255, 59, 48, 0.2);
             --state-bg-rest: rgba(48, 209, 88, 0.2);
@@ -73,8 +67,7 @@
             width: 100%; height: 100%; 
             background-color: var(--bg-body); 
             background-image: var(--bg-gradient);
-            background-size: 150% 150%;
-            animation: bg-breathe 60s ease infinite alternate;
+            background-attachment: fixed; /* Fix gradient on scroll */
             color: var(--text-primary); 
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif; 
             overflow: hidden; 
@@ -82,16 +75,10 @@
             transition: background-image 0.5s ease, color 0.3s ease;
         }
 
-        @keyframes bg-breathe {
-            0% { background-position: 0% 0%; }
-            100% { background-position: 100% 100%; }
-        }
-
         #state-overlay {
             position: absolute; top:0; left:0; width:100%; height:100%;
             background: var(--state-bg-idle);
             pointer-events: none; z-index: 1;
-            /* Faster transition for color changes so it feels responsive */
             transition: background-color 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
@@ -171,6 +158,7 @@
             background: linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
             opacity: 0.6; pointer-events: none;
         }
+        /* Glow Effect */
         .mode-card::after {
             content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
             background: radial-gradient(circle, var(--glass-highlight) 0%, transparent 60%);
@@ -437,7 +425,7 @@
 
 <script>
 /**
- * FitLoop Pro - Fixed Version v3.1 (Correct Total Calc on Reset & New Status Text)
+ * FitLoop Pro - Fixed Version v3.2 (Visuals + Total Calc Fix)
  */
 const App = (function() {
     'use strict';
@@ -605,6 +593,14 @@ const App = (function() {
             el.addEventListener('blur', function() { validateInput(this); liveUpdateTotal(); });
         });
 
+        // Add first-touch listener to unlock audio context
+        document.body.addEventListener('touchstart', function() {
+            AudioEngine.resume();
+        }, { once: true });
+        document.body.addEventListener('click', function() {
+            AudioEngine.resume();
+        }, { once: true });
+
         document.addEventListener('visibilitychange', handleVisibilityChange);
 
         applyTheme();
@@ -765,6 +761,8 @@ const App = (function() {
             updateSafeguards();
             updateActionBtnState();
             updateDisplay();
+            // [NEW] Show Paused Text when resuming
+            UI['statusText'].innerText = t('status_paused');
         } else {
             resetTimer(false);
         }
@@ -818,14 +816,15 @@ const App = (function() {
         const p = presets[currentMode];
         p.prep = Number(p.prep); p.work = Number(p.work); p.rest = Number(p.rest); p.warmupTime = Number(p.warmupTime);
 
+        // Reset state values
         if (p.prep > 0) { state.timeLeft = p.prep; state.phaseDuration = p.prep; }
         else if (p.warmupOn) { state.timeLeft = p.warmupTime; state.phaseDuration = p.warmupTime; }
         else { state.timeLeft = p.work; state.phaseDuration = p.work; }
 
-        // [FIXED] Force correct total calc on reset
-        totalRemainingSeconds = calcTotalDuration(p);
-
-        updateSafeguards(); updateActionBtnState(); updateDisplay();
+        updateSafeguards(); updateActionBtnState(); 
+        
+        // [FIXED] Manually trigger display update to ensure total time is recalculated fresh
+        updateDisplay();
     }
 
     function toggleTimerState() {
@@ -845,6 +844,10 @@ const App = (function() {
             if(state.endTime > 0) state.remainingMs = Math.max(0, state.endTime - Date.now());
             toggleWakeLock(false);
             saveSession(currentMode); 
+            
+            // [NEW] Update text to "PAUSED"
+            UI['statusText'].innerText = t('status_paused');
+            
         } else {
             // START
             toggleWakeLock(true);
@@ -864,8 +867,10 @@ const App = (function() {
             
             state.timerId = setInterval(tick, 100); 
             updateRingLoop(); 
+            // Force text update immediately to clear "PAUSED"
+            updateDisplay();
         }
-        updateSafeguards(); updateActionBtnState(); updateDisplay();
+        updateSafeguards(); updateActionBtnState();
     }
 
     function tick() {
@@ -994,13 +999,17 @@ const App = (function() {
         else if (state.phase === 'rest') { text = (currentMode === 'gym') ? t('phase_gym_rest') : t('phase_rest'); bg = 'var(--state-bg-rest)'; }
         else if (state.phase === 'finished') { text = t('phase_finish'); bg = 'var(--state-bg-finish)'; }
         
-        UI['statusText'].innerText = text; 
+        // [FIXED] Only update text if running. If paused, keep "PAUSED" text.
+        if(state.isRunning || state.phase === 'idle' || state.phase === 'finished') {
+            UI['statusText'].innerText = text; 
+        }
+        
         UI['state-overlay'].style.backgroundColor = bg;
     }
 
     function updateTextDisplay() {
         const p = presets[currentMode];
-        // [FIXED] Force correct total calculation on IDLE
+        // [FIXED] Force recalculation for total time display
         if(state.phase === 'idle') {
             totalRemainingSeconds = calcTotalDuration(p);
         } else {
