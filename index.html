@@ -12,7 +12,7 @@
             --safe-bottom: env(safe-area-inset-bottom, 20px);
             --safe-top: env(safe-area-inset-top, 0px);
             
-            /* Dark Mode (Default) - "Titanium" Gradient */
+            /* Dark Mode (Default) */
             --bg-body: #121212;
             --bg-gradient: linear-gradient(160deg, #2c3e50 0%, #000000 120%);
             
@@ -28,7 +28,6 @@
             --accent-color: #0A84FF;
             --shadow-soft: 0 12px 40px rgba(0, 0, 0, 0.5);
             
-            /* State Colors */
             --state-bg-idle: transparent;
             --state-bg-work: rgba(120, 10, 10, 0.65); 
             --state-bg-rest: rgba(10, 80, 20, 0.65);  
@@ -36,7 +35,7 @@
             --state-bg-finish: rgba(20, 60, 120, 0.65);
         }
 
-        /* Light Mode - "Morning Mist" Gradient */
+        /* Light Mode */
         [data-theme="light"] {
             --bg-body: #F2F4F7;
             --bg-gradient: linear-gradient(160deg, #E0EAFC 0%, #CFDEF3 100%);
@@ -61,23 +60,38 @@
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
         
+        /* [FIXED] iOS Reset: Force remove native styling */
+        button, input {
+            -webkit-appearance: none;
+            appearance: none;
+            border-radius: 0;
+        }
+
         html, body { 
             margin: 0; padding: 0; 
             width: 100%; height: 100%; 
             background-color: var(--bg-body); 
-            background-image: var(--bg-gradient);
-            background-attachment: fixed;
+            /* Background logic moved to ::before for iOS stability */
             color: var(--text-primary); 
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif; 
             overflow: hidden; 
             position: fixed;
-            transition: background-image 0.5s ease, color 0.3s ease;
+            transition: color 0.3s ease;
+        }
+
+        /* [FIXED] Background Layer - Solves iOS white background bug */
+        body::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: var(--bg-gradient);
+            background-size: cover;
+            z-index: -2;
+            transition: background-image 0.5s ease;
         }
 
         #state-overlay {
             position: absolute; top:0; left:0; width:100%; height:100%;
             background: var(--state-bg-idle);
-            pointer-events: none; z-index: 1;
+            pointer-events: none; z-index: -1; /* Above bg, below content */
             transition: background-color 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
@@ -128,6 +142,7 @@
             color: var(--text-primary);
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
             transition: transform 0.1s, background 0.2s; 
+            -webkit-appearance: none; /* iOS Fix */
         }
         .btn-pill:active { transform: scale(0.94); background: var(--glass-highlight); }
         .btn-icon-only { padding: 0; width: 40px; justify-content: center; }
@@ -157,7 +172,6 @@
             background: linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
             opacity: 0.6; pointer-events: none;
         }
-        /* Glow Effect */
         .mode-card::after {
             content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
             background: radial-gradient(circle, var(--glass-highlight) 0%, transparent 60%);
@@ -192,7 +206,7 @@
 
         /* --- Timer Screen --- */
         .top-bar { display: flex; justify-content: space-between; align-items: center; height: 44px; margin-bottom: 10px; flex-shrink: 0; position: relative; }
-        .btn-back { background: none; border: none; color: var(--text-primary); font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 6px; opacity: 0.9; padding: 10px 0; z-index: 2; transition: opacity 0.3s; cursor: pointer; }
+        .btn-back { background: none; border: none; color: var(--text-primary); font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 6px; opacity: 0.9; padding: 10px 0; z-index: 2; transition: opacity 0.3s; cursor: pointer; -webkit-appearance: none; }
         
         .btn-locked { opacity: 0.3; cursor: not-allowed; pointer-events: none; } 
         
@@ -232,6 +246,7 @@
             flex: 1; background: rgba(255,255,255,0.03); border: 1px solid transparent; border-radius: 20px; 
             padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
             color: var(--text-primary); transition: all 0.1s; cursor: pointer;
+            -webkit-appearance: none; /* iOS Fix */
         }
         .tool-btn:active { background: var(--glass-highlight); transform: scale(0.98); }
         .tool-btn.btn-active-green { background: rgba(48, 209, 88, 0.15) !important; border-color: rgba(48, 209, 88, 0.5) !important; color: #30D158 !important; }
@@ -244,6 +259,7 @@
             height: 100%; border-radius: 22px; border: none; font-size: 18px; font-weight: 700; cursor: pointer; 
             display: flex; align-items: center; justify-content: center; gap: 8px; 
             transition: transform 0.1s; color: #fff; will-change: transform; position: relative; overflow: hidden; 
+            -webkit-appearance: none; /* iOS Fix */
         }
         
         .btn-stop { flex: 1; background: rgba(255, 59, 48, 0.15); color: #ff453a; border: 1px solid rgba(255, 59, 48, 0.3); font-size: 16px; transition: opacity 0.3s, transform 0.1s; }
@@ -272,14 +288,14 @@
         .modal-overlay.open .modal-sheet { transform: translateY(0); }
         .sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-shrink: 0; }
         .sheet-title { font-size: 22px; font-weight: 800; }
-        .sheet-close { color: var(--accent-color); background: none; border: none; font-size: 16px; font-weight: 700; padding: 5px; cursor: pointer; }
+        .sheet-close { color: var(--accent-color); background: none; border: none; font-size: 16px; font-weight: 700; padding: 5px; cursor: pointer; -webkit-appearance: none; }
         
         .setting-row { display: flex; justify-content: space-between; align-items: center; background: var(--glass-surface); padding: 18px; margin-bottom: 1px; border: 1px solid var(--glass-border); border-bottom: none; }
         .setting-row:first-of-type { border-top-left-radius: 20px; border-top-right-radius: 20px; }
         .setting-row:last-of-type { border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; margin-bottom: 16px; border-bottom: 1px solid var(--glass-border); }
         
         .input-group { display: flex; align-items: center; gap: 8px; }
-        .nice-input { background: rgba(0,0,0,0.1); border: 1px solid var(--glass-border); color: var(--text-primary); width: 54px; padding: 10px 0; border-radius: 12px; text-align: center; font-size: 18px; font-weight: 600; -webkit-user-select: text; user-select: text; transition: border 0.2s; }
+        .nice-input { background: rgba(0,0,0,0.1); border: 1px solid var(--glass-border); color: var(--text-primary); width: 54px; padding: 10px 0; border-radius: 12px; text-align: center; font-size: 18px; font-weight: 600; -webkit-user-select: text; user-select: text; transition: border 0.2s; -webkit-appearance: none;}
         .nice-input:focus { border-color: var(--accent-color); background: rgba(0,0,0,0.2); }
         .unit { font-size: 14px; color: var(--text-secondary); }
         .total-est-box { background: var(--glass-surface); color: var(--text-secondary); text-align: center; padding: 14px; border-radius: 16px; margin-bottom: 24px; font-size: 15px; font-weight: 500; border: 1px solid var(--glass-border); }
@@ -424,7 +440,7 @@
 
 <script>
 /**
- * FitLoop Pro - Fixed Version v3.3 (Stable)
+ * FitLoop Pro - Fixed Version v3.4 (iOS Stability & Visuals)
  */
 const App = (function() {
     'use strict';
@@ -487,7 +503,7 @@ const App = (function() {
             info_gym: `<h3>重量訓練計時</h3><p>重點在於<strong>組間休息</strong>的紀律。</p><ul><li><strong>肌肥大：</strong>休 60-90 秒。</li><li><strong>最大肌力：</strong>休 3-5 分鐘以恢復能量系統。</li></ul>`
         },
         'zh-CN': {
-            btn_lang_text: "简中", mode_tabata_title: "Tabata 燃脂", mode_tabata_desc: "20秒運動 / 10秒休息", mode_hiit_title: "HIIT 间歇", mode_hiit_desc: "高强度有氧循环", mode_emom_title: "EMOM 挑战", mode_emom_desc: "每分钟整点循环", mode_gym_title: "重量训练", mode_gym_desc: "组数与休息计时", 
+            btn_lang_text: "简中", mode_tabata_title: "Tabata 燃脂", mode_tabata_desc: "20秒运动 / 10秒休息", mode_hiit_title: "HIIT 间歇", mode_hiit_desc: "高强度有氧循环", mode_emom_title: "EMOM 挑战", mode_emom_desc: "每分钟整点循环", mode_gym_title: "重量训练", mode_gym_desc: "组数与休息计时", 
             btn_back: "返回", btn_start: "开始", btn_pause: "暂停", btn_resume: "继续", btn_reset: "结束 / 重置", btn_warmup_on: "热身? (开启)", btn_warmup_off: "热身? (关闭)", btn_custom: "设定", btn_done: "完成", btn_restore: "还原默认", btn_close: "关闭", 
             label_total_remain: "剩余", label_total_est: "预估总时长", modal_settings_title: "训练设定", modal_lang_title: "语言选择", group_prep: "准备阶段", group_work: "训练内容", label_prep: "倒数准备", label_warmup: "热身时间", label_work: "运动时间", label_rest: "休息时间", label_rounds: "总组数", 
             sound_beep: "音效", sound_voice: "人声", sound_mute: "静音", phase_prep: "准备", phase_warmup: "热身", phase_work: "运动", phase_gym_work: "训练中", phase_rest: "休息", phase_gym_rest: "休息", phase_finish: "完成", phase_start_warmup: "开始热身", phase_start_work: "开始运动", phase_gym_start: "开始训练", phase_start_rest: "休息一下", phase_finish_train: "训练结束",
@@ -554,7 +570,7 @@ const App = (function() {
     let wakeLock = null;
     let confettiActive = false;
     let lastToggleTime = 0;
-    let lastThemeToggleTime = 0; // Debounce for theme
+    let lastThemeToggleTime = 0;
 
     let state = { phase: 'idle', timeLeft: 0, currentRound: 1, isRunning: false, timerId: null, endTime: 0, remainingMs: 0, phaseDuration: 0 };
     let totalRemainingSeconds = 0;
@@ -593,7 +609,7 @@ const App = (function() {
             el.addEventListener('blur', function() { validateInput(this); liveUpdateTotal(); });
         });
 
-        // Add first-touch listener to unlock audio context
+        // iOS Audio Unlock Hack
         document.body.addEventListener('touchstart', function() { AudioEngine.resume(); }, { once: true });
         document.body.addEventListener('click', function() { AudioEngine.resume(); }, { once: true });
 
@@ -630,7 +646,7 @@ const App = (function() {
 
     function toggleTheme() {
         const now = Date.now();
-        if (now - lastThemeToggleTime < 500) return; // Debounce theme switch
+        if (now - lastThemeToggleTime < 500) return; 
         lastThemeToggleTime = now;
 
         playClick();
@@ -678,11 +694,8 @@ const App = (function() {
 
     function saveSession(mode) {
         if(state.phase === 'idle' || state.phase === 'finished') return;
-        
         const sessions = getSessions();
-        sessions[mode] = {
-            state: state,
-        };
+        sessions[mode] = { state: state };
         localStorage.setItem('fitloop_sessions_v1', JSON.stringify(sessions));
         updateHomeIndicators();
     }
@@ -695,10 +708,7 @@ const App = (function() {
             state.isRunning = false; 
             state.timerId = null;
             state.endTime = 0; 
-            
-            if(state.remainingMs <= 0) {
-                state.remainingMs = state.timeLeft * 1000;
-            }
+            if(state.remainingMs <= 0) state.remainingMs = state.timeLeft * 1000;
             return true;
         }
         return false;
@@ -761,7 +771,6 @@ const App = (function() {
             updateSafeguards();
             updateActionBtnState();
             updateDisplay();
-            // [NEW] Show Paused Text when resuming
             UI['statusText'].innerText = t('status_paused');
         } else {
             resetTimer(false);
@@ -770,14 +779,12 @@ const App = (function() {
 
     function goBack() {
         playClick();
-        
         if(state.phase !== 'idle' && state.phase !== 'finished') {
             clearInterval(state.timerId); 
             state.isRunning = false; 
             if(state.endTime > 0) state.remainingMs = Math.max(0, state.endTime - Date.now());
             saveSession(currentMode); 
         }
-
         clearInterval(state.timerId); state.isRunning = false; toggleWakeLock(false);
         cancelAnimationFrame(ringFrameId);
         UI['timer-screen'].classList.add('hidden');
@@ -820,7 +827,6 @@ const App = (function() {
         else if (p.warmupOn) { state.timeLeft = p.warmupTime; state.phaseDuration = p.warmupTime; }
         else { state.timeLeft = p.work; state.phaseDuration = p.work; }
 
-        // [FIXED] Force correct total calc on reset
         totalRemainingSeconds = calcTotalDuration(p);
 
         updateSafeguards(); updateActionBtnState(); updateDisplay();
@@ -835,7 +841,6 @@ const App = (function() {
         playClick();
 
         if (state.isRunning) {
-            // PAUSE
             clearInterval(state.timerId); 
             state.isRunning = false;
             cancelAnimationFrame(ringFrameId);
@@ -843,12 +848,9 @@ const App = (function() {
             if(state.endTime > 0) state.remainingMs = Math.max(0, state.endTime - Date.now());
             toggleWakeLock(false);
             saveSession(currentMode); 
-            
-            // [NEW] Update text to "PAUSED"
             UI['statusText'].innerText = t('status_paused');
             
         } else {
-            // START
             toggleWakeLock(true);
             if(state.phase === 'finished') { state.phase = 'idle'; state.isRunning = false; resetTimer(false); state.isRunning = true; } 
             else { state.isRunning = true; }
@@ -866,7 +868,6 @@ const App = (function() {
             
             state.timerId = setInterval(tick, 100); 
             updateRingLoop(); 
-            // Force text update immediately to clear "PAUSED"
             updateDisplay();
         }
         updateSafeguards(); updateActionBtnState();
@@ -998,7 +999,6 @@ const App = (function() {
         else if (state.phase === 'rest') { text = (currentMode === 'gym') ? t('phase_gym_rest') : t('phase_rest'); bg = 'var(--state-bg-rest)'; }
         else if (state.phase === 'finished') { text = t('phase_finish'); bg = 'var(--state-bg-finish)'; }
         
-        // [FIXED] Only update text if running. If paused, keep "PAUSED" text.
         if(state.isRunning || state.phase === 'idle' || state.phase === 'finished') {
             UI['statusText'].innerText = text; 
         }
@@ -1008,7 +1008,6 @@ const App = (function() {
 
     function updateTextDisplay() {
         const p = presets[currentMode];
-        // [FIXED] Force recalculation for total time display
         if(state.phase === 'idle') {
             totalRemainingSeconds = calcTotalDuration(p);
         } else {
