@@ -16,9 +16,9 @@
             --bg-body: #121212;
             --bg-gradient: linear-gradient(160deg, #2c3e50 0%, #000000 120%);
             
-            --glass-surface: rgba(30, 30, 30, 0.6);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --glass-highlight: rgba(255, 255, 255, 0.15);
+            --glass-surface: rgba(30, 30, 30, 0.5);
+            --glass-border: rgba(255, 255, 255, 0.08); /* 更細的邊框 */
+            --glass-highlight: rgba(255, 255, 255, 0.1);
             --glass-blur: 30px;
             
             --text-primary: #ffffff;
@@ -26,7 +26,9 @@
             --text-tertiary: rgba(255, 255, 255, 0.45);
             
             --accent-color: #0A84FF;
-            --shadow-soft: 0 12px 40px rgba(0, 0, 0, 0.5);
+            
+            /* [UPDATED] Clean Shadows - No more "dirty box" look */
+            --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.2); 
             
             --state-bg-idle: transparent;
             --state-bg-work: rgba(120, 10, 10, 0.65); 
@@ -40,8 +42,8 @@
             --bg-body: #F2F4F7;
             --bg-gradient: linear-gradient(160deg, #E0EAFC 0%, #CFDEF3 100%);
             
-            --glass-surface: rgba(255, 255, 255, 0.65);
-            --glass-border: rgba(255, 255, 255, 0.4);
+            --glass-surface: rgba(255, 255, 255, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.5);
             --glass-highlight: rgba(255, 255, 255, 0.8);
             --glass-blur: 30px;
             
@@ -49,7 +51,8 @@
             --text-secondary: rgba(60, 60, 67, 0.7);
             --text-tertiary: rgba(60, 60, 67, 0.4);
             
-            --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.08);
+            /* [UPDATED] Light Mode Clean Shadow */
+            --shadow-soft: 0 4px 15px rgba(0, 0, 0, 0.03);
             
             --state-bg-idle: transparent;
             --state-bg-work: rgba(255, 59, 48, 0.2);
@@ -60,7 +63,7 @@
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
         
-        /* [FIXED] iOS Reset: Force remove native styling */
+        /* iOS Reset */
         button, input {
             -webkit-appearance: none;
             appearance: none;
@@ -71,7 +74,6 @@
             margin: 0; padding: 0; 
             width: 100%; height: 100%; 
             background-color: var(--bg-body); 
-            /* Background logic moved to ::before for iOS stability */
             color: var(--text-primary); 
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif; 
             overflow: hidden; 
@@ -79,7 +81,7 @@
             transition: color 0.3s ease;
         }
 
-        /* [FIXED] Background Layer - Solves iOS white background bug */
+        /* Background Layer */
         body::before {
             content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-image: var(--bg-gradient);
@@ -91,7 +93,7 @@
         #state-overlay {
             position: absolute; top:0; left:0; width:100%; height:100%;
             background: var(--state-bg-idle);
-            pointer-events: none; z-index: -1; /* Above bg, below content */
+            pointer-events: none; z-index: -1; 
             transition: background-color 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
@@ -140,9 +142,9 @@
             display: flex; align-items: center; gap: 8px; 
             font-size: 14px; font-weight: 600; cursor: pointer; 
             color: var(--text-primary);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-shadow: var(--shadow-soft);
             transition: transform 0.1s, background 0.2s; 
-            -webkit-appearance: none; /* iOS Fix */
+            -webkit-appearance: none; 
         }
         .btn-pill:active { transform: scale(0.94); background: var(--glass-highlight); }
         .btn-icon-only { padding: 0; width: 40px; justify-content: center; }
@@ -167,10 +169,11 @@
             min-height: 160px; position: relative; overflow: hidden;
             transform: translateZ(0);
         }
+        /* Top Highlight Line - Made subtler */
         .mode-card::before {
             content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
             background: linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
-            opacity: 0.6; pointer-events: none;
+            opacity: 0.4; pointer-events: none;
         }
         .mode-card::after {
             content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
@@ -198,7 +201,8 @@
             color: var(--card-color); 
             border: 1px solid rgba(255,255,255,0.05);
             flex-shrink: 0;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+            /* [FIXED] Removed inner shadow to fix "strange box" look */
+            box-shadow: none; 
         }
         .card-text-box { display: flex; flex-direction: column; gap: 6px; width: 100%; }
         .card-title { font-size: 19px; font-weight: 700; line-height: 1.1; letter-spacing: -0.3px; }
@@ -219,7 +223,7 @@
             font-size: 15px; font-variant-numeric: tabular-nums; 
             color: var(--text-secondary); font-weight: 600; 
             white-space: nowrap; z-index: 1; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: var(--shadow-soft);
         }
         
         .timer-display { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; min-height: 0; }
@@ -246,7 +250,7 @@
             flex: 1; background: rgba(255,255,255,0.03); border: 1px solid transparent; border-radius: 20px; 
             padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
             color: var(--text-primary); transition: all 0.1s; cursor: pointer;
-            -webkit-appearance: none; /* iOS Fix */
+            -webkit-appearance: none; 
         }
         .tool-btn:active { background: var(--glass-highlight); transform: scale(0.98); }
         .tool-btn.btn-active-green { background: rgba(48, 209, 88, 0.15) !important; border-color: rgba(48, 209, 88, 0.5) !important; color: #30D158 !important; }
@@ -259,7 +263,7 @@
             height: 100%; border-radius: 22px; border: none; font-size: 18px; font-weight: 700; cursor: pointer; 
             display: flex; align-items: center; justify-content: center; gap: 8px; 
             transition: transform 0.1s; color: #fff; will-change: transform; position: relative; overflow: hidden; 
-            -webkit-appearance: none; /* iOS Fix */
+            -webkit-appearance: none; 
         }
         
         .btn-stop { flex: 1; background: rgba(255, 59, 48, 0.15); color: #ff453a; border: 1px solid rgba(255, 59, 48, 0.3); font-size: 16px; transition: opacity 0.3s, transform 0.1s; }
@@ -440,7 +444,7 @@
 
 <script>
 /**
- * FitLoop Pro - Fixed Version v3.4 (iOS Stability & Visuals)
+ * FitLoop Pro - Fixed Version v3.5 (Crystal Clean Style)
  */
 const App = (function() {
     'use strict';
@@ -827,6 +831,7 @@ const App = (function() {
         else if (p.warmupOn) { state.timeLeft = p.warmupTime; state.phaseDuration = p.warmupTime; }
         else { state.timeLeft = p.work; state.phaseDuration = p.work; }
 
+        // [FIXED] Force correct total calc on reset
         totalRemainingSeconds = calcTotalDuration(p);
 
         updateSafeguards(); updateActionBtnState(); updateDisplay();
