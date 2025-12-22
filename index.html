@@ -21,7 +21,6 @@
             --glass-highlight: rgba(255, 255, 255, 0.1);
             --glass-blur: 30px;
             
-            /* [UPDATED] Icon Box Variables (Dark) */
             --icon-box-bg: rgba(255, 255, 255, 0.08);
             --icon-box-border: rgba(255, 255, 255, 0.05);
             
@@ -32,6 +31,14 @@
             --accent-color: #0A84FF;
             --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.2); 
             
+            /* Action Button Colors (Dark Mode) */
+            --btn-play-bg: #ffffff;
+            --btn-play-text: #000000;
+            
+            /* Language Modal (Dark) */
+            --lang-opt-bg: rgba(40, 40, 40, 0.8);
+            --lang-opt-border: rgba(255, 255, 255, 0.1);
+            
             --state-bg-idle: transparent;
             --state-bg-work: rgba(120, 10, 10, 0.65); 
             --state-bg-rest: rgba(10, 80, 20, 0.65);  
@@ -41,20 +48,30 @@
 
         /* Light Mode */
         [data-theme="light"] {
+            --bg-body: #F2F4F7;
+            --bg-gradient: linear-gradient(160deg, #E0EAFC 0%, #CFDEF3 100%);
+            
             --glass-surface: rgba(255, 255, 255, 0.6);
             --glass-border: rgba(255, 255, 255, 0.5);
             --glass-highlight: rgba(255, 255, 255, 0.8);
             --glass-blur: 30px;
             
-            /* [UPDATED] Icon Box Variables (Light) - Now visible! */
-            --icon-box-bg: rgba(0, 0, 0, 0.04); /* Subtle gray tint */
-            --icon-box-border: rgba(0, 0, 0, 0.06); /* Subtle dark border */
+            --icon-box-bg: rgba(0, 0, 0, 0.04); 
+            --icon-box-border: rgba(0, 0, 0, 0.06); 
             
             --text-primary: #1c1c1e;
             --text-secondary: rgba(60, 60, 67, 0.7);
             --text-tertiary: rgba(60, 60, 67, 0.4);
             
             --shadow-soft: 0 4px 15px rgba(0, 0, 0, 0.03);
+            
+            /* Action Button Colors (Light Mode) - High Contrast */
+            --btn-play-bg: #000000;
+            --btn-play-text: #ffffff;
+            
+            /* Language Modal (Light) - Fixed Visibility */
+            --lang-opt-bg: #ffffff;
+            --lang-opt-border: rgba(0, 0, 0, 0.1);
             
             --state-bg-idle: transparent;
             --state-bg-work: rgba(255, 59, 48, 0.2);
@@ -65,7 +82,6 @@
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
         
-        /* iOS Reset */
         button, input { -webkit-appearance: none; appearance: none; border-radius: 0; }
 
         html, body { 
@@ -211,7 +227,6 @@
         .mode-card.has-save .resume-badge { display: inline-block; }
         .mode-card.has-save .card-desc { display: none; }
 
-        /* [UPDATED] Icon Box - Uses variables for easy theming */
         .card-icon-box { 
             width: 52px; height: 52px; border-radius: 16px; 
             background: var(--icon-box-bg); 
@@ -276,19 +291,27 @@
         .tool-label { font-size: 11px; font-weight: 600; opacity: 0.8; text-align: center; }
 
         .main-actions { display: flex; gap: 12px; height: 68px; }
-        /* [FIXED] Action Button Layout - Flexbox centering */
+        
+        /* [FIXED] Main Button Layout */
         .action-btn { 
             height: 100%; border-radius: 22px; border: none; font-size: 18px; font-weight: 700; cursor: pointer; 
             display: flex; align-items: center; justify-content: center; gap: 8px; 
             padding: 0 16px;
-            transition: transform 0.1s; color: #fff; will-change: transform; position: relative; overflow: hidden; 
+            transition: transform 0.1s; will-change: transform; position: relative; overflow: hidden; 
             -webkit-appearance: none; 
+            white-space: nowrap; /* [FIXED] Prevent text wrapping */
         }
         
         .btn-stop { flex: 1; background: rgba(255, 59, 48, 0.15); color: #ff453a; border: 1px solid rgba(255, 59, 48, 0.3); font-size: 16px; transition: opacity 0.3s, transform 0.1s; }
         .btn-stop:active { background: rgba(255, 59, 48, 0.3); transform: scale(0.96); }
         
-        .btn-play { flex: 1.8; background: var(--text-primary); color: var(--bg-body); box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+        /* [FIXED] Play Button Colors - Specific Variables for Contrast */
+        .btn-play { 
+            flex: 1.8; 
+            background: var(--btn-play-bg); 
+            color: var(--btn-play-text); 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15); 
+        }
         .btn-play:active { transform: scale(0.96); opacity: 0.9; }
 
         /* [FIXED] Icon Wrap Layout */
@@ -334,7 +357,18 @@
         #info-content h4 { color: var(--text-primary); margin: 16px 0 8px 0; font-size: 16px; font-weight: 700; border-left: 3px solid var(--accent-color); padding-left: 10px; }
         #info-content strong { color: var(--text-primary); font-weight: 600; }
         
-        .lang-opt { padding:18px; background:var(--glass-surface); border-radius:16px; cursor:pointer; font-size:16px; transition: background 0.2s; border: 1px solid var(--glass-border); }
+        /* [UPDATED] Language Options Styling */
+        .lang-opt { 
+            padding: 18px; 
+            background: var(--lang-opt-bg); /* Dedicated var */
+            border-radius: 16px; 
+            cursor: pointer; 
+            font-size: 16px; 
+            transition: background 0.2s; 
+            border: 1px solid var(--lang-opt-border); /* Dedicated var */
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
         .lang-opt:active { background: var(--glass-highlight); }
     </style>
 </head>
@@ -467,12 +501,12 @@
         </div>
     </div>
     <div id="info-modal" class="modal-overlay"><div class="modal-sheet"><div class="sheet-header"><div class="sheet-title" id="info-title">About</div><button class="sheet-close" onclick="App.closeInfoModal()" data-i18n="btn_close">Close</button></div><div id="info-content"></div></div></div>
-    <div id="lang-modal" class="modal-overlay"><div class="modal-sheet"><div class="sheet-header"><div class="sheet-title" data-i18n="modal_lang_title">Language</div><button class="sheet-close" onclick="App.closeLangModal()">X</button></div><div style="display:grid; gap:10px;"><div class="lang-opt" onclick="App.setLanguage('en')">English</div><div class="lang-opt" onclick="App.setLanguage('zh-TW')">繁體中文 (Traditional Chinese)</div><div class="lang-opt" onclick="App.setLanguage('zh-CN')">简体中文 (Simplified Chinese)</div><div class="lang-opt" onclick="App.setLanguage('ja')">日本語 (Japanese)</div><div class="lang-opt" onclick="App.setLanguage('ko')">한국어 (Korean)</div></div></div></div>
+    <div id="lang-modal" class="modal-overlay"><div class="modal-sheet"><div class="sheet-header"><div class="sheet-title" data-i18n="modal_lang_title">Language</div><button class="sheet-close" onclick="App.closeLangModal()">X</button></div><div style="display:grid; gap:10px; padding-bottom:20px;"><div class="lang-opt" onclick="App.setLanguage('en')">English</div><div class="lang-opt" onclick="App.setLanguage('zh-TW')">繁體中文 (Traditional Chinese)</div><div class="lang-opt" onclick="App.setLanguage('zh-CN')">简体中文 (Simplified Chinese)</div><div class="lang-opt" onclick="App.setLanguage('ja')">日本語 (Japanese)</div><div class="lang-opt" onclick="App.setLanguage('ko')">한국어 (Korean)</div></div></div></div>
 </div>
 
 <script>
 /**
- * FitLoop Pro - Fixed Version v3.7 (UI Contrast & Button Layout)
+ * FitLoop Pro - Fixed Version v3.8 (UI Polish & Contrast Fixes)
  */
 const App = (function() {
     'use strict';
@@ -859,7 +893,6 @@ const App = (function() {
         else if (p.warmupOn) { state.timeLeft = p.warmupTime; state.phaseDuration = p.warmupTime; }
         else { state.timeLeft = p.work; state.phaseDuration = p.work; }
 
-        // [FIXED] Force correct total calc on reset
         totalRemainingSeconds = calcTotalDuration(p);
 
         updateSafeguards(); updateActionBtnState(); updateDisplay();
