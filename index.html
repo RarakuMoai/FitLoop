@@ -12,12 +12,9 @@
             --safe-bottom: env(safe-area-inset-bottom, 20px);
             --safe-top: env(safe-area-inset-top, 0px);
             
-            /* Dark Mode (Default) */
-            --bg-body: #121212;
-            --bg-gradient: linear-gradient(160deg, #2c3e50 0%, #000000 120%);
-            
+            /* Glass Variables */
             --glass-surface: rgba(30, 30, 30, 0.5);
-            --glass-border: rgba(255, 255, 255, 0.08); /* 更細的邊框 */
+            --glass-border: rgba(255, 255, 255, 0.08);
             --glass-highlight: rgba(255, 255, 255, 0.1);
             --glass-blur: 30px;
             
@@ -26,8 +23,6 @@
             --text-tertiary: rgba(255, 255, 255, 0.45);
             
             --accent-color: #0A84FF;
-            
-            /* [UPDATED] Clean Shadows - No more "dirty box" look */
             --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.2); 
             
             --state-bg-idle: transparent;
@@ -37,11 +32,8 @@
             --state-bg-finish: rgba(20, 60, 120, 0.65);
         }
 
-        /* Light Mode */
+        /* Light Mode Overrides */
         [data-theme="light"] {
-            --bg-body: #F2F4F7;
-            --bg-gradient: linear-gradient(160deg, #E0EAFC 0%, #CFDEF3 100%);
-            
             --glass-surface: rgba(255, 255, 255, 0.6);
             --glass-border: rgba(255, 255, 255, 0.5);
             --glass-highlight: rgba(255, 255, 255, 0.8);
@@ -51,7 +43,6 @@
             --text-secondary: rgba(60, 60, 67, 0.7);
             --text-tertiary: rgba(60, 60, 67, 0.4);
             
-            /* [UPDATED] Light Mode Clean Shadow */
             --shadow-soft: 0 4px 15px rgba(0, 0, 0, 0.03);
             
             --state-bg-idle: transparent;
@@ -64,31 +55,49 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
         
         /* iOS Reset */
-        button, input {
-            -webkit-appearance: none;
-            appearance: none;
-            border-radius: 0;
-        }
+        button, input { -webkit-appearance: none; appearance: none; border-radius: 0; }
 
         html, body { 
             margin: 0; padding: 0; 
             width: 100%; height: 100%; 
-            background-color: var(--bg-body); 
+            /* Body background is neutral to avoid flashes */
+            background-color: #121212; 
             color: var(--text-primary); 
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif; 
             overflow: hidden; 
             position: fixed;
-            transition: color 0.3s ease;
+            transition: color 0.3s ease, background-color 0.3s ease;
         }
 
-        /* Background Layer */
-        body::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: var(--bg-gradient);
+        /* [FIXED] Double Layer Background System */
+        .bg-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -5;
+            transition: opacity 0.6s ease; /* Smooth Cross-fade */
             background-size: cover;
-            z-index: -2;
-            transition: background-image 0.5s ease;
+            background-attachment: scroll; /* Fixes iOS jitter */
+            pointer-events: none;
         }
+
+        #bg-layer-dark {
+            background-image: linear-gradient(160deg, #2c3e50 0%, #000000 120%);
+            opacity: 0;
+        }
+
+        #bg-layer-light {
+            background-image: linear-gradient(160deg, #E0EAFC 0%, #CFDEF3 100%);
+            opacity: 0;
+        }
+
+        /* Toggle Logic */
+        [data-theme="dark"] #bg-layer-dark { opacity: 1; }
+        [data-theme="dark"] #bg-layer-light { opacity: 0; }
+        [data-theme="dark"] { background-color: #121212; }
+
+        [data-theme="light"] #bg-layer-dark { opacity: 0; }
+        [data-theme="light"] #bg-layer-light { opacity: 1; }
+        [data-theme="light"] { background-color: #F2F4F7; }
+
 
         #state-overlay {
             position: absolute; top:0; left:0; width:100%; height:100%;
@@ -169,7 +178,6 @@
             min-height: 160px; position: relative; overflow: hidden;
             transform: translateZ(0);
         }
-        /* Top Highlight Line - Made subtler */
         .mode-card::before {
             content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
             background: linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
@@ -201,7 +209,6 @@
             color: var(--card-color); 
             border: 1px solid rgba(255,255,255,0.05);
             flex-shrink: 0;
-            /* [FIXED] Removed inner shadow to fix "strange box" look */
             box-shadow: none; 
         }
         .card-text-box { display: flex; flex-direction: column; gap: 6px; width: 100%; }
@@ -335,6 +342,9 @@
     <symbol id="icon-sound-mute" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73 4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></symbol>
 </svg>
 
+<div class="bg-layer" id="bg-layer-dark"></div>
+<div class="bg-layer" id="bg-layer-light"></div>
+
 <div id="state-overlay"></div>
 
 <div id="app-container">
@@ -444,7 +454,7 @@
 
 <script>
 /**
- * FitLoop Pro - Fixed Version v3.5 (Crystal Clean Style)
+ * FitLoop Pro - Fixed Version v3.6 (iOS Perfect Backgrounds)
  */
 const App = (function() {
     'use strict';
@@ -592,7 +602,8 @@ const App = (function() {
             'set-prep-min', 'set-prep-sec', 'set-warmup-min', 'set-warmup-sec', 
             'set-work-min', 'set-work-sec', 'set-rest-min', 'set-rest-sec', 'set-rounds', 'row-work',
             'icon-theme-use', 'state-overlay',
-            'card-tabata', 'card-hiit', 'card-emom', 'card-gym'
+            'card-tabata', 'card-hiit', 'card-emom', 'card-gym',
+            'bg-layer-dark', 'bg-layer-light'
         ];
         ids.forEach(id => UI[id] = document.getElementById(id));
         
@@ -613,7 +624,6 @@ const App = (function() {
             el.addEventListener('blur', function() { validateInput(this); liveUpdateTotal(); });
         });
 
-        // iOS Audio Unlock Hack
         document.body.addEventListener('touchstart', function() { AudioEngine.resume(); }, { once: true });
         document.body.addEventListener('click', function() { AudioEngine.resume(); }, { once: true });
 
@@ -831,7 +841,6 @@ const App = (function() {
         else if (p.warmupOn) { state.timeLeft = p.warmupTime; state.phaseDuration = p.warmupTime; }
         else { state.timeLeft = p.work; state.phaseDuration = p.work; }
 
-        // [FIXED] Force correct total calc on reset
         totalRemainingSeconds = calcTotalDuration(p);
 
         updateSafeguards(); updateActionBtnState(); updateDisplay();
