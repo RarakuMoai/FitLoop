@@ -12,11 +12,18 @@
             --safe-bottom: env(safe-area-inset-bottom, 20px);
             --safe-top: env(safe-area-inset-top, 0px);
             
-            /* Glass Variables */
+            /* Dark Mode (Default) */
+            --bg-body: #121212;
+            --bg-gradient: linear-gradient(160deg, #2c3e50 0%, #000000 120%);
+            
             --glass-surface: rgba(30, 30, 30, 0.5);
             --glass-border: rgba(255, 255, 255, 0.08);
             --glass-highlight: rgba(255, 255, 255, 0.1);
             --glass-blur: 30px;
+            
+            /* [UPDATED] Icon Box Variables (Dark) */
+            --icon-box-bg: rgba(255, 255, 255, 0.08);
+            --icon-box-border: rgba(255, 255, 255, 0.05);
             
             --text-primary: #ffffff;
             --text-secondary: rgba(255, 255, 255, 0.75);
@@ -32,12 +39,16 @@
             --state-bg-finish: rgba(20, 60, 120, 0.65);
         }
 
-        /* Light Mode Overrides */
+        /* Light Mode */
         [data-theme="light"] {
             --glass-surface: rgba(255, 255, 255, 0.6);
             --glass-border: rgba(255, 255, 255, 0.5);
             --glass-highlight: rgba(255, 255, 255, 0.8);
             --glass-blur: 30px;
+            
+            /* [UPDATED] Icon Box Variables (Light) - Now visible! */
+            --icon-box-bg: rgba(0, 0, 0, 0.04); /* Subtle gray tint */
+            --icon-box-border: rgba(0, 0, 0, 0.06); /* Subtle dark border */
             
             --text-primary: #1c1c1e;
             --text-secondary: rgba(60, 60, 67, 0.7);
@@ -60,7 +71,6 @@
         html, body { 
             margin: 0; padding: 0; 
             width: 100%; height: 100%; 
-            /* Body background is neutral to avoid flashes */
             background-color: #121212; 
             color: var(--text-primary); 
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif; 
@@ -69,13 +79,13 @@
             transition: color 0.3s ease, background-color 0.3s ease;
         }
 
-        /* [FIXED] Double Layer Background System */
+        /* Double Layer Background System */
         .bg-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             z-index: -5;
-            transition: opacity 0.6s ease; /* Smooth Cross-fade */
+            transition: opacity 0.6s ease;
             background-size: cover;
-            background-attachment: scroll; /* Fixes iOS jitter */
+            background-attachment: scroll;
             pointer-events: none;
         }
 
@@ -89,7 +99,6 @@
             opacity: 0;
         }
 
-        /* Toggle Logic */
         [data-theme="dark"] #bg-layer-dark { opacity: 1; }
         [data-theme="dark"] #bg-layer-light { opacity: 0; }
         [data-theme="dark"] { background-color: #121212; }
@@ -202,12 +211,13 @@
         .mode-card.has-save .resume-badge { display: inline-block; }
         .mode-card.has-save .card-desc { display: none; }
 
+        /* [UPDATED] Icon Box - Uses variables for easy theming */
         .card-icon-box { 
             width: 52px; height: 52px; border-radius: 16px; 
-            background: rgba(255,255,255,0.08); 
+            background: var(--icon-box-bg); 
             display: flex; align-items: center; justify-content: center; 
             color: var(--card-color); 
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid var(--icon-box-border);
             flex-shrink: 0;
             box-shadow: none; 
         }
@@ -266,9 +276,11 @@
         .tool-label { font-size: 11px; font-weight: 600; opacity: 0.8; text-align: center; }
 
         .main-actions { display: flex; gap: 12px; height: 68px; }
+        /* [FIXED] Action Button Layout - Flexbox centering */
         .action-btn { 
             height: 100%; border-radius: 22px; border: none; font-size: 18px; font-weight: 700; cursor: pointer; 
             display: flex; align-items: center; justify-content: center; gap: 8px; 
+            padding: 0 16px;
             transition: transform 0.1s; color: #fff; will-change: transform; position: relative; overflow: hidden; 
             -webkit-appearance: none; 
         }
@@ -278,6 +290,12 @@
         
         .btn-play { flex: 1.8; background: var(--text-primary); color: var(--bg-body); box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
         .btn-play:active { transform: scale(0.96); opacity: 0.9; }
+
+        /* [FIXED] Icon Wrap Layout */
+        #play-icon-wrap {
+            display: flex; align-items: center; justify-content: center;
+            gap: 8px; width: 100%; height: 100%; pointer-events: none;
+        }
 
         .btn-pulse::after {
             content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -428,7 +446,7 @@
                     <span data-i18n="btn_reset">End / Reset</span>
                 </button>
                 <button class="action-btn btn-play" id="actionBtn" onclick="App.toggleTimerState()">
-                    <div id="play-icon-wrap" style="display:flex; align-items:center; gap:6px;"></div>
+                    <div id="play-icon-wrap"></div>
                 </button>
             </div>
         </div>
@@ -454,7 +472,7 @@
 
 <script>
 /**
- * FitLoop Pro - Fixed Version v3.6 (iOS Perfect Backgrounds)
+ * FitLoop Pro - Fixed Version v3.7 (UI Contrast & Button Layout)
  */
 const App = (function() {
     'use strict';
@@ -841,6 +859,7 @@ const App = (function() {
         else if (p.warmupOn) { state.timeLeft = p.warmupTime; state.phaseDuration = p.warmupTime; }
         else { state.timeLeft = p.work; state.phaseDuration = p.work; }
 
+        // [FIXED] Force correct total calc on reset
         totalRemainingSeconds = calcTotalDuration(p);
 
         updateSafeguards(); updateActionBtnState(); updateDisplay();
