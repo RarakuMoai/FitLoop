@@ -31,10 +31,6 @@
             --accent-color: #0A84FF;
             --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.2); 
             
-            /* Action Button Colors (Dark Mode) */
-            --btn-play-bg: #ffffff;
-            --btn-play-text: #000000;
-            
             /* Language Modal (Dark) */
             --lang-opt-bg: rgba(40, 40, 40, 0.8);
             --lang-opt-border: rgba(255, 255, 255, 0.1);
@@ -44,6 +40,14 @@
             --state-bg-rest: rgba(10, 80, 20, 0.65);  
             --state-bg-warmup: rgba(80, 20, 100, 0.65);
             --state-bg-finish: rgba(20, 60, 120, 0.65);
+
+            /* [NEW] Action Button Gradients (Theme Independent) */
+            /* Green for Start/Resume */
+            --btn-go-bg: linear-gradient(135deg, #30D158 0%, #20aa45 100%);
+            --btn-go-shadow: 0 4px 20px rgba(48, 209, 88, 0.3);
+            /* Orange for Pause */
+            --btn-pause-bg: linear-gradient(135deg, #FF9F0A 0%, #d48000 100%);
+            --btn-pause-shadow: 0 4px 20px rgba(255, 159, 10, 0.3);
         }
 
         /* Light Mode */
@@ -65,11 +69,7 @@
             
             --shadow-soft: 0 4px 15px rgba(0, 0, 0, 0.03);
             
-            /* Action Button Colors (Light Mode) - High Contrast */
-            --btn-play-bg: #000000;
-            --btn-play-text: #ffffff;
-            
-            /* Language Modal (Light) - Fixed Visibility */
+            /* Language Modal (Light) */
             --lang-opt-bg: #ffffff;
             --lang-opt-border: rgba(0, 0, 0, 0.1);
             
@@ -82,6 +82,7 @@
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
         
+        /* iOS Reset */
         button, input { -webkit-appearance: none; appearance: none; border-radius: 0; }
 
         html, body { 
@@ -292,29 +293,36 @@
 
         .main-actions { display: flex; gap: 12px; height: 68px; }
         
-        /* [FIXED] Main Button Layout */
         .action-btn { 
             height: 100%; border-radius: 22px; border: none; font-size: 18px; font-weight: 700; cursor: pointer; 
             display: flex; align-items: center; justify-content: center; gap: 8px; 
             padding: 0 16px;
-            transition: transform 0.1s; will-change: transform; position: relative; overflow: hidden; 
+            transition: transform 0.1s, background 0.3s, box-shadow 0.3s; /* Animated Transition */
+            will-change: transform; position: relative; overflow: hidden; 
             -webkit-appearance: none; 
-            white-space: nowrap; /* [FIXED] Prevent text wrapping */
+            white-space: nowrap; 
         }
         
         .btn-stop { flex: 1; background: rgba(255, 59, 48, 0.15); color: #ff453a; border: 1px solid rgba(255, 59, 48, 0.3); font-size: 16px; transition: opacity 0.3s, transform 0.1s; }
         .btn-stop:active { background: rgba(255, 59, 48, 0.3); transform: scale(0.96); }
         
-        /* [FIXED] Play Button Colors - Specific Variables for Contrast */
+        /* [NEW] The Main Play Button - Dynamic Color Style */
         .btn-play { 
             flex: 1.8; 
-            background: var(--btn-play-bg); 
-            color: var(--btn-play-text); 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15); 
+            /* Default to Green (Go) */
+            background: var(--btn-go-bg);
+            box-shadow: var(--btn-go-shadow);
+            color: #ffffff; /* Always White Text */
         }
+        
+        /* [NEW] Running State (Orange for Pause) */
+        .btn-play.running {
+            background: var(--btn-pause-bg);
+            box-shadow: var(--btn-pause-shadow);
+        }
+
         .btn-play:active { transform: scale(0.96); opacity: 0.9; }
 
-        /* [FIXED] Icon Wrap Layout */
         #play-icon-wrap {
             display: flex; align-items: center; justify-content: center;
             gap: 8px; width: 100%; height: 100%; pointer-events: none;
@@ -357,15 +365,14 @@
         #info-content h4 { color: var(--text-primary); margin: 16px 0 8px 0; font-size: 16px; font-weight: 700; border-left: 3px solid var(--accent-color); padding-left: 10px; }
         #info-content strong { color: var(--text-primary); font-weight: 600; }
         
-        /* [UPDATED] Language Options Styling */
         .lang-opt { 
             padding: 18px; 
-            background: var(--lang-opt-bg); /* Dedicated var */
+            background: var(--lang-opt-bg); 
             border-radius: 16px; 
             cursor: pointer; 
             font-size: 16px; 
             transition: background 0.2s; 
-            border: 1px solid var(--lang-opt-border); /* Dedicated var */
+            border: 1px solid var(--lang-opt-border); 
             color: var(--text-primary);
             margin-bottom: 8px;
         }
@@ -506,7 +513,7 @@
 
 <script>
 /**
- * FitLoop Pro - Fixed Version v3.8 (UI Polish & Contrast Fixes)
+ * FitLoop Pro - Fixed Version v3.9 (Functional Buttons)
  */
 const App = (function() {
     'use strict';
@@ -569,7 +576,7 @@ const App = (function() {
             info_gym: `<h3>重量訓練計時</h3><p>重點在於<strong>組間休息</strong>的紀律。</p><ul><li><strong>肌肥大：</strong>休 60-90 秒。</li><li><strong>最大肌力：</strong>休 3-5 分鐘以恢復能量系統。</li></ul>`
         },
         'zh-CN': {
-            btn_lang_text: "简中", mode_tabata_title: "Tabata 燃脂", mode_tabata_desc: "20秒运动 / 10秒休息", mode_hiit_title: "HIIT 间歇", mode_hiit_desc: "高强度有氧循环", mode_emom_title: "EMOM 挑战", mode_emom_desc: "每分钟整点循环", mode_gym_title: "重量训练", mode_gym_desc: "组数与休息计时", 
+            btn_lang_text: "简中", mode_tabata_title: "Tabata 燃脂", mode_tabata_desc: "20秒運動 / 10秒休息", mode_hiit_title: "HIIT 间歇", mode_hiit_desc: "高强度有氧循环", mode_emom_title: "EMOM 挑战", mode_emom_desc: "每分钟整点循环", mode_gym_title: "重量训练", mode_gym_desc: "组数与休息计时", 
             btn_back: "返回", btn_start: "开始", btn_pause: "暂停", btn_resume: "继续", btn_reset: "结束 / 重置", btn_warmup_on: "热身? (开启)", btn_warmup_off: "热身? (关闭)", btn_custom: "设定", btn_done: "完成", btn_restore: "还原默认", btn_close: "关闭", 
             label_total_remain: "剩余", label_total_est: "预估总时长", modal_settings_title: "训练设定", modal_lang_title: "语言选择", group_prep: "准备阶段", group_work: "训练内容", label_prep: "倒数准备", label_warmup: "热身时间", label_work: "运动时间", label_rest: "休息时间", label_rounds: "总组数", 
             sound_beep: "音效", sound_voice: "人声", sound_mute: "静音", phase_prep: "准备", phase_warmup: "热身", phase_work: "运动", phase_gym_work: "训练中", phase_rest: "休息", phase_gym_rest: "休息", phase_finish: "完成", phase_start_warmup: "开始热身", phase_start_work: "开始运动", phase_gym_start: "开始训练", phase_start_rest: "休息一下", phase_finish_train: "训练结束",
@@ -1104,9 +1111,14 @@ const App = (function() {
 
     function updateActionBtnState() {
         const wrapper = UI['play-icon-wrap'];
+        const btn = UI['actionBtn'];
+        
+        // [NEW] Toggle the 'running' class for color change
         if(state.isRunning) {
+            btn.classList.add('running');
             wrapper.innerHTML = `<svg class="icon-svg"><use href="#icon-pause"></use></svg><span>${t('btn_pause')}</span>`;
         } else {
+            btn.classList.remove('running');
              let txt = (state.phase === 'idle' || state.phase === 'finished') ? t('btn_start') : t('btn_resume');
              wrapper.innerHTML = `<svg class="icon-svg"><use href="#icon-play"></use></svg><span>${txt}</span>`;
         }
