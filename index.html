@@ -38,14 +38,14 @@
             --state-bg-idle: transparent;
             --state-bg-work: rgba(120, 10, 10, 0.65); 
             --state-bg-rest: rgba(10, 80, 20, 0.65);  
-            --state-bg-warmup: rgba(80, 20, 100, 0.65);
+            /* [FIX] Warmup is now Orange */
+            --state-bg-warmup: rgba(255, 159, 10, 0.65);
             --state-bg-finish: rgba(20, 60, 120, 0.65);
+            --state-bg-jog: rgba(90, 30, 140, 0.65); /* Purple for Jog */
 
-            /* [NEW] Action Button Gradients (Theme Independent) */
-            /* Green for Start/Resume */
+            /* Action Button Gradients */
             --btn-go-bg: linear-gradient(135deg, #30D158 0%, #20aa45 100%);
             --btn-go-shadow: 0 4px 20px rgba(48, 209, 88, 0.3);
-            /* Orange for Pause */
             --btn-pause-bg: linear-gradient(135deg, #FF9F0A 0%, #d48000 100%);
             --btn-pause-shadow: 0 4px 20px rgba(255, 159, 10, 0.3);
         }
@@ -69,21 +69,21 @@
             
             --shadow-soft: 0 4px 15px rgba(0, 0, 0, 0.03);
             
-            /* Language Modal (Light) */
             --lang-opt-bg: #ffffff;
             --lang-opt-border: rgba(0, 0, 0, 0.1);
             
             --state-bg-idle: transparent;
             --state-bg-work: rgba(255, 59, 48, 0.2);
             --state-bg-rest: rgba(48, 209, 88, 0.2);
-            --state-bg-warmup: rgba(191, 90, 242, 0.2);
+            /* [FIX] Warmup is now Orange */
+            --state-bg-warmup: rgba(255, 149, 0, 0.2);
             --state-bg-finish: rgba(10, 132, 255, 0.2);
+            --state-bg-jog: rgba(175, 82, 222, 0.2);
         }
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
         
-        /* iOS Reset */
-        button, input { -webkit-appearance: none; appearance: none; border-radius: 0; }
+        button, input, select { -webkit-appearance: none; appearance: none; border-radius: 0; font-family: inherit; }
 
         html, body { 
             margin: 0; padding: 0; 
@@ -106,15 +106,8 @@
             pointer-events: none;
         }
 
-        #bg-layer-dark {
-            background-image: linear-gradient(160deg, #2c3e50 0%, #000000 120%);
-            opacity: 0;
-        }
-
-        #bg-layer-light {
-            background-image: linear-gradient(160deg, #E0EAFC 0%, #CFDEF3 100%);
-            opacity: 0;
-        }
+        #bg-layer-dark { background-image: linear-gradient(160deg, #2c3e50 0%, #000000 120%); opacity: 0; }
+        #bg-layer-light { background-image: linear-gradient(160deg, #E0EAFC 0%, #CFDEF3 100%); opacity: 0; }
 
         [data-theme="dark"] #bg-layer-dark { opacity: 1; }
         [data-theme="dark"] #bg-layer-light { opacity: 0; }
@@ -209,13 +202,7 @@
             background: linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
             opacity: 0.4; pointer-events: none;
         }
-        .mode-card::after {
-            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle, var(--glass-highlight) 0%, transparent 60%);
-            opacity: 0; transition: opacity 0.3s; pointer-events: none;
-        }
         .mode-card:active { transform: scale(0.96); }
-        .mode-card:active::after { opacity: 0.1; }
         
         .resume-badge {
             display: none;
@@ -228,6 +215,14 @@
         .mode-card.has-save .resume-badge { display: inline-block; }
         .mode-card.has-save .card-desc { display: none; }
 
+        /* Wide Card for Jog */
+        .mode-card.card-wide {
+            grid-column: span 2;
+            flex-direction: row; align-items: center;
+            min-height: 120px;
+        }
+        .card-wide .card-text-box { margin-left: 12px; }
+
         .card-icon-box { 
             width: 52px; height: 52px; border-radius: 16px; 
             background: var(--icon-box-bg); 
@@ -235,7 +230,6 @@
             color: var(--card-color); 
             border: 1px solid var(--icon-box-border);
             flex-shrink: 0;
-            box-shadow: none; 
         }
         .card-text-box { display: flex; flex-direction: column; gap: 6px; width: 100%; }
         .card-title { font-size: 19px; font-weight: 700; line-height: 1.1; letter-spacing: -0.3px; }
@@ -244,7 +238,6 @@
         /* --- Timer Screen --- */
         .top-bar { display: flex; justify-content: space-between; align-items: center; height: 44px; margin-bottom: 10px; flex-shrink: 0; position: relative; }
         .btn-back { background: none; border: none; color: var(--text-primary); font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 6px; opacity: 0.9; padding: 10px 0; z-index: 2; transition: opacity 0.3s; cursor: pointer; -webkit-appearance: none; }
-        
         .btn-locked { opacity: 0.3; cursor: not-allowed; pointer-events: none; } 
         
         .total-remain-badge { 
@@ -262,12 +255,45 @@
         .timer-display { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; min-height: 0; }
         .timer-ring-svg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-90deg); width: 340px; height: 340px; pointer-events: none; z-index: 0; max-width: 85vw; max-height: 85vw; filter: drop-shadow(0 0 15px rgba(0,0,0,0.2)); }
         .ring-bg { fill: none; stroke: var(--glass-border); stroke-width: 8; }
-        
         .ring-progress { fill: none; stroke: var(--accent-color); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 1005; stroke-dashoffset: 0; filter: drop-shadow(0 0 10px var(--accent-color)); }
         
+        /* [NEW] Visual Metronome Needle - JS Driven Physics */
+        .metro-needle {
+            position: absolute; top: 50%; left: 50%;
+            width: 8px; height: 155px; 
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 4px;
+            transform-origin: bottom center;
+            margin-left: -4px; margin-top: -155px; 
+            opacity: 0; 
+            z-index: 0;
+            transition: opacity 0.3s;
+            /* No CSS transition for transform to ensure instant JS updates */
+        }
+        .metro-needle::after {
+            content: ''; position: absolute; top: 12px; left: 50%;
+            width: 24px; height: 24px;
+            transform: translateX(-50%);
+            background: var(--accent-color);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-color);
+        }
+        .metro-needle.active {
+            opacity: 1;
+        }
+
         .status-text { font-size: clamp(24px, 5vw, 32px); font-weight: 800; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px; z-index: 1; color: var(--text-secondary); text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
         .timer-digits { font-size: clamp(70px, 18vw, 110px); font-weight: 700; z-index: 1; font-variant-numeric: tabular-nums; line-height: 1; letter-spacing: -2px; color: var(--text-primary); text-shadow: 0 4px 20px rgba(0,0,0,0.15); }
-        .timer-sub { font-size: 20px; color: var(--text-tertiary); margin-top: 12px; font-weight: 600; z-index: 1; }
+        
+        /* Rounds / BPM Display */
+        .timer-sub { font-size: 20px; color: var(--text-tertiary); margin-top: 12px; font-weight: 600; z-index: 2; height: 40px; display: flex; align-items: center; justify-content: center;}
+
+        /* [NEW] BPM Controls */
+        .bpm-controls { display: flex; align-items: center; gap: 16px; background: rgba(0,0,0,0.2); padding: 4px 12px; border-radius: 20px; border: 1px solid var(--glass-border); }
+        .bpm-btn { width: 32px; height: 32px; border-radius: 50%; background: var(--glass-surface); border: 1px solid var(--glass-border); color: var(--text-primary); font-size: 18px; font-weight: 600; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s; user-select: none; }
+        .bpm-btn:active { background: var(--accent-color); border-color: transparent; }
+        .bpm-val { font-size: 18px; font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums; min-width: 40px; text-align: center; }
+        .bpm-label { font-size: 12px; color: var(--text-secondary); margin-left: 4px; font-weight: 600; }
 
         /* --- Controls --- */
         .controls-wrapper { 
@@ -297,7 +323,7 @@
             height: 100%; border-radius: 22px; border: none; font-size: 18px; font-weight: 700; cursor: pointer; 
             display: flex; align-items: center; justify-content: center; gap: 8px; 
             padding: 0 16px;
-            transition: transform 0.1s, background 0.3s, box-shadow 0.3s; /* Animated Transition */
+            transition: transform 0.1s, background 0.3s, box-shadow 0.3s;
             will-change: transform; position: relative; overflow: hidden; 
             -webkit-appearance: none; 
             white-space: nowrap; 
@@ -306,28 +332,22 @@
         .btn-stop { flex: 1; background: rgba(255, 59, 48, 0.15); color: #ff453a; border: 1px solid rgba(255, 59, 48, 0.3); font-size: 16px; transition: opacity 0.3s, transform 0.1s; }
         .btn-stop:active { background: rgba(255, 59, 48, 0.3); transform: scale(0.96); }
         
-        /* [NEW] The Main Play Button - Dynamic Color Style */
         .btn-play { 
             flex: 1.8; 
-            /* Default to Green (Go) */
             background: var(--btn-go-bg);
             box-shadow: var(--btn-go-shadow);
-            color: #ffffff; /* Always White Text */
+            color: #ffffff; 
         }
-        
-        /* [NEW] Running State (Orange for Pause) */
         .btn-play.running {
             background: var(--btn-pause-bg);
             box-shadow: var(--btn-pause-shadow);
         }
-
         .btn-play:active { transform: scale(0.96); opacity: 0.9; }
 
         #play-icon-wrap {
             display: flex; align-items: center; justify-content: center;
             gap: 8px; width: 100%; height: 100%; pointer-events: none;
         }
-
         .btn-pulse::after {
             content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             border-radius: 22px; box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.7);
@@ -353,11 +373,15 @@
         .setting-row { display: flex; justify-content: space-between; align-items: center; background: var(--glass-surface); padding: 18px; margin-bottom: 1px; border: 1px solid var(--glass-border); border-bottom: none; }
         .setting-row:first-of-type { border-top-left-radius: 20px; border-top-right-radius: 20px; }
         .setting-row:last-of-type { border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; margin-bottom: 16px; border-bottom: 1px solid var(--glass-border); }
-        
+        .setting-row.hidden { display: none; }
+
         .input-group { display: flex; align-items: center; gap: 8px; }
         .nice-input { background: rgba(0,0,0,0.1); border: 1px solid var(--glass-border); color: var(--text-primary); width: 54px; padding: 10px 0; border-radius: 12px; text-align: center; font-size: 18px; font-weight: 600; -webkit-user-select: text; user-select: text; transition: border 0.2s; -webkit-appearance: none;}
         .nice-input:focus { border-color: var(--accent-color); background: rgba(0,0,0,0.2); }
         .unit { font-size: 14px; color: var(--text-secondary); }
+        
+        .nice-select { background: rgba(0,0,0,0.1); border: 1px solid var(--glass-border); color: var(--text-primary); padding: 10px 16px; border-radius: 12px; font-size: 16px; font-weight: 500; -webkit-appearance: none; text-align-last: right; }
+
         .total-est-box { background: var(--glass-surface); color: var(--text-secondary); text-align: center; padding: 14px; border-radius: 16px; margin-bottom: 24px; font-size: 15px; font-weight: 500; border: 1px solid var(--glass-border); }
 
         #info-content { color: var(--text-secondary); line-height: 1.6; font-size: 15px; }
@@ -377,6 +401,8 @@
             margin-bottom: 8px;
         }
         .lang-opt:active { background: var(--glass-highlight); }
+        .selected-opt { border-color: var(--accent-color); background: rgba(255,255,255,0.05); }
+
     </style>
 </head>
 <body>
@@ -389,16 +415,18 @@
     <symbol id="icon-hiit" viewBox="0 0 24 24"><path fill="currentColor" d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/></symbol>
     <symbol id="icon-emom" viewBox="0 0 24 24"><path fill="currentColor" d="M7 2v11h3v9l7-12h-4l4-8z"/></symbol>
     <symbol id="icon-gym" viewBox="0 0 24 24"><path fill="currentColor" d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14l1.43 1.43L2 7.71l1.43 1.43L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22 14.86 20.57 16.29 22 18.43 19.86 19.86 21.29 21.29 19.86l-1.43-1.43L22 16.29z"/></symbol>
+    <symbol id="icon-jog" viewBox="0 0 24 24"><path fill="currentColor" d="M13.49 5.48c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-3.6 13.9l1-4.4 2.1 2v6h2v-7.5l-2.1-2 .6-3c1.3 1.5 3.3 2.5 5.5 2.5v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1l-5.2 2.2v4.7h2v-3.4l1.8-.7-1.6 8.1-4.9-1-.4 2 6.8 1.4z"/></symbol> 
     <symbol id="icon-back" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></symbol>
     <symbol id="icon-info" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></symbol>
     <symbol id="icon-warmup" viewBox="0 0 24 24"><path d="M15 13V5c0-1.66-1.34-3-3-3S9 3.34 9 5v8c-1.21.91-2 2.37-2 4 0 2.76 2.24 5 5 5s5-2.24 5-5c0-1.63-.79-3.09-2-4zm-4-2V5c0-.55.45-1 1-1s1 .45 1 1v1h-1v1h1v1h-1v1h1v2H11z"/></symbol>
+    <symbol id="icon-metronome" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c-.55 0-1 .45-1 1v1.17C7.36 4.85 5 8.65 5 12h2c0-3.31 2.69-6 6-6s6 2.69 6 6h2c0-3.35-2.36-7.15-6-7.83V3c0-.55-.45-1-1-1zM7 21h10v-2H7v2zM13.03 6.06L11.59 9 9.3 16.3c-.23.75.21 1.54.99 1.68.75.14 1.5-.32 1.67-1.09L13.7 7.21c.09-.43-.17-.85-.59-1.04-.02-.01-.05-.01-.08-.01z"/></symbol>
     <symbol id="icon-settings" viewBox="0 0 24 24"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></symbol>
     <symbol id="icon-stop" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></symbol>
     <symbol id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></symbol>
     <symbol id="icon-pause" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></symbol>
     <symbol id="icon-sound-voice" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></symbol>
     <symbol id="icon-sound-beep" viewBox="0 0 24 24"><path d="M7.58 4.08L6.15 2.65C3.75 4.48 2.17 7.3 2.03 10.5h2c.15-2.65 1.51-4.97 3.55-6.42zm12.39 6.42h2c-.15-3.2-1.73-6.02-4.12-7.85l-1.42 1.43c2.02 1.45 3.39 3.77 3.54 6.42zM18 11c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2v-5zm-6 11c.14 0 .27-.01.4-.04.65-.14 1.18-.58 1.44-1.18.1-.24.16-.49.16-.78h-4c0 .35.08.67.2.96.23.56.74.98 1.4 1.04h.4z"/></symbol>
-    <symbol id="icon-sound-mute" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73 4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></symbol>
+    <symbol id="icon-sound-mute" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73 4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></symbol>
 </svg>
 
 <div class="bg-layer" id="bg-layer-dark"></div>
@@ -440,6 +468,10 @@
                 <div class="card-icon-box"><svg class="icon-lg"><use href="#icon-gym"></use></svg></div>
                 <div class="card-text-box"><div class="card-title" data-i18n="mode_gym_title">Gym / Weights</div><div class="card-desc" data-i18n="mode_gym_desc">Sets & Rest Timer</div><div class="resume-badge" data-i18n="status_paused">PAUSED</div></div>
             </div>
+            <div class="mode-card card-wide" id="card-jog" style="--card-color: #BF5AF2;" onclick="App.selectMode('jog')">
+                <div class="card-icon-box"><svg class="icon-lg"><use href="#icon-jog"></use></svg></div>
+                <div class="card-text-box"><div class="card-title" data-i18n="mode_jog_title">Slow Jog</div><div class="card-desc" data-i18n="mode_jog_desc">180 BPM Pacing</div><div class="resume-badge" data-i18n="status_paused">PAUSED</div></div>
+            </div>
         </div>
     </div>
 
@@ -460,21 +492,38 @@
                 <circle class="ring-bg" cx="180" cy="180" r="160" />
                 <circle class="ring-progress" id="ringProgress" cx="180" cy="180" r="160" />
             </svg>
+            <div id="metro-needle" class="metro-needle"></div>
+
             <div class="status-text" id="statusText">READY</div>
             <div class="timer-digits" id="timerDigits">00:00</div>
-            <div class="timer-sub" id="roundsText">Set 1 / 8</div>
+            
+            <div class="timer-sub">
+                <span id="roundsText">Set 1 / 8</span>
+                <div id="bpmControls" class="bpm-controls hidden">
+                    <div class="bpm-btn" id="btn-bpm-minus">−</div>
+                    <div class="bpm-val"><span id="bpmDisplay">180</span><span class="bpm-label">BPM</span></div>
+                    <div class="bpm-btn" id="btn-bpm-plus">+</div>
+                </div>
+            </div>
         </div>
 
         <div class="controls-wrapper">
-            <div class="tools-row">
+            <div class="tools-row" id="toolsRow">
                 <button class="tool-btn" onclick="App.toggleSoundMode()">
                     <div class="tool-icon-wrap" id="icon-sound"><svg class="icon-svg"><use href="#icon-sound-beep"></use></svg></div>
                     <span class="tool-label" id="text-sound" data-i18n="sound_beep">Beep</span>
                 </button>
+                
                 <button class="tool-btn lockable" id="btn-warmup" onclick="App.toggleWarmupDirect()">
                     <div class="tool-icon-wrap"><svg class="icon-svg"><use href="#icon-warmup"></use></svg></div>
                     <span class="tool-label" id="text-warmup" data-i18n="btn_warmup_off">Warmup? (OFF)</span>
                 </button>
+
+                <button class="tool-btn hidden" id="btn-metronome" onclick="App.openMetronomeModal()">
+                    <div class="tool-icon-wrap"><svg class="icon-svg"><use href="#icon-metronome"></use></svg></div>
+                    <span class="tool-label" id="text-metronome">Wood</span>
+                </button>
+
                 <button class="tool-btn lockable" onclick="App.openSettings()">
                     <div class="tool-icon-wrap"><svg class="icon-svg"><use href="#icon-settings"></use></svg></div>
                     <span class="tool-label" data-i18n="btn_custom">Edit</span>
@@ -493,34 +542,62 @@
         </div>
     </div>
 
+    <div id="metro-modal" class="modal-overlay">
+        <div class="modal-sheet">
+            <div class="sheet-header"><div class="sheet-title" data-i18n="modal_sound_title">Metronome Sound</div><button class="sheet-close" onclick="App.closeMetronomeModal()" data-i18n="btn_done">Done</button></div>
+            <div style="display:grid; gap:10px; padding-bottom:20px;">
+                <div class="lang-opt" id="opt-mute" onclick="App.setMetronomeSound('mute')">🔕 Mute</div>
+                <div class="lang-opt" id="opt-woodblock" onclick="App.setMetronomeSound('woodblock')">🪵 Woodblock</div>
+                <div class="lang-opt" id="opt-digital" onclick="App.setMetronomeSound('digital')">⚡️ Digital</div>
+                <div class="lang-opt" id="opt-kick" onclick="App.setMetronomeSound('kick')">🥁 Kick Drum</div>
+                <div class="lang-opt" id="opt-click" onclick="App.setMetronomeSound('click')">⚙️ Tick</div>
+            </div>
+        </div>
+    </div>
+
     <div id="settings-modal" class="modal-overlay">
         <div class="modal-sheet">
             <div class="sheet-header"><div class="sheet-title" data-i18n="modal_settings_title">Settings</div><button class="sheet-close" onclick="App.closeSettings()" data-i18n="btn_done">Done</button></div>
             <div class="total-est-box" id="modalTotalTime">Total: 00:00</div>
-            <div style="margin-bottom:10px; color:var(--text-secondary); font-size:12px; font-weight:700;" data-i18n="group_prep">PREPARATION</div>
-            <div class="setting-row"><span data-i18n="label_prep">Get Ready</span><div class="input-group"><input type="tel" class="nice-input" id="set-prep-min" data-group="set-prep"><span class="unit">m</span><input type="tel" class="nice-input" id="set-prep-sec" data-group="set-prep"><span class="unit">s</span></div></div>
-            <div class="setting-row"><span data-i18n="label_warmup">Warmup</span><div class="input-group"><input type="tel" class="nice-input" id="set-warmup-min" data-group="set-warmup"><span class="unit">m</span><input type="tel" class="nice-input" id="set-warmup-sec" data-group="set-warmup"><span class="unit">s</span></div></div>
-            <div style="margin-bottom:10px; margin-top:20px; color:var(--text-secondary); font-size:12px; font-weight:700;" data-i18n="group_work">WORKOUT</div>
-            <div class="setting-row" id="row-work"><span data-i18n="label_work">Work</span><div class="input-group"><input type="tel" class="nice-input" id="set-work-min" data-group="set-work"><span class="unit">m</span><input type="tel" class="nice-input" id="set-work-sec" data-group="set-work"><span class="unit">s</span></div></div>
-            <div class="setting-row"><span data-i18n="label_rest">Rest</span><div class="input-group"><input type="tel" class="nice-input" id="set-rest-min" data-group="set-rest"><span class="unit">m</span><input type="tel" class="nice-input" id="set-rest-sec" data-group="set-rest"><span class="unit">s</span></div></div>
-            <div class="setting-row"><span data-i18n="label_rounds">Rounds</span><div class="input-group"><input type="tel" class="nice-input" id="set-rounds"></div></div>
+            
+            <div id="group-standard">
+                <div style="margin-bottom:10px; color:var(--text-secondary); font-size:12px; font-weight:700;" data-i18n="group_prep">PREPARATION</div>
+                <div class="setting-row"><span data-i18n="label_prep">Get Ready</span><div class="input-group"><input type="tel" class="nice-input" id="set-prep-min" data-group="set-prep"><span class="unit">m</span><input type="tel" class="nice-input" id="set-prep-sec" data-group="set-prep"><span class="unit">s</span></div></div>
+                <div class="setting-row"><span data-i18n="label_warmup">Warmup</span><div class="input-group"><input type="tel" class="nice-input" id="set-warmup-min" data-group="set-warmup"><span class="unit">m</span><input type="tel" class="nice-input" id="set-warmup-sec" data-group="set-warmup"><span class="unit">s</span></div></div>
+                <div style="margin-bottom:10px; margin-top:20px; color:var(--text-secondary); font-size:12px; font-weight:700;" data-i18n="group_work">WORKOUT</div>
+                <div class="setting-row" id="row-work"><span data-i18n="label_work">Work</span><div class="input-group"><input type="tel" class="nice-input" id="set-work-min" data-group="set-work"><span class="unit">m</span><input type="tel" class="nice-input" id="set-work-sec" data-group="set-work"><span class="unit">s</span></div></div>
+                <div class="setting-row"><span data-i18n="label_rest">Rest</span><div class="input-group"><input type="tel" class="nice-input" id="set-rest-min" data-group="set-rest"><span class="unit">m</span><input type="tel" class="nice-input" id="set-rest-sec" data-group="set-rest"><span class="unit">s</span></div></div>
+                <div class="setting-row"><span data-i18n="label_rounds">Rounds</span><div class="input-group"><input type="tel" class="nice-input" id="set-rounds"></div></div>
+            </div>
+
+            <div id="group-jog" class="hidden">
+                 <div style="margin-bottom:10px; color:var(--text-secondary); font-size:12px; font-weight:700;" data-i18n="group_prep">PREPARATION</div>
+                 <div class="setting-row"><span data-i18n="label_prep">Get Ready</span><div class="input-group"><input type="tel" class="nice-input" id="set-jog-prep-min"><span class="unit">m</span><input type="tel" class="nice-input" id="set-jog-prep-sec"><span class="unit">s</span></div></div>
+                 <div class="setting-row"><span data-i18n="label_warmup">Warmup</span><div class="input-group"><input type="tel" class="nice-input" id="set-jog-warmup-min"><span class="unit">m</span><input type="tel" class="nice-input" id="set-jog-warmup-sec"><span class="unit">s</span></div></div>
+                 <div style="margin-bottom:10px; margin-top:20px; color:var(--text-secondary); font-size:12px; font-weight:700;" data-i18n="group_work">WORKOUT</div>
+                 <div class="setting-row"><span data-i18n="label_duration">Jog Duration</span><div class="input-group"><input type="tel" class="nice-input" id="set-jog-min"><span class="unit">m</span></div></div>
+            </div>
+
             <div style="text-align: center; margin-top: 30px;"><button onclick="App.restoreDefaults()" style="background:none; border:none; color: #ff453a; font-size:14px; cursor:pointer;" data-i18n="btn_restore">Reset Defaults</button></div>
         </div>
     </div>
+    
     <div id="info-modal" class="modal-overlay"><div class="modal-sheet"><div class="sheet-header"><div class="sheet-title" id="info-title">About</div><button class="sheet-close" onclick="App.closeInfoModal()" data-i18n="btn_close">Close</button></div><div id="info-content"></div></div></div>
     <div id="lang-modal" class="modal-overlay"><div class="modal-sheet"><div class="sheet-header"><div class="sheet-title" data-i18n="modal_lang_title">Language</div><button class="sheet-close" onclick="App.closeLangModal()">X</button></div><div style="display:grid; gap:10px; padding-bottom:20px;"><div class="lang-opt" onclick="App.setLanguage('en')">English</div><div class="lang-opt" onclick="App.setLanguage('zh-TW')">繁體中文 (Traditional Chinese)</div><div class="lang-opt" onclick="App.setLanguage('zh-CN')">简体中文 (Simplified Chinese)</div><div class="lang-opt" onclick="App.setLanguage('ja')">日本語 (Japanese)</div><div class="lang-opt" onclick="App.setLanguage('ko')">한국어 (Korean)</div></div></div></div>
 </div>
 
 <script>
 /**
- * FitLoop Pro - Fixed Version v3.9 (Functional Buttons)
+ * FitLoop Pro - Fixed Version v4.9 (Physics Needle, Orange Warmup, Final Logic Fix)
  */
 const App = (function() {
     'use strict';
 
-    // --- 1. Audio Engine ---
+    // --- 1. Audio Engine 2.0 (Precision Metronome) ---
     const AudioEngine = {
         ctx: null,
+        nextNoteTime: 0.0,
+        
         init: function() {
             if (!this.ctx) {
                 const Ctx = window.AudioContext || window.webkitAudioContext;
@@ -535,8 +612,6 @@ const App = (function() {
         },
         play: function(freq, type, duration, vol, startTime = 0) {
             if (!this.ctx) return;
-            if(this.ctx.state === 'suspended') this.ctx.resume();
-            
             const t = this.ctx.currentTime + startTime;
             const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
@@ -548,65 +623,133 @@ const App = (function() {
             gain.connect(this.ctx.destination);
             osc.start(t);
             osc.stop(t + duration);
+        },
+        // Synthesize Metronome Sounds
+        playSynth: function(type, time) {
+             if(!this.ctx || type === 'mute') return;
+             const t = time || this.ctx.currentTime;
+             
+             if(type === 'digital') {
+                 const osc = this.ctx.createOscillator();
+                 const gain = this.ctx.createGain();
+                 osc.frequency.setValueAtTime(1200, t);
+                 osc.frequency.exponentialRampToValueAtTime(800, t + 0.05);
+                 gain.gain.setValueAtTime(0.3, t);
+                 gain.gain.exponentialRampToValueAtTime(0.01, t + 0.05);
+                 osc.connect(gain); gain.connect(this.ctx.destination);
+                 osc.start(t); osc.stop(t + 0.05);
+             } 
+             else if(type === 'kick') {
+                 const osc = this.ctx.createOscillator();
+                 const gain = this.ctx.createGain();
+                 osc.frequency.setValueAtTime(150, t);
+                 osc.frequency.exponentialRampToValueAtTime(0.01, t + 0.5);
+                 gain.gain.setValueAtTime(0.5, t);
+                 gain.gain.exponentialRampToValueAtTime(0.01, t + 0.5);
+                 osc.connect(gain); gain.connect(this.ctx.destination);
+                 osc.start(t); osc.stop(t + 0.5);
+             }
+             else if(type === 'click') {
+                 // [FIX] Changed to "Tick" (Quartz style) - High pitch sine
+                 const osc = this.ctx.createOscillator();
+                 const gain = this.ctx.createGain();
+                 osc.frequency.setValueAtTime(1500, t); // High pitch
+                 gain.gain.setValueAtTime(0.8, t);
+                 gain.gain.exponentialRampToValueAtTime(0.01, t + 0.03); // Very short decay
+                 osc.connect(gain); gain.connect(this.ctx.destination);
+                 osc.start(t); osc.stop(t + 0.03);
+             }
+             else { // Woodblock (Default)
+                 const osc = this.ctx.createOscillator();
+                 const gain = this.ctx.createGain();
+                 osc.frequency.setValueAtTime(800, t); 
+                 gain.gain.setValueAtTime(0.5, t);
+                 gain.gain.exponentialRampToValueAtTime(0.01, t + 0.05);
+                 osc.connect(gain); gain.connect(this.ctx.destination);
+                 osc.start(t); osc.stop(t + 0.05);
+                 const osc2 = this.ctx.createOscillator();
+                 const gain2 = this.ctx.createGain();
+                 osc2.type = 'square';
+                 osc2.frequency.setValueAtTime(1200, t); 
+                 gain2.gain.setValueAtTime(0.1, t);
+                 gain2.gain.exponentialRampToValueAtTime(0.01, t + 0.03);
+                 osc2.connect(gain2); gain2.connect(this.ctx.destination);
+                 osc2.start(t); osc2.stop(t + 0.03);
+             }
         }
     };
 
     // --- 2. Translations ---
     const translations = {
         'en': {
-            btn_lang_text: "EN", mode_tabata_title: "Tabata", mode_tabata_desc: "20s Work / 10s Rest", mode_hiit_title: "HIIT", mode_hiit_desc: "High Intensity Intervals", mode_emom_title: "EMOM", mode_emom_desc: "Every Minute on the Minute", mode_gym_title: "Gym / Weights", mode_gym_desc: "Sets & Rest Timer", 
+            btn_lang_text: "EN", mode_tabata_title: "Tabata", mode_tabata_desc: "20s Work / 10s Rest", mode_hiit_title: "HIIT", mode_hiit_desc: "High Intensity Intervals", mode_emom_title: "EMOM", mode_emom_desc: "Every Minute on the Minute", mode_gym_title: "Gym / Weights", mode_gym_desc: "Sets & Rest Timer", mode_jog_title: "Slow Jog", mode_jog_desc: "180 BPM Pacing",
             btn_back: "Back", btn_start: "Start", btn_pause: "Pause", btn_resume: "Resume", btn_reset: "End / Reset", btn_warmup_on: "Warmup? (ON)", btn_warmup_off: "Warmup? (OFF)", btn_custom: "Edit", btn_done: "Done", btn_restore: "Reset Defaults", btn_close: "Close", 
-            label_total_remain: "Total Left", label_total_est: "Est. Total", modal_settings_title: "Settings", modal_lang_title: "Language", group_prep: "Preparation", group_work: "Workout", label_prep: "Get Ready", label_warmup: "Warmup", label_work: "Work", label_rest: "Rest", label_rounds: "Rounds", 
-            sound_beep: "Beep", sound_voice: "Voice", sound_mute: "Mute", phase_prep: "GET READY", phase_warmup: "WARM UP", phase_work: "WORK", phase_gym_work: "WORKOUT", phase_rest: "REST", phase_gym_rest: "REST", phase_finish: "COMPLETE", phase_start_warmup: "Start Warmup", phase_start_work: "Start Work", phase_gym_start: "Start Training", phase_start_rest: "Rest Now", phase_finish_train: "Workout Complete",
+            modal_settings_title: "Settings", modal_lang_title: "Language", modal_sound_title: "Metronome Sound",
+            group_prep: "Preparation", group_work: "Workout", label_prep: "Get Ready", label_warmup: "Warmup", label_work: "Work", label_rest: "Rest", label_rounds: "Rounds", 
+            label_duration: "Duration", label_total_remain: "Total Left", label_total_est: "Est. Total",
+            sound_beep: "Beep", sound_voice: "Voice", sound_mute: "Mute", phase_prep: "GET READY", phase_warmup: "WARM UP", phase_work: "WORK", phase_gym_work: "WORKOUT", phase_rest: "REST", phase_gym_rest: "REST", phase_finish: "COMPLETE", phase_start_warmup: "Start Warmup", phase_start_work: "Start Work", phase_gym_start: "Start Training", phase_start_rest: "Rest Now", phase_finish_train: "Workout Complete", phase_jog: "KEEP PACE",
             status_paused: "TIMER PAUSED", 
-            info_tabata: `<h3>Tabata Protocol</h3><p>A specific form of HIIT developed by <strong>Dr. Izumi Tabata</strong>.</p><ul><li><strong>Ultra Intensity:</strong> 20s all-out.</li><li><strong>Short Rest:</strong> 10s rest.</li><li><strong>Duration:</strong> 4 mins total.</li></ul>`,
-            info_hiit: `<h3>HIIT</h3><p>High-Intensity Interval Training. Alternates short bursts of intense exercise with recovery.</p><p>Creates the <strong>Afterburn Effect (EPOC)</strong>, burning calories hours after workout.</p>`,
-            info_emom: `<h3>EMOM</h3><p><strong>Every Minute on the Minute</strong>.</p><ul><li>Start task at the start of every minute.</li><li>Remaining time is your rest.</li></ul>`,
-            info_gym: `<h3>Gym / Weights</h3><p>Focus on the <strong>Rest Period</strong> between sets.</p><ul><li><strong>Hypertrophy:</strong> 60-90s rest.</li><li><strong>Strength:</strong> 3-5 mins rest.</li></ul>`
+            info_tabata: `<h3>Tabata Protocol</h3><p>20s all-out, 10s rest. 4 mins total.</p>`,
+            info_hiit: `<h3>HIIT</h3><p>High-Intensity Interval Training. Burns calories fast.</p>`,
+            info_emom: `<h3>EMOM</h3><p>Every Minute on the Minute. Finish task, rest remaining time.</p>`,
+            info_gym: `<h3>Gym / Weights</h3><p>Focus on rest periods for Hypertrophy (60-90s) or Strength (3-5m).</p>`,
+            info_jog: `<h3>Super Slow Jogging</h3><p>Run at a slow pace with high cadence (180 BPM).</p><ul><li><strong>Posture:</strong> Keep back straight, look forward.</li><li><strong>Landing:</strong> Land on forefoot.</li><li><strong>Niko Niko Pace:</strong> Smile and run comfortably!</li></ul>`
         },
         'zh-TW': {
-            btn_lang_text: "繁中", mode_tabata_title: "Tabata 燃脂", mode_tabata_desc: "20秒運動 / 10秒休息", mode_hiit_title: "HIIT 間歇", mode_hiit_desc: "高強度有氧循環", mode_emom_title: "EMOM 挑戰", mode_emom_desc: "每分鐘整點循環", mode_gym_title: "重量訓練", mode_gym_desc: "組數與休息計時", 
+            btn_lang_text: "繁中", mode_tabata_title: "Tabata 燃脂", mode_tabata_desc: "20秒運動 / 10秒休息", mode_hiit_title: "HIIT 間歇", mode_hiit_desc: "高強度有氧循環", mode_emom_title: "EMOM 挑戰", mode_emom_desc: "每分鐘整點循環", mode_gym_title: "重量訓練", mode_gym_desc: "組數與休息計時", mode_jog_title: "超慢跑", mode_jog_desc: "180 BPM 節拍器",
             btn_back: "返回", btn_start: "開始", btn_pause: "暫停", btn_resume: "繼續", btn_reset: "結束 / 重置", btn_warmup_on: "暖身? (開啟)", btn_warmup_off: "暖身? (關閉)", btn_custom: "設定", btn_done: "完成", btn_restore: "還原預設", btn_close: "關閉", 
-            label_total_remain: "剩餘", label_total_est: "預估總時長", modal_settings_title: "訓練設定", modal_lang_title: "語言選擇", group_prep: "準備階段", group_work: "訓練內容", label_prep: "倒數準備", label_warmup: "暖身時間", label_work: "運動時間", label_rest: "休息時間", label_rounds: "總組數", 
-            sound_beep: "音效", sound_voice: "語音", sound_mute: "靜音", phase_prep: "準備", phase_warmup: "暖身", phase_work: "運動", phase_gym_work: "訓練中", phase_rest: "休息", phase_gym_rest: "休息", phase_finish: "完成", phase_start_warmup: "開始暖身", phase_start_work: "開始運動", phase_gym_start: "開始訓練", phase_start_rest: "休息一下", phase_finish_train: "訓練結束",
+            modal_settings_title: "訓練設定", modal_lang_title: "語言選擇", modal_sound_title: "節拍器音色",
+            group_prep: "準備階段", group_work: "訓練內容", label_prep: "倒數準備", label_warmup: "暖身時間", label_work: "運動時間", label_rest: "休息時間", label_rounds: "總組數", 
+            label_duration: "目標時間", label_total_remain: "剩餘", label_total_est: "預估總時長",
+            sound_beep: "音效", sound_voice: "語音", sound_mute: "靜音", phase_prep: "準備", phase_warmup: "暖身", phase_work: "運動", phase_gym_work: "訓練中", phase_rest: "休息", phase_gym_rest: "休息", phase_finish: "完成", phase_start_warmup: "開始暖身", phase_start_work: "開始運動", phase_gym_start: "開始訓練", phase_start_rest: "休息一下", phase_finish_train: "訓練結束", phase_jog: "保持節奏",
             status_paused: "計時暫停",
-            info_tabata: `<h3>Tabata 訓練法</h3><p>由<strong>田畑泉博士</strong>研發。20秒極限衝刺 + 10秒休息，共 4 分鐘。</p><p>能同時提升有氧與無氧能力，並產生極高的後燃效應。</p>`,
-            info_hiit: `<h3>HIIT 高強度間歇</h3><p>透過劇烈心率波動，引發<strong>後燃效應 (EPOC)</strong>。</p><p>適合想在短時間內減脂、保留肌肉並提升心肺功能的人。</p>`,
-            info_emom: `<h3>EMOM 分鐘訓練</h3><p>源自 CrossFit。每分鐘整點開始做動作，做完剩下的時間即為休息。</p><p>強迫你在疲勞時仍保持動作效率。</p>`,
-            info_gym: `<h3>重量訓練計時</h3><p>重點在於<strong>組間休息</strong>的紀律。</p><ul><li><strong>肌肥大：</strong>休 60-90 秒。</li><li><strong>最大肌力：</strong>休 3-5 分鐘以恢復能量系統。</li></ul>`
+            info_tabata: `<h3>Tabata 訓練法</h3><p>20秒極限衝刺 + 10秒休息，共 4 分鐘。</p>`,
+            info_hiit: `<h3>HIIT 高強度間歇</h3><p>透過劇烈心率波動，引發後燃效應。</p>`,
+            info_emom: `<h3>EMOM 分鐘訓練</h3><p>每分鐘整點開始做動作，做完剩下的時間即為休息。</p>`,
+            info_gym: `<h3>重量訓練計時</h3><p>重點在於組間休息。肌肥大休60-90秒，最大肌力休3-5分。</p>`,
+            info_jog: `<h3>超慢跑</h3><p>以輕鬆的速度搭配高步頻 (180 BPM) 跑步。</p><ul><li><strong>姿勢：</strong>背部打直，視線向前，保持微笑。</li><li><strong>落地：</strong>前腳掌先著地（避免腳跟衝擊）。</li><li><strong>優點：</strong>低衝擊、不累、燃脂效率高。</li></ul>`
         },
         'zh-CN': {
-            btn_lang_text: "简中", mode_tabata_title: "Tabata 燃脂", mode_tabata_desc: "20秒運動 / 10秒休息", mode_hiit_title: "HIIT 间歇", mode_hiit_desc: "高强度有氧循环", mode_emom_title: "EMOM 挑战", mode_emom_desc: "每分钟整点循环", mode_gym_title: "重量训练", mode_gym_desc: "组数与休息计时", 
+            btn_lang_text: "简中", mode_tabata_title: "Tabata 燃脂", mode_tabata_desc: "20秒运动 / 10秒休息", mode_hiit_title: "HIIT 间歇", mode_hiit_desc: "高强度有氧循环", mode_emom_title: "EMOM 挑战", mode_emom_desc: "每分钟整点循环", mode_gym_title: "重量训练", mode_gym_desc: "组数与休息计时", mode_jog_title: "超慢跑", mode_jog_desc: "180 BPM 节拍器",
             btn_back: "返回", btn_start: "开始", btn_pause: "暂停", btn_resume: "继续", btn_reset: "结束 / 重置", btn_warmup_on: "热身? (开启)", btn_warmup_off: "热身? (关闭)", btn_custom: "设定", btn_done: "完成", btn_restore: "还原默认", btn_close: "关闭", 
-            label_total_remain: "剩余", label_total_est: "预估总时长", modal_settings_title: "训练设定", modal_lang_title: "语言选择", group_prep: "准备阶段", group_work: "训练内容", label_prep: "倒数准备", label_warmup: "热身时间", label_work: "运动时间", label_rest: "休息时间", label_rounds: "总组数", 
-            sound_beep: "音效", sound_voice: "人声", sound_mute: "静音", phase_prep: "准备", phase_warmup: "热身", phase_work: "运动", phase_gym_work: "训练中", phase_rest: "休息", phase_gym_rest: "休息", phase_finish: "完成", phase_start_warmup: "开始热身", phase_start_work: "开始运动", phase_gym_start: "开始训练", phase_start_rest: "休息一下", phase_finish_train: "训练结束",
+            modal_settings_title: "训练设定", modal_lang_title: "语言选择", modal_sound_title: "节拍器音色",
+            group_prep: "准备阶段", group_work: "训练内容", label_prep: "倒数准备", label_warmup: "热身时间", label_work: "运动时间", label_rest: "休息时间", label_rounds: "总组数", 
+            label_duration: "目标时间", label_total_remain: "剩余", label_total_est: "预估总时长",
+            sound_beep: "音效", sound_voice: "人声", sound_mute: "静音", phase_prep: "准备", phase_warmup: "热身", phase_work: "运动", phase_gym_work: "训练中", phase_rest: "休息", phase_gym_rest: "休息", phase_finish: "完成", phase_start_warmup: "开始热身", phase_start_work: "开始运动", phase_gym_start: "开始训练", phase_start_rest: "休息一下", phase_finish_train: "训练结束", phase_jog: "保持节奏",
             status_paused: "计时暂停",
-            info_tabata: `<h3>Tabata 训练法</h3><p>由<strong>田畑泉博士</strong>研发。20秒极限冲刺 + 10秒休息，共 4 分钟。</p><p>能同时提升有氧与无氧能力。</p>`,
-            info_hiit: `<h3>HIIT 高强度间歇</h3><p>通过剧烈心率波动，引发<strong>后燃效应 (EPOC)</strong>。</p><p>适合想在短时间内减脂、保留肌肉的人。</p>`,
-            info_emom: `<h3>EMOM 分钟训练</h3><p>每分钟整点开始做动作，做完剩下的时间即为休息。</p><p>强迫你在疲劳时仍保持动作效率。</p>`,
-            info_gym: `<h3>重量训练计时</h3><p>重点在于<strong>组间休息</strong>的纪律。</p><ul><li><strong>肌肥大：</strong>休 60-90 秒。</li><li><strong>最大肌力：</strong>休 3-5 分钟。</li></ul>`
+            info_tabata: `<h3>Tabata 训练法</h3><p>20秒极限冲刺 + 10秒休息，共 4 分钟。</p>`,
+            info_hiit: `<h3>HIIT 高强度间歇</h3><p>通过剧烈心率波动，引发后燃效应。</p>`,
+            info_emom: `<h3>EMOM 分钟训练</h3><p>每分钟整点开始做动作，做完剩下的时间即为休息。</p>`,
+            info_gym: `<h3>重量训练计时</h3><p>重点在于组间休息。</p>`,
+            info_jog: `<h3>超慢跑</h3><p>以轻松的速度搭配高步频 (180 BPM) 跑步。</p><ul><li><strong>姿势：</strong>背部打直，视线向前，保持微笑。</li><li><strong>落地：</strong>前脚掌先着地。</li></ul>`
         },
         'ja': { 
-            btn_lang_text: "JP", mode_tabata_title: "タバタ式", mode_tabata_desc: "20秒運動 / 10秒休憩", mode_hiit_title: "HIIT", mode_hiit_desc: "高強度インターバル", mode_emom_title: "EMOM", mode_emom_desc: "1分間ごとのセット", mode_gym_title: "筋トレ", mode_gym_desc: "セット＆休憩タイマー", 
+            btn_lang_text: "JP", mode_tabata_title: "タバタ式", mode_tabata_desc: "20秒運動 / 10秒休憩", mode_hiit_title: "HIIT", mode_hiit_desc: "高強度インターバル", mode_emom_title: "EMOM", mode_emom_desc: "1分間ごとのセット", mode_gym_title: "筋トレ", mode_gym_desc: "セット＆休憩タイマー", mode_jog_title: "スロージョグ", mode_jog_desc: "180 BPM ペーシング",
             btn_back: "戻る", btn_start: "開始", btn_pause: "一時停止", btn_resume: "再開", btn_reset: "終了 / リセット", btn_warmup_on: "準備運動? (オン)", btn_warmup_off: "準備運動? (オフ)", btn_custom: "設定", btn_done: "完了", btn_restore: "初期化", btn_close: "閉じる", 
-            label_total_remain: "残り時間", label_total_est: "合計時間", modal_settings_title: "設定", modal_lang_title: "言語", group_prep: "準備", group_work: "トレーニング", label_prep: "準備時間", label_warmup: "準備運動", label_work: "運動", label_rest: "休憩", label_rounds: "セット数", 
-            sound_beep: "ビープ音", sound_voice: "音声", sound_mute: "ミュート", phase_prep: "準備", phase_warmup: "準備運動", phase_work: "運動中", phase_gym_work: "トレーニング", phase_rest: "休憩", phase_gym_rest: "休憩", phase_finish: "完了", phase_start_warmup: "ウォームアップ開始", phase_start_work: "運動開始", phase_gym_start: "トレーニング開始", phase_start_rest: "休憩", phase_finish_train: "終了", 
+            modal_settings_title: "設定", modal_lang_title: "言語", modal_sound_title: "メトロノーム音",
+            group_prep: "準備", group_work: "トレーニング", label_prep: "準備時間", label_warmup: "準備運動", label_work: "運動", label_rest: "休憩", label_rounds: "セット数", 
+            label_duration: "目標時間", label_total_remain: "残り時間", label_total_est: "合計時間",
+            sound_beep: "ビープ音", sound_voice: "音声", sound_mute: "ミュート", phase_prep: "準備", phase_warmup: "準備運動", phase_work: "運動中", phase_gym_work: "トレーニング", phase_rest: "休憩", phase_gym_rest: "休憩", phase_finish: "完了", phase_start_warmup: "ウォームアップ開始", phase_start_work: "運動開始", phase_gym_start: "トレーニング開始", phase_start_rest: "休憩", phase_finish_train: "終了", phase_jog: "ペース維持",
             status_paused: "一時停止中",
-            info_tabata: `<h3>タバタ・プロトコル</h3><p><strong>田畑泉博士</strong>が考案。20秒全力+10秒休憩。</p><p>短時間で極めて高い脂肪燃焼効果が期待できます。</p>`,
-            info_hiit: `<h3>HIIT</h3><p>高強度インターバルトレーニング。</p><p>運動後もカロリー消費が続く<strong>アフターバーン効果</strong>を引き起こします。</p>`,
-            info_emom: `<h3>EMOM</h3><p>1分間ごとに決まったタスクを行うトレーニング。</p><p>早く終われば休憩時間が増えます。</p>`,
-            info_gym: `<h3>筋トレ休憩タイマー</h3><p>セット間の休憩を管理します。</p><ul><li><strong>筋肥大:</strong> 60〜90秒。</li><li><strong>筋力:</strong> 3〜5分。</li></ul>`
+            info_tabata: `<h3>タバタ・プロトコル</h3><p>20秒全力+10秒休憩。</p>`,
+            info_hiit: `<h3>HIIT</h3><p>高強度インターバルトレーニング。</p>`,
+            info_emom: `<h3>EMOM</h3><p>1分間ごとに決まったタスクを行うトレーニング。</p>`,
+            info_gym: `<h3>筋トレ休憩タイマー</h3><p>セット間の休憩を管理します。</p>`,
+            info_jog: `<h3>スロージョグ</h3><p>ニコニコペースで走る運動法。</p><ul><li><strong>180 BPM:</strong> 小刻みなリズムで関節への負担を減らします。</li><li><strong>フォアフット:</strong> 足の指の付け根あたりで着地しましょう。</li></ul>`
         },
         'ko': { 
-            btn_lang_text: "KR", mode_tabata_title: "타바타", mode_tabata_desc: "20초 운동 / 10초 휴식", mode_hiit_title: "HIIT", mode_hiit_desc: "고강도 인터벌", mode_emom_title: "EMOM", mode_emom_desc: "1분 단위 반복", mode_gym_title: "웨이트", mode_gym_desc: "세트 및 휴식", 
+            btn_lang_text: "KR", mode_tabata_title: "타바타", mode_tabata_desc: "20초 운동 / 10초 휴식", mode_hiit_title: "HIIT", mode_hiit_desc: "고강도 인터벌", mode_emom_title: "EMOM", mode_emom_desc: "1분 단위 반복", mode_gym_title: "웨이트", mode_gym_desc: "세트 및 휴식", mode_jog_title: "슬로우 조깅", mode_jog_desc: "180 BPM 페이싱",
             btn_back: "뒤로", btn_start: "시작", btn_pause: "일시정지", btn_resume: "계속", btn_reset: "종료 / 초기화", btn_warmup_on: "웜업? (켜짐)", btn_warmup_off: "웜업? (꺼짐)", btn_custom: "설정", btn_done: "완료", btn_restore: "초기화", btn_close: "닫기", 
-            label_total_remain: "남은 시간", label_total_est: "총 시간", modal_settings_title: "설정", modal_lang_title: "언어", group_prep: "준비", group_work: "운동", label_prep: "준비 시간", label_warmup: "웜업", label_work: "운동", label_rest: "휴식", label_rounds: "세트 수", 
-            sound_beep: "비프음", sound_voice: "음성", sound_mute: "무음", phase_prep: "준비", phase_warmup: "웜업", phase_work: "운동", phase_gym_work: "트레이닝", phase_rest: "휴식", phase_gym_rest: "휴식", phase_finish: "완료", phase_start_warmup: "웜업 시작", phase_start_work: "운동 시작", phase_gym_start: "트레이닝 시작", phase_start_rest: "휴식", phase_finish_train: "운동 종료", 
+            modal_settings_title: "설정", modal_lang_title: "언어", modal_sound_title: "메트로놈 소리",
+            group_prep: "준비", group_work: "운동", label_prep: "준비 시간", label_warmup: "웜업", label_work: "운동", label_rest: "휴식", label_rounds: "세트 수", 
+            label_duration: "목표 시간", label_total_remain: "남은 시간", label_total_est: "총 시간",
+            sound_beep: "비프음", sound_voice: "음성", sound_mute: "무음", phase_prep: "준비", phase_warmup: "웜업", phase_work: "운동", phase_gym_work: "트레이닝", phase_rest: "휴식", phase_gym_rest: "휴식", phase_finish: "완료", phase_start_warmup: "웜업 시작", phase_start_work: "운동 시작", phase_gym_start: "트레이닝 시작", phase_start_rest: "휴식", phase_finish_train: "운동 종료", phase_jog: "페이스 유지",
             status_paused: "일시정지",
-            info_tabata: `<h3>타바타</h3><p>20초 운동 + 10초 휴식.</p><p>짧은 시간에 강력한 칼로리 소모 효과.</p>`,
-            info_hiit: `<h3>HIIT</h3><p>고강도 인터벌 트레이닝.</p><p>운동 후에도 칼로리를 태우는 애프터번 효과.</p>`,
-            info_emom: `<h3>EMOM</h3><p>1분마다 정해진 동작 수행.</p><p>빨리 끝내면 남은 시간은 휴식입니다.</p>`,
-            info_gym: `<h3>웨이트 타이머</h3><p>세트 간 휴식 시간 관리.</p><ul><li><strong>근비대:</strong> 60~90초.</li><li><strong>스트렝스:</strong> 3~5분.</li></ul>`
+            info_tabata: `<h3>타바타</h3><p>20초 운동 + 10초 휴식.</p>`,
+            info_hiit: `<h3>HIIT</h3><p>고강도 인터벌 트레이닝.</p>`,
+            info_emom: `<h3>EMOM</h3><p>1분마다 정해진 동작 수행.</p>`,
+            info_gym: `<h3>웨이트 타이머</h3><p>세트 간 휴식 시간 관리.</p>`,
+            info_jog: `<h3>슬로우 조깅</h3><p>옆사람과 대화할 수 있는 속도로 달리세요.</p><ul><li><strong>180 BPM:</strong> 부상 방지를 위한 최적의 케이던스.</li><li><strong>미드풋/포어풋:</strong> 발바닥 전체나 앞부분으로 착지하세요.</li></ul>`
         }
     };
 
@@ -621,33 +764,54 @@ const App = (function() {
     }
 
     let currentTheme = localStorage.getItem('fitloopTheme') || 'dark';
+    
+    // Global Sound State (Persistence)
+    let soundMode = localStorage.getItem('fitloopSoundMode') || 'beep'; 
 
     const defaultPresets = {
         tabata: { name: "Tabata", work: 20, rest: 10, rounds: 8, prep: 5, warmupOn: false, warmupTime: 60, type: 'interval', color: '#FF3B30' },
         hiit:   { name: "HIIT",   work: 30, rest: 30, rounds: 10, prep: 5, warmupOn: true, warmupTime: 120, type: 'interval', color: '#FF9F0A' },
         emom:   { name: "EMOM",   work: 60, rest: 0, rounds: 10, prep: 5, warmupOn: false, warmupTime: 60, type: 'loop', color: '#30D158' },
-        gym:    { name: "Gym",    work: 40, rest: 90, rounds: 5, prep: 5, warmupOn: false, warmupTime: 0, type: 'interval', color: '#0A84FF' }
+        gym:    { name: "Gym",    work: 40, rest: 90, rounds: 5, prep: 5, warmupOn: false, warmupTime: 0, type: 'interval', color: '#0A84FF' },
+        // [FIX] Independent variables for jog prep and warmup
+        jog:    { name: "Jog",    duration: 1800, prep: 5, warmupOn: true, warmupTime: 180, bpm: 180, soundType: 'woodblock', type: 'continuous', color: '#BF5AF2' }
     };
 
     let presets = JSON.parse(localStorage.getItem('fitloopSettings')) || JSON.parse(JSON.stringify(defaultPresets));
+    // Migration for existing users
+    if(!presets.jog) { presets.jog = JSON.parse(JSON.stringify(defaultPresets.jog)); }
+
+    // Ensure numbers
     for(let k in presets) {
-        presets[k].work = Number(presets[k].work);
-        presets[k].rest = Number(presets[k].rest);
-        presets[k].rounds = Number(presets[k].rounds);
-        presets[k].prep = Number(presets[k].prep);
-        presets[k].warmupTime = Number(presets[k].warmupTime);
+        if(k === 'jog') {
+             presets[k].duration = Number(presets[k].duration);
+             // Ensure jog specific variables exist, if not migrate them
+             if(presets[k].prep === undefined) presets[k].prep = 5;
+             if(presets[k].warmupTime === undefined) presets[k].warmupTime = 180;
+             
+             presets[k].prep = Number(presets[k].prep);
+             presets[k].warmupTime = Number(presets[k].warmupTime);
+             presets[k].bpm = Number(presets[k].bpm);
+        } else {
+             presets[k].work = Number(presets[k].work);
+             presets[k].rest = Number(presets[k].rest);
+             presets[k].rounds = Number(presets[k].rounds);
+             presets[k].prep = Number(presets[k].prep);
+             presets[k].warmupTime = Number(presets[k].warmupTime);
+        }
     }
 
     let currentMode = 'tabata';
-    let soundMode = 'beep';
     let wakeLock = null;
     let confettiActive = false;
     let lastToggleTime = 0;
     let lastThemeToggleTime = 0;
 
-    let state = { phase: 'idle', timeLeft: 0, currentRound: 1, isRunning: false, timerId: null, endTime: 0, remainingMs: 0, phaseDuration: 0 };
+    // [FIX] needlePhase state added
+    let state = { phase: 'idle', timeLeft: 0, currentRound: 1, isRunning: false, timerId: null, endTime: 0, remainingMs: 0, phaseDuration: 0, nextNoteTime: 0, needlePhase: 0 };
     let totalRemainingSeconds = 0;
     let ringFrameId = null;
+    let lastFrameTime = 0;
 
     const UI = {};
 
@@ -656,13 +820,17 @@ const App = (function() {
         const ids = [
             'app-container', 'home-screen', 'timer-screen', 'confetti-canvas',
             'btnBack', 'totalRemainDisplay', 'ringProgress', 'statusText', 'timerDigits', 'roundsText',
-            'btnReset', 'actionBtn', 'play-icon-wrap', 'btn-warmup', 'text-warmup', 'text-sound', 'icon-sound',
-            'settings-modal', 'info-modal', 'lang-modal', 'info-title', 'info-content', 'modalTotalTime',
+            'btnReset', 'actionBtn', 'play-icon-wrap', 'btn-warmup', 'text-warmup', 'text-sound', 'icon-sound', 
+            'btn-metronome', 'text-metronome', 'toolsRow', 'metro-needle',
+            'settings-modal', 'info-modal', 'lang-modal', 'metro-modal', 'info-title', 'info-content', 'modalTotalTime',
             'set-prep-min', 'set-prep-sec', 'set-warmup-min', 'set-warmup-sec', 
             'set-work-min', 'set-work-sec', 'set-rest-min', 'set-rest-sec', 'set-rounds', 'row-work',
             'icon-theme-use', 'state-overlay',
-            'card-tabata', 'card-hiit', 'card-emom', 'card-gym',
-            'bg-layer-dark', 'bg-layer-light'
+            'card-tabata', 'card-hiit', 'card-emom', 'card-gym', 'card-jog',
+            'bg-layer-dark', 'bg-layer-light',
+            'group-standard', 'group-jog', 'set-jog-min', 
+            'set-jog-prep-min', 'set-jog-prep-sec', 'set-jog-warmup-min', 'set-jog-warmup-sec',
+            'bpmControls', 'bpmDisplay', 'btn-bpm-plus', 'btn-bpm-minus'
         ];
         ids.forEach(id => UI[id] = document.getElementById(id));
         
@@ -672,6 +840,7 @@ const App = (function() {
                     if(this.id === 'settings-modal') closeSettings();
                     if(this.id === 'info-modal') closeInfoModal();
                     if(this.id === 'lang-modal') closeLangModal();
+                    if(this.id === 'metro-modal') closeMetronomeModal();
                 }
             });
         });
@@ -683,6 +852,10 @@ const App = (function() {
             el.addEventListener('blur', function() { validateInput(this); liveUpdateTotal(); });
         });
 
+        // Rapid Fire BPM Controls
+        initRapidFire(UI['btn-bpm-minus'], -1);
+        initRapidFire(UI['btn-bpm-plus'], 1);
+
         document.body.addEventListener('touchstart', function() { AudioEngine.resume(); }, { once: true });
         document.body.addEventListener('click', function() { AudioEngine.resume(); }, { once: true });
 
@@ -692,6 +865,41 @@ const App = (function() {
         applyLanguage();
         updateSafeguards();
         updateHomeIndicators(); 
+    }
+
+    // --- Rapid Fire Logic (Dual Speed) ---
+    function initRapidFire(btn, direction) {
+        let timeout, interval;
+        let startTime;
+
+        const action = () => {
+            const now = Date.now();
+            const elapsed = now - startTime;
+            // Tier 2 speed (Fast) after 1.5s hold, else Tier 1 (Slow)
+            const amount = (elapsed > 1500) ? 5 : 1;
+            App.adjustBPM(direction * amount);
+        };
+        
+        const start = (e) => {
+            e.preventDefault();
+            startTime = Date.now();
+            App.adjustBPM(direction); // Immediate click
+            // Start repeating after delay
+            timeout = setTimeout(() => {
+                interval = setInterval(action, 100);
+            }, 500);
+        };
+        const stop = (e) => {
+            e.preventDefault();
+            clearTimeout(timeout);
+            clearInterval(interval);
+        };
+
+        btn.addEventListener('mousedown', start);
+        btn.addEventListener('touchstart', start);
+        btn.addEventListener('mouseup', stop);
+        btn.addEventListener('mouseleave', stop);
+        btn.addEventListener('touchend', stop);
     }
 
     function t(key) { return translations[currentLang][key] || key; }
@@ -745,13 +953,14 @@ const App = (function() {
             const key = el.getAttribute('data-i18n');
             if(t(key)) el.innerText = t(key);
         });
-        updateSoundUI(); updateWarmupUI(); updateActionBtnState();
+        updateSoundUI(); updateWarmupUI(); updateActionBtnState(); updateMetronomeUI();
         if(state.phase === 'idle') updateDisplay();
     }
 
     function openInfoModal() {
         playClick();
-        if(currentMode === 'tabata') { UI['info-title'].innerText = t('mode_tabata_title'); UI['info-content'].innerHTML = t('info_tabata'); }
+        if(currentMode === 'jog') { UI['info-title'].innerText = t('mode_jog_title'); UI['info-content'].innerHTML = t('info_jog'); }
+        else if(currentMode === 'tabata') { UI['info-title'].innerText = t('mode_tabata_title'); UI['info-content'].innerHTML = t('info_tabata'); }
         else if(currentMode === 'hiit') { UI['info-title'].innerText = t('mode_hiit_title'); UI['info-content'].innerHTML = t('info_hiit'); }
         else if(currentMode === 'emom') { UI['info-title'].innerText = t('mode_emom_title'); UI['info-content'].innerHTML = t('info_emom'); }
         else if(currentMode === 'gym') { UI['info-title'].innerText = t('mode_gym_title'); UI['info-content'].innerHTML = t('info_gym'); }
@@ -759,7 +968,7 @@ const App = (function() {
     }
     function closeInfoModal() { playClick(); UI['info-modal'].classList.remove('open'); }
 
-    // --- INDEPENDENT SAVE / LOAD STATE LOGIC ---
+    // --- SAVE / LOAD SESSIONS ---
     function getSessions() {
         const stored = localStorage.getItem('fitloop_sessions_v1');
         return stored ? JSON.parse(stored) : {};
@@ -798,7 +1007,7 @@ const App = (function() {
 
     function updateHomeIndicators() {
         const sessions = getSessions();
-        const modes = ['tabata', 'hiit', 'emom', 'gym'];
+        const modes = ['tabata', 'hiit', 'emom', 'gym', 'jog'];
         modes.forEach(m => {
             const card = UI['card-' + m];
             if(sessions[m]) card.classList.add('has-save');
@@ -806,31 +1015,7 @@ const App = (function() {
         });
     }
 
-    // --- Dynamic Total Time Calculation Logic ---
-    function getFutureRemainingTime(p) {
-        let future = 0;
-        const totalRounds = p.rounds;
-        const currentRound = state.currentRound;
-        const remainingRounds = totalRounds - currentRound; 
-
-        if (state.phase === 'prep') {
-            if(p.warmupOn) future += p.warmupTime;
-            future += (p.work + p.rest) * totalRounds;
-        }
-        else if (state.phase === 'warmup') {
-            future += (p.work + p.rest) * totalRounds;
-        }
-        else if (state.phase === 'work') {
-            future += p.rest;
-            future += (p.work + p.rest) * remainingRounds;
-        }
-        else if (state.phase === 'rest') {
-            future += (p.work + p.rest) * remainingRounds;
-        }
-        
-        return future;
-    }
-
+    // --- Mode Selection & Logic ---
     function selectMode(mode) {
         playClick();
         currentMode = mode;
@@ -838,13 +1023,30 @@ const App = (function() {
         UI['timer-screen'].classList.remove('hidden');
         const color = presets[mode].color || '#fff';
         document.documentElement.style.setProperty('--accent-color', color);
-        updateSoundUI(); updateWarmupUI(); 
+        
+        // Toggle UI based on mode
+        if(currentMode === 'jog') {
+            UI['roundsText'].classList.add('hidden');
+            UI['bpmControls'].classList.remove('hidden');
+            UI['bpmDisplay'].innerText = presets.jog.bpm;
+            UI['btn-metronome'].classList.remove('hidden');
+            UI['toolsRow'].style.display = 'grid';
+            UI['toolsRow'].style.gridTemplateColumns = '1fr 1fr 1fr 1fr';
+        } else {
+            UI['roundsText'].classList.remove('hidden');
+            UI['bpmControls'].classList.add('hidden');
+            UI['btn-metronome'].classList.add('hidden');
+            UI['toolsRow'].style.display = 'flex';
+        }
+
+        updateSoundUI(); updateWarmupUI(); updateMetronomeUI();
         
         if(loadSession(mode)) {
             updateSafeguards();
             updateActionBtnState();
             updateDisplay();
             UI['statusText'].innerText = t('status_paused');
+            if(currentMode === 'jog') UI['bpmDisplay'].innerText = presets.jog.bpm;
         } else {
             resetTimer(false);
         }
@@ -863,19 +1065,27 @@ const App = (function() {
         UI['timer-screen'].classList.add('hidden');
         UI['home-screen'].classList.remove('hidden');
         UI['state-overlay'].style.backgroundColor = 'var(--state-bg-idle)';
+        UI['metro-needle'].classList.remove('active');
         stopConfetti();
     }
 
     function calcTotalDuration(p) {
-        let total = Number(p.prep);
-        if(p.warmupOn) total += Number(p.warmupTime);
-        if(p.type === 'countdown') {
-            total += Number(p.rest);
+        let total = 0;
+        if(currentMode === 'jog') {
+            total += Number(p.prep);
+            if(p.warmupOn) total += Number(p.warmupTime);
+            total += Number(p.duration);
         } else {
-            const work = Number(p.work);
-            const rest = Number(p.rest);
-            const rounds = Number(p.rounds);
-            total += (work + rest) * rounds;
+            total = Number(p.prep);
+            if(p.warmupOn) total += Number(p.warmupTime);
+            if(p.type === 'countdown') {
+                total += Number(p.rest);
+            } else {
+                const work = Number(p.work);
+                const rest = Number(p.rest);
+                const rounds = Number(p.rounds);
+                total += (work + rest) * rounds;
+            }
         }
         return total;
     }
@@ -889,20 +1099,52 @@ const App = (function() {
         state.isRunning = false; state.currentRound = 1; state.phase = 'idle'; state.remainingMs = 0;
         
         clearSession(currentMode);
-
         toggleWakeLock(false);
         stopConfetti();
+        UI['metro-needle'].classList.remove('active');
         
         const p = presets[currentMode];
-        p.prep = Number(p.prep); p.work = Number(p.work); p.rest = Number(p.rest); p.warmupTime = Number(p.warmupTime);
-
-        if (p.prep > 0) { state.timeLeft = p.prep; state.phaseDuration = p.prep; }
-        else if (p.warmupOn) { state.timeLeft = p.warmupTime; state.phaseDuration = p.warmupTime; }
-        else { state.timeLeft = p.work; state.phaseDuration = p.work; }
+        
+        if(currentMode === 'jog') {
+             p.prep = Number(p.prep); p.warmupTime = Number(p.warmupTime);
+             p.duration = Number(p.duration);
+             UI['bpmDisplay'].innerText = p.bpm;
+             
+             if (p.prep > 0) { state.timeLeft = p.prep; state.phaseDuration = p.prep; }
+             else if (p.warmupOn) { state.timeLeft = p.warmupTime; state.phaseDuration = p.warmupTime; }
+             else { state.timeLeft = p.duration; state.phaseDuration = p.duration; }
+             
+        } else {
+            p.prep = Number(p.prep); p.warmupTime = Number(p.warmupTime);
+            p.work = Number(p.work); p.rest = Number(p.rest);
+            
+            if (p.prep > 0) { state.timeLeft = p.prep; state.phaseDuration = p.prep; }
+            else if (p.warmupOn) { state.timeLeft = p.warmupTime; state.phaseDuration = p.warmupTime; }
+            else { state.timeLeft = p.work; state.phaseDuration = p.work; }
+        }
 
         totalRemainingSeconds = calcTotalDuration(p);
 
         updateSafeguards(); updateActionBtnState(); updateDisplay();
+    }
+
+    // --- Metronome Scheduler ---
+    function scheduleMetronome() {
+        if(!state.isRunning || currentMode !== 'jog' || state.phase !== 'work') return;
+
+        const lookahead = 0.1; 
+        const p = presets['jog'];
+        
+        // If sound is ON (not mute)
+        if (p.soundType !== 'mute') {
+            while (state.nextNoteTime < AudioEngine.ctx.currentTime + lookahead) {
+                AudioEngine.playSynth(p.soundType, state.nextNoteTime);
+                const secondsPerBeat = 60.0 / p.bpm;
+                state.nextNoteTime += secondsPerBeat;
+            }
+        } else {
+             state.nextNoteTime = AudioEngine.ctx.currentTime + 0.1;
+        }
     }
 
     function toggleTimerState() {
@@ -922,6 +1164,7 @@ const App = (function() {
             toggleWakeLock(false);
             saveSession(currentMode); 
             UI['statusText'].innerText = t('status_paused');
+            UI['metro-needle'].classList.remove('active');
             
         } else {
             toggleWakeLock(true);
@@ -929,17 +1172,40 @@ const App = (function() {
             else { state.isRunning = true; }
             
             const p = presets[currentMode];
+
+            // [FIX] Physics Init
+            lastFrameTime = Date.now();
+
+            // Phase init logic
             if(state.phase === 'idle') {
                 if (p.prep > 0) { state.phase = 'prep'; state.timeLeft = p.prep; state.phaseDuration = p.prep; announce(t('phase_prep'), "start"); }
                 else if (p.warmupOn) { state.phase = 'warmup'; state.timeLeft = p.warmupTime; state.phaseDuration = p.warmupTime; announce(t('phase_start_warmup'), "start"); }
-                else { state.phase = 'work'; state.timeLeft = p.work; state.phaseDuration = p.work; announce(t('phase_start_work'), "start"); }
+                else { 
+                    state.phase = 'work'; 
+                    state.timeLeft = (currentMode === 'jog') ? p.duration : p.work; 
+                    state.phaseDuration = state.timeLeft; 
+                    if(currentMode === 'jog') {
+                        announce(t('phase_jog'), "start");
+                        state.nextNoteTime = AudioEngine.ctx.currentTime + 0.1;
+                        UI['metro-needle'].classList.add('active');
+                    } else {
+                        announce(t('phase_start_work'), "start"); 
+                    }
+                }
+            } else if(currentMode === 'jog' && state.phase === 'work') {
+                state.nextNoteTime = AudioEngine.ctx.currentTime + 0.1;
+                UI['metro-needle'].classList.add('active');
             }
 
             const durationMs = (state.remainingMs > 0) ? state.remainingMs : (state.timeLeft * 1000);
             state.endTime = Date.now() + durationMs; 
             state.remainingMs = 0;
             
-            state.timerId = setInterval(tick, 100); 
+            state.timerId = setInterval(() => {
+                tick();
+                if(currentMode === 'jog') scheduleMetronome();
+            }, 50); 
+            
             updateRingLoop(); 
             updateDisplay();
         }
@@ -957,14 +1223,18 @@ const App = (function() {
             UI['ringProgress'].style.strokeDashoffset = 1005; 
             UI['timerDigits'].innerText = "00:00"; 
             clearInterval(state.timerId); 
-            nextPhase(); 
+            
+            // [CRITICAL FIX] Only finish if it's the actual WORK phase
+            if(currentMode === 'jog' && state.phase === 'work') finishAll();
+            else nextPhase(); 
             return;
         }
 
         const newTimeLeft = Math.ceil(diff / 1000);
         if (newTimeLeft !== state.timeLeft) {
             state.timeLeft = newTimeLeft;
-            if (state.timeLeft <= 3) {
+            // Standard countdown sounds (except Jog Work phase)
+            if (!(currentMode === 'jog' && state.phase === 'work') && state.timeLeft <= 3) {
                  if(soundMode==='beep') announce("", "tick");
                  if(soundMode==='voice') speak(state.timeLeft);
             }
@@ -979,6 +1249,20 @@ const App = (function() {
         const totalMs = state.phaseDuration * 1000;
         const totalLength = 1005; 
         
+        // [FIX] Physics Driven Needle
+        if(currentMode === 'jog' && state.phase === 'work') {
+            const dt = (now - lastFrameTime) / 1000;
+            const bpm = presets.jog.bpm;
+            // Calculate speed in radians per second based on BPM
+            const speed = Math.PI * (bpm / 60); 
+            state.needlePhase += speed * dt;
+            const angle = 35 * Math.sin(state.needlePhase);
+            UI['metro-needle'].style.transform = `rotate(${angle}deg)`;
+        } else {
+            UI['metro-needle'].style.transform = `rotate(0deg)`;
+        }
+        lastFrameTime = now;
+
         if(totalMs <= 0) { UI['ringProgress'].style.strokeDashoffset = totalLength; } 
         else { 
             const ratio = leftMs / totalMs; 
@@ -992,24 +1276,59 @@ const App = (function() {
         const p = presets[currentMode];
         let nextT = 0; let nextType = ''; let txt = ''; let nextP = '';
 
-        if (state.phase === 'prep') {
-            if (p.warmupOn) { nextP = 'warmup'; nextT = p.warmupTime; txt = t('phase_start_warmup'); nextType = 'start'; } 
-            else { nextP = 'work'; nextT = p.work; txt = t('phase_start_work'); nextType = 'start'; }
-        }
-        else if (state.phase === 'warmup') {
-            nextP = 'work'; nextT = p.work; txt = t('phase_start_work'); nextType = 'start';
-        }
-        else if (state.phase === 'work') {
-            if (p.type === 'loop') { finishRound(p); return; }
-            else { nextP = 'rest'; nextT = p.rest; txt = t('phase_start_rest'); nextType = 'rest'; }
-        }
-        else if (state.phase === 'rest') {
-            finishRound(p); return;
+        // [CRITICAL FIX] JOG MODE SEPARATE LOGIC
+        if(currentMode === 'jog') {
+            if(state.phase === 'prep') {
+                if(p.warmupOn) { 
+                    nextP = 'warmup'; 
+                    nextT = p.warmupTime; 
+                    txt = t('phase_start_warmup'); 
+                    nextType = 'start'; 
+                } else { 
+                    nextP = 'work'; 
+                    nextT = p.duration; 
+                    txt = t('phase_jog'); 
+                    nextType = 'start'; 
+                }
+            }
+            else if(state.phase === 'warmup') {
+                // FORCE to work phase with correct duration
+                nextP = 'work'; 
+                nextT = p.duration; 
+                txt = t('phase_jog'); 
+                nextType = 'start';
+            }
+        } 
+        // STANDARD FLOW
+        else {
+            if (state.phase === 'prep') {
+                if (p.warmupOn) { nextP = 'warmup'; nextT = p.warmupTime; txt = t('phase_start_warmup'); nextType = 'start'; } 
+                else { nextP = 'work'; nextT = p.work; txt = t('phase_start_work'); nextType = 'start'; }
+            }
+            else if (state.phase === 'warmup') {
+                nextP = 'work'; nextT = p.work; txt = t('phase_start_work'); nextType = 'start';
+            }
+            else if (state.phase === 'work') {
+                if (p.type === 'loop') { finishRound(p); return; }
+                else { nextP = 'rest'; nextT = p.rest; txt = t('phase_start_rest'); nextType = 'rest'; }
+            }
+            else if (state.phase === 'rest') {
+                finishRound(p); return;
+            }
         }
 
         if (nextT > 0) {
              state.phase = nextP; state.timeLeft = nextT; state.phaseDuration = nextT;
              announce(txt, nextType);
+             
+             // Activate visual needle ONLY for jog work phase
+             if(currentMode === 'jog' && state.phase === 'work') {
+                 state.nextNoteTime = AudioEngine.ctx.currentTime + 0.1;
+                 UI['metro-needle'].classList.add('active');
+             } else {
+                 UI['metro-needle'].classList.remove('active');
+             }
+             
              startTimerLoop();
         } else if (nextT === 0 && nextP !== '') {
             state.phase = nextP; state.timeLeft = 0; nextPhase(); 
@@ -1028,7 +1347,10 @@ const App = (function() {
     function startTimerLoop() {
         state.endTime = Date.now() + (state.timeLeft * 1000);
         updateDisplay();
-        state.timerId = setInterval(tick, 100);
+        state.timerId = setInterval(() => {
+            tick();
+            if(currentMode === 'jog') scheduleMetronome();
+        }, 50); 
         updateRingLoop(); 
     }
 
@@ -1038,6 +1360,7 @@ const App = (function() {
         state.isRunning = false; toggleWakeLock(false);
         clearSession(currentMode); 
         cancelAnimationFrame(ringFrameId);
+        UI['metro-needle'].classList.remove('active');
         updateSafeguards(); updateActionBtnState(); updateDisplay(); startConfetti(); 
     }
 
@@ -1059,18 +1382,29 @@ const App = (function() {
         if (state.phase === 'finished') ring.style.strokeDashoffset = totalLength; 
         else if(!state.isRunning) ring.style.strokeDashoffset = offset; 
         
-        if(state.phase === 'rest') ring.style.stroke = '#30D158';
+        if(currentMode === 'jog') ring.style.stroke = '#BF5AF2';
+        else if(state.phase === 'rest') ring.style.stroke = '#30D158';
         else if(state.phase === 'warmup' || state.phase === 'prep') ring.style.stroke = '#BF5AF2';
         else ring.style.stroke = p.color || '#fff';
 
         UI['roundsText'].innerText = `${t('label_rounds')} ${state.currentRound} / ${p.rounds}`;
         
         let text = '', bg = 'var(--state-bg-idle)';
-        if (state.phase === 'idle' || state.phase === 'prep') { text = t('phase_prep'); bg = 'var(--state-bg-idle)'; }
-        else if (state.phase === 'warmup') { text = t('phase_warmup'); bg = 'var(--state-bg-warmup)'; }
-        else if (state.phase === 'work') { text = (currentMode === 'gym') ? t('phase_gym_work') : t('phase_work'); bg = 'var(--state-bg-work)'; }
-        else if (state.phase === 'rest') { text = (currentMode === 'gym') ? t('phase_gym_rest') : t('phase_rest'); bg = 'var(--state-bg-rest)'; }
-        else if (state.phase === 'finished') { text = t('phase_finish'); bg = 'var(--state-bg-finish)'; }
+        if(currentMode === 'jog') {
+             text = (state.phase === 'finished') ? t('phase_finish') : t('phase_jog');
+             if(state.phase === 'prep') { text = t('phase_prep'); bg = 'var(--state-bg-idle)'; }
+             /* [FIX] Warmup Orange */
+             else if(state.phase === 'warmup') { text = t('phase_warmup'); bg = 'var(--state-bg-warmup)'; }
+             else if(state.phase === 'work') { text = t('phase_jog'); bg = 'var(--state-bg-jog)'; }
+             else if(state.phase === 'finished') { text = t('phase_finish'); bg = 'var(--state-bg-finish)'; }
+        } else {
+            if (state.phase === 'idle' || state.phase === 'prep') { text = t('phase_prep'); bg = 'var(--state-bg-idle)'; }
+            /* [FIX] Warmup Orange */
+            else if (state.phase === 'warmup') { text = t('phase_warmup'); bg = 'var(--state-bg-warmup)'; }
+            else if (state.phase === 'work') { text = (currentMode === 'gym') ? t('phase_gym_work') : t('phase_work'); bg = 'var(--state-bg-work)'; }
+            else if (state.phase === 'rest') { text = (currentMode === 'gym') ? t('phase_gym_rest') : t('phase_rest'); bg = 'var(--state-bg-rest)'; }
+            else if (state.phase === 'finished') { text = t('phase_finish'); bg = 'var(--state-bg-finish)'; }
+        }
         
         if(state.isRunning || state.phase === 'idle' || state.phase === 'finished') {
             UI['statusText'].innerText = text; 
@@ -1080,14 +1414,34 @@ const App = (function() {
     }
 
     function updateTextDisplay() {
-        const p = presets[currentMode];
-        if(state.phase === 'idle') {
-            totalRemainingSeconds = calcTotalDuration(p);
+        if(currentMode === 'jog' && state.phase === 'work') {
+             totalRemainingSeconds = state.timeLeft;
         } else {
-            const future = getFutureRemainingTime(p);
-            totalRemainingSeconds = state.timeLeft + future;
+             const p = presets[currentMode];
+             if(state.phase === 'idle') {
+                 totalRemainingSeconds = calcTotalDuration(p);
+             } else {
+                 // Estimation logic
+                 let future = 0;
+                 if(state.phase !== 'finished') {
+                     if(currentMode === 'jog') {
+                         if(state.phase === 'prep' || state.phase === 'warmup') {
+                             future = p.duration;
+                             if(state.phase === 'prep' && p.warmupOn) future += p.warmupTime;
+                         }
+                     } else {
+                         const roundsLeft = p.rounds - state.currentRound;
+                         if(state.phase === 'work') future = p.rest + (roundsLeft * (p.work + p.rest));
+                         else if(state.phase === 'rest') future = (roundsLeft * (p.work + p.rest));
+                         else if(state.phase === 'prep' || state.phase === 'warmup') {
+                             future = (p.rounds * (p.work + p.rest));
+                             if(state.phase === 'prep' && p.warmupOn) future += p.warmupTime;
+                         }
+                     }
+                 }
+                 totalRemainingSeconds = state.timeLeft + future;
+             }
         }
-
         UI['timerDigits'].innerText = formatTime(state.timeLeft);
         UI['totalRemainDisplay'].innerText = `${t('label_total_remain')}: ${formatTime(totalRemainingSeconds)}`;
     }
@@ -1113,7 +1467,6 @@ const App = (function() {
         const wrapper = UI['play-icon-wrap'];
         const btn = UI['actionBtn'];
         
-        // [NEW] Toggle the 'running' class for color change
         if(state.isRunning) {
             btn.classList.add('running');
             wrapper.innerHTML = `<svg class="icon-svg"><use href="#icon-pause"></use></svg><span>${t('btn_pause')}</span>`;
@@ -1133,7 +1486,9 @@ const App = (function() {
 
     function validateInput(el) {
         if(el.value.length > 1 && el.value.startsWith('0')) el.value = parseInt(el.value);
-        let max = 99; if(el.id.includes('sec')) max = 59; if(el.id.includes('rounds')) max = 999;
+        let max = 99; 
+        if(el.id.includes('sec')) max = 59; 
+        if(el.id.includes('rounds')) max = 999;
         if(el.value === '') { el.value = 0; return; }
         let val = parseInt(el.value); 
         if(isNaN(val) || val < 0) val = 0; 
@@ -1142,28 +1497,43 @@ const App = (function() {
     }
 
     function getTimeFromInputs(idPrefix) {
+        if(idPrefix === 'set-jog') {
+             return (parseInt(UI['set-jog-min'].value) || 30) * 60;
+        }
+        if(idPrefix === 'set-jog-prep') {
+             const min = parseInt(UI['set-jog-prep-min'].value) || 0;
+             const sec = parseInt(UI['set-jog-prep-sec'].value) || 0;
+             return (min * 60) + sec;
+        }
+        if(idPrefix === 'set-jog-warmup') {
+             const min = parseInt(UI['set-jog-warmup-min'].value) || 0;
+             const sec = parseInt(UI['set-jog-warmup-sec'].value) || 0;
+             return (min * 60) + sec;
+        }
         const min = parseInt(document.getElementById(idPrefix + '-min').value) || 0;
         const sec = parseInt(document.getElementById(idPrefix + '-sec').value) || 0;
         return (min * 60) + sec;
     }
 
-    function calculateTotalFromInputs() {
-        const p = presets[currentMode];
-        const tempP = {
-            prep: getTimeFromInputs('set-prep'),
-            warmupTime: getTimeFromInputs('set-warmup'),
-            work: getTimeFromInputs('set-work'),
-            rest: getTimeFromInputs('set-rest'),
-            rounds: Math.max(1, parseInt(UI['set-rounds'].value) || 1),
-            warmupOn: p.warmupOn,
-            type: p.type
-        };
-        return calcTotalDuration(tempP);
-    }
-
     function liveUpdateTotal() {
-        if(!UI['set-prep-min']) return;
-        const total = calculateTotalFromInputs();
+        let total = 0;
+        if(currentMode === 'jog') {
+            const p = presets['jog'];
+            total = getTimeFromInputs('set-jog') + getTimeFromInputs('set-jog-prep');
+            if(p.warmupOn) total += getTimeFromInputs('set-jog-warmup');
+        } else {
+             const p = presets[currentMode];
+             const tempP = {
+                prep: getTimeFromInputs('set-prep'),
+                warmupTime: getTimeFromInputs('set-warmup'),
+                work: getTimeFromInputs('set-work'),
+                rest: getTimeFromInputs('set-rest'),
+                rounds: Math.max(1, parseInt(UI['set-rounds'].value) || 1),
+                warmupOn: p.warmupOn,
+                type: p.type
+            };
+            total = calcTotalDuration(tempP);
+        }
         UI['modalTotalTime'].innerText = `${t('label_total_est')}: ${formatTime(total)}`;
     }
 
@@ -1176,24 +1546,46 @@ const App = (function() {
     function loadSettingsToUI() {
         const p = presets[currentMode];
         const setVal = (id, val) => UI[id].value = val;
-        setVal('set-prep-min', Math.floor(p.prep/60)); setVal('set-prep-sec', p.prep%60);
-        setVal('set-warmup-min', Math.floor(p.warmupTime/60)); setVal('set-warmup-sec', p.warmupTime%60);
-        setVal('set-work-min', Math.floor(p.work/60)); setVal('set-work-sec', p.work%60);
-        setVal('set-rest-min', Math.floor(p.rest/60)); setVal('set-rest-sec', p.rest%60);
-        setVal('set-rounds', p.rounds);
-        UI['row-work'].style.display = (p.type === 'countdown') ? 'none' : 'flex';
+        
+        if(currentMode === 'jog') {
+            UI['group-standard'].classList.add('hidden');
+            UI['group-jog'].classList.remove('hidden');
+            setVal('set-jog-min', Math.floor(p.duration/60));
+            setVal('set-jog-prep-min', Math.floor(p.prep/60)); setVal('set-jog-prep-sec', p.prep%60);
+            setVal('set-jog-warmup-min', Math.floor(p.warmupTime/60)); setVal('set-jog-warmup-sec', p.warmupTime%60);
+        } else {
+            UI['group-standard'].classList.remove('hidden');
+            UI['group-jog'].classList.add('hidden');
+            setVal('set-prep-min', Math.floor(p.prep/60)); setVal('set-prep-sec', p.prep%60);
+            setVal('set-warmup-min', Math.floor(p.warmupTime/60)); setVal('set-warmup-sec', p.warmupTime%60);
+            setVal('set-work-min', Math.floor(p.work/60)); setVal('set-work-sec', p.work%60);
+            setVal('set-rest-min', Math.floor(p.rest/60)); setVal('set-rest-sec', p.rest%60);
+            setVal('set-rounds', p.rounds);
+            UI['row-work'].style.display = (p.type === 'countdown') ? 'none' : 'flex';
+        }
     }
 
     function saveSettingsFromUI() {
         const p = presets[currentMode];
-        p.prep = getTimeFromInputs('set-prep'); p.warmupTime = getTimeFromInputs('set-warmup');
-        p.work = getTimeFromInputs('set-work'); p.rest = getTimeFromInputs('set-rest');
-        p.rounds = Math.max(1, parseInt(UI['set-rounds'].value));
+        if(currentMode === 'jog') {
+             p.duration = getTimeFromInputs('set-jog');
+             p.prep = getTimeFromInputs('set-jog-prep');
+             p.warmupTime = getTimeFromInputs('set-jog-warmup');
+        } else {
+            p.prep = getTimeFromInputs('set-prep'); p.warmupTime = getTimeFromInputs('set-warmup');
+            p.work = getTimeFromInputs('set-work'); p.rest = getTimeFromInputs('set-rest');
+            p.rounds = Math.max(1, parseInt(UI['set-rounds'].value));
+        }
         localStorage.setItem('fitloopSettings', JSON.stringify(presets));
     }
 
     function restoreDefaults() {
-        if(confirm("Restore defaults?")) { playClick(); presets[currentMode] = JSON.parse(JSON.stringify(defaultPresets[currentMode])); localStorage.setItem('fitloopSettings', JSON.stringify(presets)); loadSettingsToUI(); liveUpdateTotal(); }
+        if(confirm("Restore defaults?")) { 
+            playClick(); 
+            presets[currentMode] = JSON.parse(JSON.stringify(defaultPresets[currentMode])); 
+            localStorage.setItem('fitloopSettings', JSON.stringify(presets)); 
+            loadSettingsToUI(); liveUpdateTotal(); 
+        }
     }
 
     function toggleWarmupDirect() {
@@ -1201,15 +1593,68 @@ const App = (function() {
         playClick(); const p = presets[currentMode]; p.warmupOn = !p.warmupOn;
         localStorage.setItem('fitloopSettings', JSON.stringify(presets)); updateWarmupUI(); resetTimer(false);
     }
+
+    // --- Metronome Menu Functions ---
+    function openMetronomeModal() {
+        playClick();
+        UI['metro-modal'].classList.add('open');
+        updateMetronomeUI(); // highlight current selection
+    }
+    function closeMetronomeModal() { playClick(); UI['metro-modal'].classList.remove('open'); }
+
+    function setMetronomeSound(type) {
+        presets.jog.soundType = type;
+        localStorage.setItem('fitloopSettings', JSON.stringify(presets));
+        
+        // Visual feedback
+        document.querySelectorAll('#metro-modal .lang-opt').forEach(el => el.classList.remove('selected-opt'));
+        document.getElementById('opt-'+type).classList.add('selected-opt');
+        
+        updateMetronomeUI();
+        if(type !== 'mute') AudioEngine.playSynth(type);
+        
+        // If running, update next note logic
+        if(state.isRunning) state.nextNoteTime = AudioEngine.ctx.currentTime + 0.1;
+    }
+
+    function updateMetronomeUI() {
+        const type = presets.jog.soundType;
+        const btnText = UI['text-metronome'];
+        
+        let label = 'Wood';
+        if(type === 'mute') label = 'Mute';
+        else if(type === 'digital') label = 'Digi';
+        else if(type === 'kick') label = 'Kick';
+        else if(type === 'click') label = 'Tick';
+        
+        btnText.innerText = label;
+        
+        // In Modal
+        document.querySelectorAll('#metro-modal .lang-opt').forEach(el => el.classList.remove('selected-opt'));
+        if(document.getElementById('opt-'+type)) document.getElementById('opt-'+type).classList.add('selected-opt');
+    }
+    
     function updateWarmupUI() {
         const p = presets[currentMode]; 
         if(p.warmupOn) { UI['btn-warmup'].classList.add('btn-active-green'); UI['text-warmup'].innerText = t('btn_warmup_on'); } 
         else { UI['btn-warmup'].classList.remove('btn-active-green'); UI['text-warmup'].innerText = t('btn_warmup_off'); }
     }
 
+    function adjustBPM(change) {
+        const p = presets['jog'];
+        let newBPM = p.bpm + change;
+        if(newBPM < 30) newBPM = 30;
+        if(newBPM > 240) newBPM = 240;
+        p.bpm = newBPM;
+        UI['bpmDisplay'].innerText = newBPM;
+        localStorage.setItem('fitloopSettings', JSON.stringify(presets));
+        // Note: No need to update CSS animation duration anymore
+    }
+    
     function toggleSoundMode() {
         playClick();
         if (soundMode === 'beep') soundMode = 'voice'; else if (soundMode === 'voice') soundMode = 'mute'; else soundMode = 'beep';
+        localStorage.setItem('fitloopSoundMode', soundMode); // Persistence
         updateSoundUI();
         if(soundMode === 'voice') speak(t('sound_voice')); else if(soundMode === 'beep') AudioEngine.play(800, 'sine', 0.1, 0.3);
     }
@@ -1273,11 +1718,11 @@ const App = (function() {
         canvas.classList.remove('active');
     }
 
-    // Export all public functions
     return {
-        init, selectMode, goBack, resetTimer, toggleTimerState, toggleSoundMode, toggleWarmupDirect,
-        openSettings, closeSettings, restoreDefaults, openLangModal, closeLangModal, setLanguage,
-        openInfoModal, closeInfoModal, toggleTheme
+        init, selectMode, goBack, resetTimer, toggleTimerState, toggleSoundMode, 
+        toggleWarmupDirect, openSettings, closeSettings, restoreDefaults, 
+        openLangModal, closeLangModal, setLanguage, openInfoModal, closeInfoModal, toggleTheme, 
+        adjustBPM, openMetronomeModal, closeMetronomeModal, setMetronomeSound
     };
 
 })();
